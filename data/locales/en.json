@@ -1,0 +1,89 @@
+{
+    "splash": {
+        "subtitle": "Gainian1 · Creating value with code"
+    },
+    "nav": {
+        "welcome": "Welcome",
+        "about": "About",
+        "games": "Game Development",
+        "software": "Software Development",
+        "blog": "Blog",
+        "contact": "Contact"
+    },
+    "hero": {
+        "title": "JBF250 / Gainian1",
+        "subtitle": "Game Developer | Software Engineer",
+        "explore": "Start Exploring",
+        "scroll": "Scroll Down"
+    },
+    "about": {
+        "badge": "About Me",
+        "title": "Hello, I'm JBF250",
+        "subtitle": "Creating Value with Code",
+        "alias": "I also have an alias called Gainian1",
+        "p1": "I also have an alias called Gainian1. I'm a passionate game developer and software engineer who has been interested in computer science since childhood. Although my programming experience may be limited, my goal is to create amazing digital experiences, whether immersive game worlds or efficient software solutions.",
+        "p2": "I'm familiar with modern web technologies. In my work, I focus on code quality and user experience, striving to make every project the best it can be.",
+        "description": "I'm a passionate developer focused on game development and software design. With extensive experience in Unity and full-stack development. I believe code is the best way to express creativity, and every line of code is a bridge to dreams.",
+        "experience": "Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "years": "Years",
+        "projects": "Projects",
+        "commits": "Commits"
+    },
+    "games": {
+        "badge": "Game Development",
+        "title": "Game Works",
+        "subtitle": "Explore the game worlds I created",
+        "view_all": "View All",
+        "more": "Learn More"
+    },
+    "software": {
+        "badge": "Software Development",
+        "title": "Software Projects",
+        "subtitle": "Practical software solutions",
+        "view_all": "View All",
+        "more": "Learn More"
+    },
+    "blog": {
+        "badge": "Blog",
+        "title": "Tech Notes",
+        "subtitle": "Documenting my learning and thoughts",
+        "read_more": "Read More"
+    },
+    "contact": {
+        "title": "Contact",
+        "subtitle": "Looking Forward to Connect",
+        "outlook": "Outlook",
+        "qq": "QQ Mail"
+    },
+    "footer": {
+        "copyright": "2026 JBF250. All rights reserved.",
+        "slogan": "Creating Value with Code"
+    },
+    "buttons": {
+        "back": "Back"
+    },
+    "detail": {
+        "project_details": "Project Details",
+        "overview": "Overview",
+        "about_game": "About This Game",
+        "about_software": "About This Software",
+        "overview_text": "This is a detailed overview of the game project. Here you can fill in the development background, core gameplay, and technical highlights of the game.",
+        "software_overview_text": "This is a detailed overview of the software project. Here you can fill in the development background, core features, and technical highlights of the software.",
+        "tech_stack": "Tech Stack",
+        "screenshots": "Screenshots",
+        "screenshot": "Screenshot",
+        "progress": "Progress",
+        "progress_text": "Current progress: Completed",
+        "features": "Core Features",
+        "feature1": "Feature 1",
+        "feature2": "Feature 2",
+        "feature3": "Feature 3",
+        "feature4": "Feature 4",
+        "back_to_games": "Back to Games",
+        "back_to_software": "Back to Software",
+        "back_to_home": "Back to Home",
+        "scroll_down": "Scroll down for details"
+    }
+}

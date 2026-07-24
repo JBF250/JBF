@@ -1,0 +1,89 @@
+{
+    "splash": {
+        "subtitle": "概念1 · 用代码创造价值"
+    },
+    "nav": {
+        "welcome": "欢迎",
+        "about": "关于",
+        "games": "游戏开发",
+        "software": "软件开发",
+        "blog": "博客",
+        "contact": "联系"
+    },
+    "hero": {
+        "title": "JBF250 / 概念1",
+        "subtitle": "游戏开发者 | 软件工程师",
+        "explore": "开始探索",
+        "scroll": "向下滚动"
+    },
+    "about": {
+        "badge": "关于我",
+        "title": "你好，我是 JBF250",
+        "subtitle": "用代码创造价值",
+        "alias": "我还有一个别名叫概念1",
+        "p1": "我还有一个别名叫概念1，我是一名充满激情的游戏开发者和软件工程师，从小对计算机领域有浓厚的兴趣，我的编程经验虽然可能不足，但是我的目标是创造令人惊叹的数字体验，无论是沉浸式的游戏世界还是高效的软件解决方案。",
+        "p2": "我熟悉现代 Web 技术。在工作中，我注重代码质量和用户体验，力求将每一个项目都做到最好。",
+        "description": "我是一名热爱技术的开发者，专注于游戏开发和软件设计。拥有丰富的Unity开发经验和全栈开发能力。我相信代码是表达创意的最佳方式，每一行代码都是通往梦想的桥梁。",
+        "experience": "工作经验",
+        "education": "教育背景",
+        "skills": "专业技能",
+        "years": "年经验",
+        "projects": "项目",
+        "commits": "代码提交"
+    },
+    "games": {
+        "badge": "游戏开发",
+        "title": "游戏作品",
+        "subtitle": "探索我创造的游戏世界",
+        "view_all": "查看全部",
+        "more": "了解更多"
+    },
+    "software": {
+        "badge": "软件开发",
+        "title": "软件项目",
+        "subtitle": "实用的软件解决方案",
+        "view_all": "查看全部",
+        "more": "了解更多"
+    },
+    "blog": {
+        "badge": "个人博客",
+        "title": "技术笔记",
+        "subtitle": "记录我的学习和思考",
+        "read_more": "阅读更多"
+    },
+    "contact": {
+        "title": "联系我",
+        "subtitle": "期待与您交流",
+        "outlook": "Outlook",
+        "qq": "QQ邮箱"
+    },
+    "footer": {
+        "copyright": "2026 JBF250. All rights reserved.",
+        "slogan": "用代码创造价值"
+    },
+    "buttons": {
+        "back": "返回"
+    },
+    "detail": {
+        "project_details": "项目详情",
+        "overview": "项目概述",
+        "about_game": "关于这款游戏",
+        "about_software": "关于这款软件",
+        "overview_text": "这是游戏项目的详细概述。这里可以填写游戏的开发背景、核心玩法、技术亮点等内容。",
+        "software_overview_text": "这是软件项目的详细概述。这里可以填写软件的开发背景、核心功能、技术亮点等内容。",
+        "tech_stack": "技术栈",
+        "screenshots": "截图展示",
+        "screenshot": "截图",
+        "progress": "开发进度",
+        "progress_text": "当前进度: 已完成",
+        "features": "核心功能",
+        "feature1": "功能特性 1",
+        "feature2": "功能特性 2",
+        "feature3": "功能特性 3",
+        "feature4": "功能特性 4",
+        "back_to_games": "返回游戏列表",
+        "back_to_software": "返回软件列表",
+        "back_to_home": "回到首页",
+        "scroll_down": "向下滚动查看详情"
+    }
+}

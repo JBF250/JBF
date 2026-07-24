@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客认证 - JBF250</title>
+    <link rel="icon" type="image/png" href="../pictures/icon.png">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: var(--color-canvas-card);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-4xl);
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-4xl);
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .login-subtitle {
+            color: var(--color-body-muted);
+            font-size: 0.875rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            color: var(--color-body-strong);
+            font-weight: 500;
+        }
+
+        .form-input {
+            padding: var(--spacing-md);
+            background-color: var(--color-canvas-soft);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-md);
+            color: var(--color-ink);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+            font-family: var(--font-family-mono);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .form-input::placeholder {
+            color: var(--color-mute);
+        }
+
+        .login-btn {
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent-violet));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            text-align: center;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background-color: rgba(239, 68, 68, 0.1);
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: var(--spacing-xl);
+        }
+
+        .back-link a {
+            color: var(--color-link);
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2 class="login-title">我们需要验证你的身份</h2>
+            <p class="login-subtitle">请输入访问密码以继续</p>
+        </div>
+
+        <div class="error-message" id="error-message">密码错误，请重试</div>
+
+        <form class="login-form" id="login-form">
+            <div class="form-group">
+                <label class="form-label">访问密码</label>
+                <input type="password" class="form-input" id="password" placeholder="请输入密码" autocomplete="off">
+            </div>
+            <button type="submit" class="login-btn">进入博客</button>
+        </form>
+
+        <div class="back-link">
+            <a href="../index.html">← 返回首页</a>
+        </div>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('login-form');
+            const passwordInput = document.getElementById('password');
+            const errorMessage = document.getElementById('error-message');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (passwordInput.value === '250') {
+                    localStorage.setItem('blog_authenticated', 'true');
+                    window.location.href = 'blog-admin.html';
+                } else {
+                    errorMessage.style.display = 'block';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    
+                    setTimeout(function() {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        });
+    </script>
+</body>
+</html>

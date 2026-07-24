@@ -1,0 +1,107 @@
+{
+    "posts": [
+        {
+            "id": "blog-1",
+            "title": {
+                "zh": "Unity 性能优化技巧",
+                "en": "Unity Performance Optimization Tips"
+            },
+            "excerpt": {
+                "zh": "分享一些在 Unity 开发中常用的性能优化技巧，帮助你的游戏运行得更流畅。",
+                "en": "Sharing some commonly used performance optimization tips in Unity development to help your game run more smoothly."
+            },
+            "category": "技术",
+            "date": "2024-01-15",
+            "readTime": "5 min",
+            "tags": ["Unity", "Performance", "Optimization"],
+            "content": {
+                "zh": [
+                    {"type": "heading", "text": "为什么性能优化很重要"},
+                    {"type": "paragraph", "text": "在游戏开发中，性能优化是一个永恒的话题。一个流畅的游戏体验可以大大提升玩家的满意度。"},
+                    {"type": "heading", "text": "常用优化技巧"},
+                    {"type": "paragraph", "text": "1. 对象池技术：复用对象，减少内存分配\n2. 纹理压缩：使用合适的纹理格式\n3. 批处理：合并绘制调用\n4. LOD系统：根据距离调整细节"},
+                    {"type": "code", "text": "// 对象池示例\npublic class ObjectPool {\n    public GameObject prefab;\n    private Queue<GameObject> pool = new Queue<GameObject>();\n    \n    public GameObject Get() {\n        if (pool.Count > 0) {\n            return pool.Dequeue();\n        }\n        return Instantiate(prefab);\n    }\n    \n    public void Return(GameObject obj) {\n        obj.SetActive(false);\n        pool.Enqueue(obj);\n    }\n}"}
+                ],
+                "en": [
+                    {"type": "heading", "text": "Why Performance Optimization Matters"},
+                    {"type": "paragraph", "text": "In game development, performance optimization is an eternal topic. A smooth gaming experience can greatly enhance player satisfaction."},
+                    {"type": "heading", "text": "Common Optimization Techniques"},
+                    {"type": "paragraph", "text": "1. Object Pooling: Reuse objects to reduce memory allocation\n2. Texture Compression: Use appropriate texture formats\n3. Batching: Merge draw calls\n4. LOD System: Adjust detail based on distance"},
+                    {"type": "code", "text": "// Object Pool Example\npublic class ObjectPool {\n    public GameObject prefab;\n    private Queue<GameObject> pool = new Queue<GameObject>();\n    \n    public GameObject Get() {\n        if (pool.Count > 0) {\n            return pool.Dequeue();\n        }\n        return Instantiate(prefab);\n    }\n    \n    public void Return(GameObject obj) {\n        obj.SetActive(false);\n        pool.Enqueue(obj);\n    }\n}"}
+                ]
+            }
+        },
+        {
+            "id": "blog-2",
+            "title": {
+                "zh": "React Hooks 最佳实践",
+                "en": "React Hooks Best Practices"
+            },
+            "excerpt": {
+                "zh": "深入探讨 React Hooks 的最佳实践，避免常见陷阱。",
+                "en": "Deep dive into React Hooks best practices and avoid common pitfalls."
+            },
+            "category": "技术",
+            "date": "2024-01-10",
+            "readTime": "8 min",
+            "tags": ["React", "Hooks", "JavaScript"],
+            "content": {
+                "zh": [
+                    {"type": "heading", "text": "Hooks 的基本规则"},
+                    {"type": "paragraph", "text": "1. 只在函数组件顶层调用 Hooks\n2. 不要在循环、条件或嵌套函数中调用\n3. 只在 React 函数组件中调用"},
+                    {"type": "heading", "text": "自定义 Hooks"},
+                    {"type": "paragraph", "text": "自定义 Hooks 是复用状态逻辑的好方式，命名以 use 开头。"}
+                ],
+                "en": [
+                    {"type": "heading", "text": "Basic Rules of Hooks"},
+                    {"type": "paragraph", "text": "1. Only call Hooks at the top level\n2. Don't call Hooks inside loops, conditions, or nested functions\n3. Only call Hooks from React function components"},
+                    {"type": "heading", "text": "Custom Hooks"},
+                    {"type": "paragraph", "text": "Custom Hooks are a great way to reuse state logic, named with use prefix."}
+                ]
+            }
+        },
+        {
+            "id": "blog-3",
+            "title": {
+                "zh": "游戏开发心得",
+                "en": "Game Development Insights"
+            },
+            "excerpt": {
+                "zh": "分享我在游戏开发过程中的一些心得体会和经验教训。",
+                "en": "Sharing some insights and lessons learned during my game development journey."
+            },
+            "category": "心得",
+            "date": "2024-01-05",
+            "readTime": "10 min",
+            "tags": ["GameDev", "Experience"],
+            "content": {
+                "zh": [
+                    {"type": "paragraph", "text": "游戏开发是一个充满挑战但也非常有趣的过程。从想法到实现，每一步都需要精心打磨。"},
+                    {"type": "heading", "text": "最重要的事"},
+                    {"type": "paragraph", "text": "1. 保持热情：游戏开发周期长，需要持续的动力\n2. 迭代开发：不要追求完美，先做出原型\n3. 用户反馈：倾听玩家的声音"}
+                ],
+                "en": [
+                    {"type": "paragraph", "text": "Game development is a challenging but very rewarding process. From idea to implementation, every step requires careful polishing."},
+                    {"type": "heading", "text": "The Most Important Things"},
+                    {"type": "paragraph", "text": "1. Stay passionate: Game development has long cycles, requires sustained motivation\n2. Iterative development: Don't pursue perfection, make a prototype first\n3. User feedback: Listen to your players"}
+                ]
+            }
+        },
+        {
+            "id": "blog-4",
+            "title": {
+                "zh": "新文章占位",
+                "en": "New Article Placeholder"
+            },
+            "excerpt": {
+                "zh": "更多精彩内容即将发布，敬请期待！",
+                "en": "More exciting content coming soon!"
+            },
+            "category": "待发布",
+            "date": "",
+            "readTime": "",
+            "tags": [],
+            "content": {}
+        }
+    ]
+}

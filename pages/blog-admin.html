@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客管理 - JBF250</title>
+    <link rel="icon" type="image/png" href="../pictures/icon.png">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-4xl) var(--spacing-2xl);
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-4xl);
+            padding-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--color-hairline);
+        }
+
+        .admin-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-ink);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent-violet));
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-xl);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-canvas-soft);
+            color: var(--color-body-strong);
+            padding: var(--spacing-sm) var(--spacing-xl);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-primary);
+            color: var(--color-ink);
+        }
+
+        .btn-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-edit {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--color-primary);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-edit:hover {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .blog-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+        }
+
+        .blog-card {
+            background-color: var(--color-canvas-card);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            transition: all var(--transition-normal);
+        }
+
+        .blog-card:hover {
+            border-color: var(--color-primary);
+        }
+
+        .blog-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .blog-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin: 0;
+        }
+
+        .blog-meta {
+            font-size: 0.75rem;
+            color: var(--color-mute);
+            margin-top: var(--spacing-xs);
+        }
+
+        .blog-excerpt {
+            color: var(--color-body);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin: 0 0 var(--spacing-lg);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .blog-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-6xl) var(--spacing-2xl);
+            color: var(--color-mute);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-xl);
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-body-strong);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .empty-state-desc {
+            font-size: 0.875rem;
+            color: var(--color-mute);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--color-canvas-card);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-3xl);
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-2xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-hairline);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-mute);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            color: var(--color-ink);
+            background-color: var(--color-canvas-soft);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--color-body-strong);
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            background-color: var(--color-canvas-soft);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-md);
+            color: var(--color-ink);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: var(--spacing-md);
+            background-color: var(--color-canvas-soft);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-md);
+            color: var(--color-ink);
+            font-size: 1rem;
+            transition: all var(--transition-fast);
+            box-sizing: border-box;
+            min-height: 200px;
+            resize: vertical;
+            font-family: var(--font-family-mono);
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-hairline);
+        }
+
+        .success-message {
+            color: #22c55e;
+            font-size: 0.875rem;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background-color: rgba(34, 197, 94, 0.1);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-xl);
+            display: none;
+        }
+
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .confirm-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confirm-content {
+            background-color: var(--color-canvas-card);
+            border: 1px solid var(--color-hairline);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-3xl);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .confirm-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .confirm-desc {
+            font-size: 0.875rem;
+            color: var(--color-body);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">博客管理</h1>
+            <div class="admin-actions">
+                <button class="btn-primary" onclick="openNewBlogModal()">新建博客</button>
+                <button class="btn-secondary" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+
+        <div class="success-message" id="success-message">保存成功！</div>
+
+        <div class="blog-list" id="blog-list">
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="blog-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">新建博客</h2>
+                <button class="modal-close" onclick="closeBlogModal()">×</button>
+            </div>
+            <form id="blog-form">
+                <input type="hidden" id="blog-id">
+                <div class="form-group">
+                    <label class="form-label">标题</label>
+                    <input type="text" class="form-input" id="blog-title" placeholder="输入博客标题" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">内容</label>
+                    <textarea class="form-textarea" id="blog-content" placeholder="输入博客内容（支持换行）" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeBlogModal()">取消</button>
+                    <button type="submit" class="btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="confirm-modal" id="delete-confirm">
+        <div class="confirm-content">
+            <h3 class="confirm-title">确认删除</h3>
+            <p class="confirm-desc">删除后无法恢复，确定要删除这篇博客吗？</p>
+            <div class="confirm-actions">
+                <button class="btn-secondary" onclick="closeDeleteConfirm()">取消</button>
+                <button class="btn-danger" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script>
+        const BLOG_KEY = 'jbf250_blogs';
+        let blogs = [];
+        let deleteBlogId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadBlogs();
+            renderBlogs();
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        });
+
+        function checkAuth() {
+            if (!localStorage.getItem('blog_authenticated')) {
+                window.location.href = 'blog-login.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('blog_authenticated');
+            window.location.href = '../index.html';
+        }
+
+        function loadBlogs() {
+            const saved = localStorage.getItem(BLOG_KEY);
+            if (saved) {
+                blogs = JSON.parse(saved);
+            } else {
+                blogs = [
+                    {
+                        id: '1',
+                        title: '欢迎使用博客系统',
+                        content: '这是一篇示例博客。你可以在这里记录你的技术笔记、学习心得和开发经验。\n\n点击"新建博客"按钮创建新文章，或者点击编辑按钮修改现有文章。\n\n祝写作愉快！',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveBlogs();
+            }
+        }
+
+        function saveBlogs() {
+            localStorage.setItem(BLOG_KEY, JSON.stringify(blogs));
+        }
+
+        function renderBlogs() {
+            const container = document.getElementById('blog-list');
+            
+            if (blogs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div class="empty-state-title">暂无博客</div>
+                        <div class="empty-state-desc">点击上方"新建博客"按钮创建你的第一篇文章</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedBlogs = [...blogs].sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+
+            container.innerHTML = sortedBlogs.map(blog => `
+                <div class="blog-card">
+                    <div class="blog-card-header">
+                        <div>
+                            <h3 class="blog-title">${escapeHtml(blog.title)}</h3>
+                            <div class="blog-meta">${formatDate(blog.createdAt)}</div>
+                        </div>
+                        <div class="blog-actions">
+                            <button class="btn-edit" onclick="editBlog('${blog.id}')">编辑</button>
+                            <button class="btn-danger" onclick="openDeleteConfirm('${blog.id}')">删除</button>
+                        </div>
+                    </div>
+                    <p class="blog-excerpt">${escapeHtml(blog.content)}</p>
+                </div>
+            `).join('');
+        }
+
+        function openNewBlogModal() {
+            document.getElementById('modal-title').textContent = '新建博客';
+            document.getElementById('blog-id').value = '';
+            document.getElementById('blog-title').value = '';
+            document.getElementById('blog-content').value = '';
+            document.getElementById('blog-modal').classList.add('active');
+        }
+
+        function editBlog(id) {
+            const blog = blogs.find(b => b.id === id);
+            if (!blog) return;
+
+            document.getElementById('modal-title').textContent = '编辑博客';
+            document.getElementById('blog-id').value = blog.id;
+            document.getElementById('blog-title').value = blog.title;
+            document.getElementById('blog-content').value = blog.content;
+            document.getElementById('blog-modal').classList.add('active');
+        }
+
+        function closeBlogModal() {
+            document.getElementById('blog-modal').classList.remove('active');
+        }
+
+        document.getElementById('blog-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('blog-id').value;
+            const title = document.getElementById('blog-title').value.trim();
+            const content = document.getElementById('blog-content').value.trim();
+
+            if (!title || !content) {
+                alert('请填写标题和内容');
+                return;
+            }
+
+            if (id) {
+                const index = blogs.findIndex(b => b.id === id);
+                if (index !== -1) {
+                    blogs[index] = { ...blogs[index], title, content };
+                }
+            } else {
+                blogs.push({
+                    id: Date.now().toString(),
+                    title,
+                    content,
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            saveBlogs();
+            renderBlogs();
+            closeBlogModal();
+            showSuccess();
+        });
+
+        function showSuccess() {
+            const msg = document.getElementById('success-message');
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 2000);
+        }
+
+        function openDeleteConfirm(id) {
+            deleteBlogId = id;
+            document.getElementById('delete-confirm').classList.add('active');
+        }
+
+        function closeDeleteConfirm() {
+            deleteBlogId = null;
+            document.getElementById('delete-confirm').classList.remove('active');
+        }
+
+        function confirmDelete() {
+            if (deleteBlogId) {
+                blogs = blogs.filter(b => b.id !== deleteBlogId);
+                saveBlogs();
+                renderBlogs();
+                showSuccess();
+            }
+            closeDeleteConfirm();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+    </script>
+</body>
+</html>

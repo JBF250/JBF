@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客详情 - JBF250</title>
+    <link rel="icon" type="image/png" href="../pictures/icon.png">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/detail.css">
+</head>
+<body>
+    <nav id="navbar" class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="../index.html" class="logo-link">
+                    <img src="../pictures/JBF250.png" alt="JBF250 Logo" class="logo-image">
+                </a>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="../index.html#hero" class="nav-link">Logo</a></li>
+                <li><a href="../index.html#about" class="nav-link">关于</a></li>
+                <li><a href="../index.html#games" class="nav-link">游戏开发</a></li>
+                <li><a href="../index.html#software" class="nav-link">软件开发</a></li>
+                <li><a href="blog-login.html" class="nav-link active">博客</a></li>
+                <li><a href="../index.html#contact" class="nav-link">联系</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button id="language-switcher" class="btn btn-ghost btn-sm">EN</button>
+                <button id="theme-switcher" class="theme-switcher" title="切换主题">
+                    <div class="theme-dark"></div>
+                    <div class="theme-light"></div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="detail-hero">
+        <div class="container">
+            <div class="back-link">
+                <a href="../index.html#blog" class="btn btn-secondary btn-sm">← 返回博客列表</a>
+            </div>
+            <div class="detail-content">
+                <div class="detail-image">
+                    <div class="image-placeholder">📚</div>
+                </div>
+                <div class="detail-info">
+                    <span class="tag tag-dark" id="blog-category">技术</span>
+                    <h1 class="detail-title" id="blog-title">文章标题</h1>
+                    <div class="detail-meta">
+                        <span>📅 <span id="blog-date">2024-01-15</span></span>
+                        <span>⏱️ <span id="blog-readtime">5 min</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="detail-section">
+        <div class="container">
+            <div class="blog-content" id="blog-content">
+                <p>文章内容将在这里显示...</p>
+            </div>
+            <div class="blog-tags">
+                <span class="mono">#Unity</span>
+                <span class="mono">#Performance</span>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="../pictures/JBF250.png" alt="JBF250 Logo" class="footer-logo-image">
+                    <span class="footer-text">用代码创造价值</span>
+                </div>
+                <div class="footer-links">
+                    <a href="../index.html#hero">Logo</a>
+                    <a href="../index.html#about">关于</a>
+                    <a href="../index.html#games">游戏</a>
+                    <a href="../index.html#software">软件</a>
+                    <a href="../index.html#blog">博客</a>
+                    <a href="../index.html#contact">联系</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <span class="mono">© 2024 JBF250. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/detail-loader.js"></script>
+</body>
+</html>

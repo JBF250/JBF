@@ -1,0 +1,26 @@
+[
+  {
+    "id": "gainian-1",
+    "title": {
+      "zh": "游戏开发心得：从灵感落地到成品发布",
+      "en": "Game Development Insights: From Idea to Release"
+    },
+    "content": {
+      "zh": "开发一款游戏是一个漫长而复杂的过程。从最初的灵感构思，到角色设计、场景搭建、剧情编写，再到最终的测试和发布，每一步都充满挑战。\n\n在开发《离去之后》的过程中，我学到了很多关于叙事设计和游戏机制的知识。一个好的故事不仅仅是文字，还需要通过游戏玩法来传达情感和主题。\n\n希望这篇文章能给正在开发游戏的你一些启发和帮助。",
+      "en": "Developing a game is a long and complex process. From the initial inspiration, to character design, scene building, story writing, and finally testing and release, every step is full of challenges.\n\nDuring the development of \"After Leaving\", I learned a lot about narrative design and game mechanics. A good story is not just words, but needs to convey emotions and themes through gameplay.\n\nI hope this article can give you some inspiration and help if you are developing a game."
+    },
+    "date": "2026-07-01"
+  },
+  {
+    "id": "gainian-2",
+    "title": {
+      "zh": "WinUI3 桌面小组件开发实战",
+      "en": "WinUI3 Desktop Widget Development Practice"
+    },
+    "content": {
+      "zh": "Lume 是我开发的一款 WinUI3 桌面日程小组件。在开发过程中，我遇到了很多关于 Windows 桌面应用开发的挑战。\n\n本文将分享我在开发过程中的经验，包括如何实现悬浮窗口、如何处理系统主题变化、如何优化性能等方面的内容。",
+      "en": "Lume is a WinUI3 desktop schedule widget I developed. During development, I encountered many challenges related to Windows desktop application development.\n\nThis article will share my experiences during development, including how to implement floating windows, handle system theme changes, and optimize performance."
+    },
+    "date": "2026-06-15"
+  }
+]

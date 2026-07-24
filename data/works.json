@@ -1,0 +1,60 @@
+{
+    "games": [
+        {
+            "id": "game-1",
+            "title": {
+                "zh": "离去之后",
+                "en": "After Leaving"
+            },
+            "description": {
+                "zh": "一场披着俗套勇者外皮的冒险故事，却是感动人心的双向救赎。",
+                "en": "An adventure story wrapped in a clichéd hero's guise, yet a touching mutual redemption."
+            },
+            "fullDescription": {
+                "zh": "未来的某一天，沉浸式人工智能心理医疗程序推出了，一个生活失意的年轻人，是如何在这个构想的勇者世界中找寻到了新的自我，完成一次救赎之旅。\n\n这是我独立开发的第一款游戏，你将扮演一位踏上旅途的勇者，在看似俗套的王道剧情背后，隐藏着一段关于告别与成长的深刻故事。游戏融合了经典的JRPG战斗系统与创新的叙事手法，每一个选择都将影响故事的走向。你将在这场旅途中遇到形形色色的角色，与他们建立羁绊，最终发现所谓的「离去」并非结束，而是另一种形式的开始。\n\n如果你喜欢的话，可以联系我获取游戏测试版文件，等到一切都做的差不多时，我也会让其在steam发售。",
+                "en": "In the future, an immersive AI psychological therapy program was launched. A young man living a disappointing life found a new self in this constructed hero's world and completed a journey of redemption.\n\nThis is the first game I independently developed. You play as a hero embarking on a journey. Behind the seemingly clichéd heroic storyline lies a profound tale of farewell and growth. The game combines a classic JRPG battle system with innovative narrative techniques, where every choice shapes the story. You will meet diverse characters along the way, forge bonds with them, and ultimately discover that 'leaving' is not an end, but another form of beginning.\n\nIf you like it, you can contact me to get the game beta test files. When everything is nearly complete, I will also release it on Steam."
+            },
+            "tech": ["RPGMV", "JavaScript", "JRPG"],
+            "status": "completed",
+            "thumbnail": "pictures/AL.png"
+        },
+        {
+            "id": "game-2",
+            "title": {
+                "zh": "嘲哳",
+                "en": "ZhaoZha"
+            },
+            "description": {
+                "zh": "探究失传媒体嘲哳的真相，开启惊心动魄的旅程。",
+                "en": "Explore the truth of the lost media 'ZhaoZha' and embark on a thrilling journey."
+            },
+            "fullDescription": {
+                "zh": "「嘲哳」——一段神秘的失传媒体，相传这款作品以诡谲的文言文笔法书写社会底层图景，无CG画面、文笔晦涩诡谲、整体气质癫狂，且已遭封禁；同时盛赞其为「绝对的宝藏级作品……再也找不出第二个这般的游戏，文笔堪称一绝」，但也坦言游戏本体仅存于私人电脑，如今已无处可寻。此后众多AVG爱好者依据这些线索全网检索，却始终未能找到任何有效信息。\n\n2026年2月，一则消息打破了所有期待——所谓的「嘲哳」被证实只是一款同人制作的游戏。这个结果让我们难以接受：耗费数年追寻的失落媒体，此刻竟像一场荒唐的玩笑。\n\n也正因如此，我们选择踏上一条全新的道路：与其被动等待虚无的真相，不如主动创造真实。由我们亲手，打造出一个真正配得上「失落媒体」之名的《嘲哳》。\n\n此游戏并不是我独立开发，我只是在团队中担任首席程序员，具体可以关注：https://soy666.github.io/ZhaoZha/aboutme.html",
+                "en": "'ZhaoZha' — a mysterious lost media. It is said that this work depicts the underclass of society with eerie classical Chinese prose, with no CG graphics, obscure and eerie writing, and an overall frenzied atmosphere, and has been banned. At the same time, it is praised as 'an absolute treasure-level work... you won't find another game like this, the writing is unparalleled,' but it is also admitted that the game only exists on private computers and is now nowhere to be found. Since then, many AVG enthusiasts have searched the internet based on these clues, but have never been able to find any valid information.\n\nIn February 2026, a piece of news broke all expectations — the so-called 'ZhaoZha' was confirmed to be just a fan-made game. This result was hard for us to accept: the lost media we spent years pursuing turned out to be like an absurd joke.\n\nBecause of this, we chose to embark on a brand new path: rather than passively waiting for an empty truth, we would actively create reality. With our own hands, we will craft a 'ZhaoZha' that truly deserves the name of 'lost media'.\n\nThis game was not developed independently by me. I only served as the lead programmer in the team. For more details, visit: https://soy666.github.io/ZhaoZha/aboutme.html"
+            },
+            "tech": ["RPGMV", "JavaScript", "Visual Novel"],
+            "status": "completed",
+            "thumbnail": "pictures/ZZ.png"
+        }
+    ],
+    "software": [
+        {
+            "id": "software-1",
+            "title": {
+                "zh": "Lume",
+                "en": "Lume"
+            },
+            "description": {
+                "zh": "简洁易用的桌面级日程软件。",
+                "en": "A simple and easy-to-use desktop scheduling software."
+            },
+            "fullDescription": {
+                "zh": "Lume是一款基于WinUI3原生技术打造的极致轻量化桌面悬浮日程小组件，转为Win11/10设计，主打高度自定义的桌面日程管理，你可以在桌面放置你的日程安排，让每一步目标都更加清晰。",
+                "en": "Lume is an extremely lightweight desktop floating schedule widget built with native WinUI3 technology, designed specifically for Win11/10. It focuses on highly customizable desktop schedule management, allowing you to place your schedule on the desktop, making every goal clearer."
+            },
+            "tech": ["WinUI3", "C#", "Desktop Widget"],
+            "status": "completed",
+            "thumbnail": ""
+        }
+    ]
+}

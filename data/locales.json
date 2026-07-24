@@ -1,0 +1,114 @@
+{
+    "zh": {
+        "navbar": {
+            "hero": "Logo",
+            "about": "关于",
+            "games": "游戏开发",
+            "software": "软件开发",
+            "blog": "博客",
+            "contact": "联系"
+        },
+        "hero": {
+            "title": "JBF250 / 概念1",
+            "subtitle": "游戏开发者 | 软件工程师",
+            "explore": "开始探索",
+            "scroll": "向下滚动"
+        },
+        "about": {
+            "badge": "关于我",
+            "title": "你好，我是 JBF250",
+            "p1": "我是一名充满激情的游戏开发者和软件工程师，拥有多年的编程经验。我的目标是创造令人惊叹的数字体验，无论是沉浸式的游戏世界还是高效的软件解决方案。",
+            "p2": "我擅长使用 Unity 引擎开发游戏，同时也精通 React、Node.js 等现代 Web 技术。在工作中，我注重代码质量和用户体验，力求将每一个项目都做到最好。",
+            "years": "年经验",
+            "projects": "项目",
+            "commits": "代码提交"
+        },
+        "games": {
+            "badge": "游戏开发",
+            "title": "游戏作品",
+            "subtitle": "探索我创造的游戏世界"
+        },
+        "software": {
+            "badge": "软件开发",
+            "title": "软件项目",
+            "subtitle": "实用的软件解决方案"
+        },
+        "blog": {
+            "badge": "个人博客",
+            "title": "技术笔记",
+            "subtitle": "记录我的学习和思考"
+        },
+        "contact": {
+            "badge": "联系我",
+            "title": "让我们一起创造",
+            "p1": "如果你有任何项目想法、合作机会，或者只是想聊聊技术，欢迎随时联系我。",
+            "email": "Email",
+            "github": "GitHub",
+            "twitter": "Twitter",
+            "formTitle": "发送消息",
+            "name": "姓名",
+            "message": "消息内容",
+            "send": "发送"
+        },
+        "footer": {
+            "text": "用代码创造价值",
+            "copyright": "© 2024 JBF250. All rights reserved."
+        }
+    },
+    "en": {
+        "navbar": {
+            "hero": "Logo",
+            "about": "About",
+            "games": "Games",
+            "software": "Software",
+            "blog": "Blog",
+            "contact": "Contact"
+        },
+        "hero": {
+            "title": "JBF250 / Concept 1",
+            "subtitle": "Game Developer | Software Engineer",
+            "explore": "Explore",
+            "scroll": "Scroll down"
+        },
+        "about": {
+            "badge": "About Me",
+            "title": "Hello, I'm JBF250",
+            "p1": "I'm a passionate game developer and software engineer with years of programming experience. My goal is to create amazing digital experiences, whether immersive game worlds or efficient software solutions.",
+            "p2": "I specialize in Unity engine game development and also master modern web technologies like React and Node.js. In my work, I focus on code quality and user experience, striving to make every project the best it can be.",
+            "years": "Years",
+            "projects": "Projects",
+            "commits": "Commits"
+        },
+        "games": {
+            "badge": "Game Development",
+            "title": "Games",
+            "subtitle": "Explore the game worlds I've created"
+        },
+        "software": {
+            "badge": "Software Development",
+            "title": "Software",
+            "subtitle": "Practical software solutions"
+        },
+        "blog": {
+            "badge": "Blog",
+            "title": "Tech Notes",
+            "subtitle": "Documenting my learning and thoughts"
+        },
+        "contact": {
+            "badge": "Contact",
+            "title": "Let's Create Together",
+            "p1": "If you have any project ideas, collaboration opportunities, or just want to chat about technology, feel free to contact me anytime.",
+            "email": "Email",
+            "github": "GitHub",
+            "twitter": "Twitter",
+            "formTitle": "Send Message",
+            "name": "Name",
+            "message": "Message",
+            "send": "Send"
+        },
+        "footer": {
+            "text": "Creating value with code",
+            "copyright": "© 2024 JBF250. All rights reserved."
+        }
+    }
+}

@@ -1,0 +1,251 @@
+@import 'lenis/dist/lenis.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a25;
+  --bg-card: #1a1a25;
+  --bg-hover: #252530;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --border-color: #27272a;
+  --nav-bg: rgba(10, 10, 15, 0.9);
+  --btn-primary: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  --btn-primary-text: #ffffff;
+  --accent-pink: #f472b6;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+@layer utilities {
+  .text-gradient {
+    background: var(--btn-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #06b6d4, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-primary {
+    background: var(--btn-primary);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+  }
+
+  .glass {
+    background: rgba(18, 18, 26, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+    text-stroke: 1px rgba(255, 255, 255, 0.3);
+  }
+
+  .text-stroke-thick {
+    -webkit-text-stroke: 2px rgba(139, 92, 246, 0.5);
+    text-stroke: 2px rgba(139, 92, 246, 0.5);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1.5s ease-out forwards;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 1.5s ease-out 0.5s forwards;
+    opacity: 0;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 1.2s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 1s ease-out forwards;
+  }
+
+  .animate-explode {
+    animation: explode 0.6s ease-out forwards;
+  }
+
+  .animate-implode {
+    animation: implode 0.4s ease-in forwards;
+  }
+
+  .animate-particle-burst {
+    animation: particleBurst 0.8s ease-out forwards;
+  }
+
+  .bg-theme-primary {
+    background-color: var(--bg-primary);
+  }
+
+  .bg-theme-secondary {
+    background-color: var(--bg-secondary);
+  }
+
+  .bg-theme-tertiary {
+    background-color: var(--bg-tertiary);
+  }
+
+  .bg-theme-card {
+    background-color: var(--bg-card);
+  }
+
+  .bg-theme-hover {
+    background-color: var(--bg-hover);
+  }
+
+  .text-theme-primary {
+    color: var(--text-primary);
+  }
+
+  .text-theme-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-theme-tertiary {
+    color: var(--text-tertiary);
+  }
+
+  .border-theme-color {
+    border-color: var(--border-color);
+  }
+
+  .bg-nav-bg {
+    background-color: var(--nav-bg);
+  }
+
+  .btn-primary-text {
+    color: var(--btn-primary-text);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes explode {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+    filter: brightness(2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+    filter: brightness(3);
+  }
+}
+
+@keyframes implode {
+  0% {
+    opacity: 0;
+    transform: scale(2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}

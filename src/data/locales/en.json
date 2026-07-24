@@ -1,0 +1,105 @@
+{
+  "nav": {
+    "welcome": "Welcome",
+    "about": "About",
+    "games": "Game Development",
+    "software": "Software Development",
+    "contact": "Contact",
+    "blog": "Blog"
+  },
+  "hero": {
+    "title": "JBF250 / Gainian1",
+    "subtitle": "Game Developer | Software Engineer",
+    "tag1": "RPGMaker",
+    "tag2": "godot",
+    "tag3": "nwjs",
+    "scroll": "Scroll down"
+  },
+  "about": {
+    "title": "About Me",
+    "intro": "I also have an alias called Gainian1, a developer passionate about game development and software programming.",
+    "description": "In the era of AI, what we need most is the spirit of continuous learning and daring exploration. I started programming in high school and have years of development experience. I enjoy developing games and software, dedicated to creating meaningful digital products."
+  },
+  "games": {
+    "title": "Game Development",
+    "subtitle": "Explore infinite possibilities in virtual worlds"
+  },
+  "software": {
+    "title": "Software Development",
+    "subtitle": "Build practical tools and applications"
+  },
+  "contact": {
+    "title": "Contact Me",
+    "github": "GitHub",
+    "qqEmail": "QQ Email",
+    "outlookEmail": "Outlook Email",
+    "message": "Have any questions or collaboration opportunities? Feel free to reach out!"
+  },
+  "blog": {
+    "title": "Personal Blog",
+    "community": "Community",
+    "gainian": "Gainian1",
+    "newPost": "New Post",
+    "titlePlaceholder": "Post title",
+    "contentPlaceholder": "Write something...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this post?",
+    "confirmDeleteComment": "Are you sure you want to delete this comment?",
+    "submit": "Submit",
+    "update": "Update",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "logout": "Logout",
+    "passwordMismatch": "Passwords do not match",
+    "invalidEmail": "Please enter a valid email address",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "registering": "Registering...",
+    "verifyEmailTitle": "Verify Your Email",
+    "verifyEmailSent": "We've sent a verification email to:",
+    "verifyEmailTips": "Please check your inbox and click the link in the email to complete verification. You can log in after verification. If you didn't receive the email, check your spam folder.",
+    "resend": "Resend verification email",
+    "sending": "Sending...",
+    "resendSuccess": "Verification email has been resent",
+    "resendFailed": "Failed to resend, please try again later",
+    "goLogin": "Go to Login",
+    "backHome": "Back to Home",
+    "registerFailed": "Registration failed, please try again later",
+    "emailNotVerified": "Please verify your email before logging in",
+    "loginFailed": "Invalid email or password"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "profile": "Profile",
+    "displayName": "Display Name",
+    "avatar": "Avatar",
+    "theme": "Theme Settings",
+    "color": "Theme Color",
+    "language": "Language",
+    "chinese": "中文",
+    "english": "English",
+    "japanese": "日本語",
+    "save": "Save",
+    "saved": "Settings saved"
+  },
+  "detail": {
+    "back": "Back to Home",
+    "overview": "Project Overview",
+    "aboutGame": "About This Game",
+    "aboutSoftware": "About This Software"
+  },
+  "footer": {
+    "copyright": "2026 JBF250. All rights reserved."
+  }
+}

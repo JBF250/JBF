@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品展示 - 游戏开发 & 软件开发</title>
+    <meta name="description" content="查看我的游戏开发和软件开发作品">
+    <link rel="icon" type="image/png" href="../pictures/icon.png">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/works.css">
+</head>
+<body>
+    <nav id="navbar" class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="../index.html" class="logo-link">
+                    <div class="logo-circle">
+                        <span class="logo-icon">G</span>
+                    </div>
+                    <span class="logo-text">Gainian</span>
+                </a>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="../index.html#about" class="nav-link" data-i18n="navbar.about">关于</a></li>
+                <li><a href="../index.html#skills" class="nav-link" data-i18n="navbar.skills">技能</a></li>
+                <li><a href="works.html" class="nav-link active" data-i18n="navbar.works">作品</a></li>
+                <li><a href="blog.html" class="nav-link" data-i18n="navbar.blog">博客</a></li>
+                <li><a href="../index.html#contact" class="nav-link" data-i18n="navbar.contact">联系</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button id="language-switcher" class="btn btn-ghost btn-sm">EN</button>
+                <a href="../index.html" class="btn btn-primary btn-sm" data-i18n="navbar.backHome">返回首页</a>
+            </div>
+            <button class="navbar-toggle" id="navbar-toggle">
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1 class="page-title" data-i18n="works.title">作品展示</h1>
+            <p class="page-subtitle" data-i18n="works.subtitle">探索我的游戏开发和软件开发项目</p>
+            <div class="category-tabs">
+                <button class="category-tab active" data-category="all" data-i18n="works.all">全部作品</button>
+                <button class="category-tab" data-category="game" data-i18n="works.game">游戏开发</button>
+                <button class="category-tab" data-category="software" data-i18n="works.software">软件开发</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="works-section section">
+        <div class="container">
+            <div class="works-content" id="works-content">
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section section section-dark">
+        <div class="container">
+            <h2 data-i18n="works.moreDetails">想要了解更多项目细节？</h2>
+            <p>我很乐意分享更多关于我的项目的技术细节和开发过程。</p>
+            <a href="../index.html#contact" class="btn btn-secondary" data-i18n="works.contactMe">联系我</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo-circle">
+                        <span class="logo-icon">G</span>
+                    </div>
+                    <span class="logo-text">Gainian</span>
+                </div>
+                <p class="footer-text" data-i18n="footer.text">用代码创造价值，用创意改变世界</p>
+                <div class="footer-links">
+                    <a href="../index.html#about" data-i18n="navbar.about">关于</a>
+                    <a href="works.html" data-i18n="navbar.works">作品</a>
+                    <a href="blog.html" data-i18n="navbar.blog">博客</a>
+                    <a href="../index.html#contact" data-i18n="navbar.contact">联系</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <span class="mono" data-i18n="footer.copyright">© 2024 Developer. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../js/i18n.js"></script>
+    <script type="module" src="../js/works-renderer.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+</html>

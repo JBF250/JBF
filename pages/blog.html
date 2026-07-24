@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人博客 - 技术备忘录</title>
+    <meta name="description" content="记录我的技术经验和学习心得">
+    <link rel="icon" type="image/png" href="../pictures/icon.png">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/blog.css">
+</head>
+<body>
+    <nav id="navbar" class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="../index.html" class="logo-link">
+                    <div class="logo-circle">
+                        <span class="logo-icon">G</span>
+                    </div>
+                    <span class="logo-text">Gainian</span>
+                </a>
+            </div>
+            <ul class="navbar-links">
+                <li><a href="../index.html#about" class="nav-link" data-i18n="navbar.about">关于</a></li>
+                <li><a href="../index.html#skills" class="nav-link" data-i18n="navbar.skills">技能</a></li>
+                <li><a href="works.html" class="nav-link" data-i18n="navbar.works">作品</a></li>
+                <li><a href="blog.html" class="nav-link active" data-i18n="navbar.blog">博客</a></li>
+                <li><a href="../index.html#contact" class="nav-link" data-i18n="navbar.contact">联系</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button id="language-switcher" class="btn btn-ghost btn-sm">EN</button>
+                <a href="../index.html" class="btn btn-primary btn-sm" data-i18n="navbar.backHome">返回首页</a>
+            </div>
+            <button class="navbar-toggle" id="navbar-toggle">
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1 class="page-title" data-i18n="blog.title">个人博客</h1>
+            <p class="page-subtitle" data-i18n="blog.subtitle">记录我的技术经验、学习心得与思考</p>
+        </div>
+    </section>
+
+    <section class="blog-section section">
+        <div class="container">
+            <div class="blog-content">
+                <div class="blog-sidebar">
+                    <div class="sidebar-widget">
+                        <h3>关于博客</h3>
+                        <p data-i18n="blog.aboutBlog">这是我的技术备忘录，记录在开发过程中遇到的问题和解决方案，分享学习心得和技术见解。</p>
+                    </div>
+                    <div class="sidebar-widget">
+                        <h3>最近文章</h3>
+                        <ul class="recent-posts" id="recent-posts">
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="blog-main" id="blog-main">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo-circle">
+                        <span class="logo-icon">G</span>
+                    </div>
+                    <span class="logo-text">Gainian</span>
+                </div>
+                <p class="footer-text" data-i18n="footer.text">用代码创造价值，用创意改变世界</p>
+                <div class="footer-links">
+                    <a href="../index.html#about" data-i18n="navbar.about">关于</a>
+                    <a href="works.html" data-i18n="navbar.works">作品</a>
+                    <a href="blog.html" data-i18n="navbar.blog">博客</a>
+                    <a href="../index.html#contact" data-i18n="navbar.contact">联系</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <span class="mono" data-i18n="footer.copyright">© 2024 Developer. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="../js/i18n.js"></script>
+    <script type="module" src="../js/blog-renderer.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+{
+  "nav": {
+    "welcome": "欢迎",
+    "about": "关于",
+    "games": "游戏开发",
+    "software": "软件开发",
+    "contact": "联系",
+    "blog": "博客"
+  },
+  "hero": {
+    "title": "JBF250 / 概念1",
+    "subtitle": "游戏开发者 | 软件工程师",
+    "tag1": "RPGMaker",
+    "tag2": "godot",
+    "tag3": "nwjs",
+    "scroll": "向下滚动"
+  },
+  "about": {
+    "title": "关于我",
+    "intro": "我还有一个别名叫概念1，是一名热爱游戏开发和软件编程的开发者。",
+    "description": "AI来临的时代，我们最需要的是不断学习和敢于探索的精神。我从高中时期开始接触编程，至今已有多年开发经验。我喜欢进行游戏和软件的开发，致力于打造有意义的数字产品。"
+  },
+  "games": {
+    "title": "游戏开发",
+    "subtitle": "探索虚拟世界的无限可能"
+  },
+  "software": {
+    "title": "软件开发",
+    "subtitle": "打造实用的工具和应用"
+  },
+  "contact": {
+    "title": "联系我",
+    "github": "GitHub",
+    "qqEmail": "QQ邮箱",
+    "outlookEmail": "Outlook邮箱",
+    "message": "有任何问题或合作意向，欢迎随时联系！"
+  },
+  "blog": {
+    "title": "个人博客",
+    "community": "社区",
+    "gainian": "概念1",
+    "newPost": "发布新帖",
+    "titlePlaceholder": "帖子标题",
+    "contentPlaceholder": "写点什么...",
+    "edit": "编辑",
+    "delete": "删除",
+    "confirmDelete": "确定删除这个帖子吗？",
+    "confirmDeleteComment": "确定删除这条评论吗？",
+    "submit": "发布",
+    "update": "更新",
+    "cancel": "取消"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "username": "用户名",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "noAccount": "还没有账户？",
+    "hasAccount": "已有账户？",
+    "loginSuccess": "登录成功",
+    "registerSuccess": "注册成功",
+    "logout": "退出登录",
+    "passwordMismatch": "密码不匹配",
+    "invalidEmail": "请输入有效的邮箱地址",
+    "passwordTooShort": "密码长度至少为6位",
+    "registering": "注册中...",
+    "verifyEmailTitle": "验证你的邮箱",
+    "verifyEmailSent": "我们已向以下邮箱发送验证邮件：",
+    "verifyEmailTips": "请前往邮箱查收验证邮件，点击邮件中的链接完成验证。验证完成后即可登录。如果没收到邮件，请检查垃圾邮件文件夹。",
+    "resend": "重新发送验证邮件",
+    "sending": "发送中...",
+    "resendSuccess": "验证邮件已重新发送",
+    "resendFailed": "重新发送失败，请稍后重试",
+    "goLogin": "前往登录",
+    "backHome": "返回首页",
+    "registerFailed": "注册失败，请稍后重试",
+    "emailNotVerified": "请先验证邮箱后再登录",
+    "loginFailed": "邮箱或密码错误"
+  },
+  "settings": {
+    "title": "账户设置",
+    "profile": "个人资料",
+    "displayName": "显示名称",
+    "avatar": "头像",
+    "theme": "主题设置",
+    "color": "主题颜色",
+    "language": "语言",
+    "chinese": "中文",
+    "english": "English",
+    "japanese": "日本語",
+    "save": "保存",
+    "saved": "设置已保存"
+  },
+  "detail": {
+    "back": "返回首页",
+    "overview": "项目概述",
+    "aboutGame": "关于这款游戏",
+    "aboutSoftware": "关于这款软件"
+  },
+  "footer": {
+    "copyright": "2026 JBF250. All rights reserved."
+  }
+}

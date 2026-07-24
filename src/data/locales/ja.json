@@ -1,0 +1,105 @@
+{
+  "nav": {
+    "welcome": "ようこそ",
+    "about": "私について",
+    "games": "ゲーム開発",
+    "software": "ソフトウェア開発",
+    "contact": "連絡先",
+    "blog": "ブログ"
+  },
+  "hero": {
+    "title": "JBF250 / 概念1",
+    "subtitle": "ゲーム開発者 | ソフトウェアエンジニア",
+    "tag1": "RPGMaker",
+    "tag2": "godot",
+    "tag3": "nwjs",
+    "scroll": "下にスクロール"
+  },
+  "about": {
+    "title": "私について",
+    "intro": "別名「概念1」といい、ゲーム開発とソフトウェアプログラミングに情熱を注ぐ開発者です。",
+    "description": "AIの時代において、私たちに最も必要なのは継続的な学習と勇気ある探求の精神です。高校時代からプログラミングに触れ、現在まで長年の開発経験があります。ゲームやソフトウェアの開発を楽しみ、有意義なデジタル製品の創造に取り組んでいます。"
+  },
+  "games": {
+    "title": "ゲーム開発",
+    "subtitle": "仮想世界の無限の可能性を探求"
+  },
+  "software": {
+    "title": "ソフトウェア開発",
+    "subtitle": "実用的なツールとアプリケーションを作成"
+  },
+  "contact": {
+    "title": "連絡先",
+    "github": "GitHub",
+    "qqEmail": "QQメール",
+    "outlookEmail": "Outlookメール",
+    "message": "質問や協力の意向があれば、いつでもお気軽にご連絡ください！"
+  },
+  "blog": {
+    "title": "個人ブログ",
+    "community": "コミュニティ",
+    "gainian": "概念1",
+    "newPost": "新しい投稿",
+    "titlePlaceholder": "投稿タイトル",
+    "contentPlaceholder": "何かを書く...",
+    "edit": "編集",
+    "delete": "削除",
+    "confirmDelete": "この投稿を削除してもよろしいですか？",
+    "confirmDeleteComment": "このコメントを削除してもよろしいですか？",
+    "submit": "送信",
+    "update": "更新",
+    "cancel": "キャンセル"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "email": "メールアドレス",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "confirmPassword": "パスワード確認",
+    "noAccount": "アカウントをお持ちではありませんか？",
+    "hasAccount": "既にアカウントをお持ちですか？",
+    "loginSuccess": "ログイン成功",
+    "registerSuccess": "登録成功",
+    "logout": "ログアウト",
+    "passwordMismatch": "パスワードが一致しません",
+    "invalidEmail": "有効なメールアドレスを入力してください",
+    "passwordTooShort": "パスワードは6文字以上である必要があります",
+    "registering": "登録中...",
+    "verifyEmailTitle": "メールアドレスを認証してください",
+    "verifyEmailSent": "認証メールを以下のアドレスに送信しました：",
+    "verifyEmailTips": "受信箱を確認し、メール内のリンクをクリックして認証を完了してください。認証完了後にログインできます。メールが届かない場合は、迷惑メールフォルダーをご確認ください。",
+    "resend": "認証メールを再送信",
+    "sending": "送信中...",
+    "resendSuccess": "認証メールが再送信されました",
+    "resendFailed": "再送信に失敗しました、後でもう一度お試しください",
+    "goLogin": "ログインへ",
+    "backHome": "ホームに戻る",
+    "registerFailed": "登録に失敗しました、後でもう一度お試しください",
+    "emailNotVerified": "ログイン前にメールアドレスを認証してください",
+    "loginFailed": "メールアドレスまたはパスワードが正しくありません"
+  },
+  "settings": {
+    "title": "アカウント設定",
+    "profile": "プロフィール",
+    "displayName": "表示名",
+    "avatar": "アバター",
+    "theme": "テーマ設定",
+    "color": "テーマカラー",
+    "language": "言語",
+    "chinese": "中文",
+    "english": "English",
+    "japanese": "日本語",
+    "save": "保存",
+    "saved": "設定が保存されました"
+  },
+  "detail": {
+    "back": "ホームに戻る",
+    "overview": "プロジェクト概要",
+    "aboutGame": "このゲームについて",
+    "aboutSoftware": "このソフトウェアについて"
+  },
+  "footer": {
+    "copyright": "2026 JBF250. All rights reserved."
+  }
+}
