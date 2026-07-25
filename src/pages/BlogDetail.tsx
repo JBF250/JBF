@@ -4,7 +4,7 @@ import { ArrowLeft, ThumbsUp, MessageCircle, Send, ArrowUp, Trash2 } from 'lucid
 import { useI18n } from '@/context/I18nContext'
 import { useAuth } from '@/context/AuthContext'
 import { supabase, type CommunityPost } from '@/lib/supabase'
-import gainianPosts from '@/data/gainian-posts.json'
+import gainianPosts, { type GainianPost } from '@/lib/gainianPosts'
 import { useResetScroll } from '@/hooks/useResetScroll'
 
 interface Comment {
@@ -22,13 +22,13 @@ export default function BlogDetail() {
   const navigate = useNavigate()
   const { lang, t } = useI18n()
   const { user } = useAuth()
-  const currentLang = lang === 'ja' ? 'en' : lang
+  const currentLang = lang
   const commentInputRef = useRef<HTMLTextAreaElement>(null)
 
   useResetScroll()
 
   const [post, setPost] = useState<CommunityPost | null>(null)
-  const [gainianPost, setGainianPost] = useState<typeof gainianPosts[0] | null>(null)
+  const [gainianPost, setGainianPost] = useState<GainianPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [likes, setLikes] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
@@ -48,15 +48,15 @@ export default function BlogDetail() {
           .single()
         
         if (!error && data) {
-          const { data: author } = await supabase
-            .from('users')
-            .select('id, display_name, avatar_url, username')
-            .eq('id', data.user_id)
-            .single()
+          const authorData = {
+            display_name: data.author_display_name || '匿名用户',
+            avatar_url: data.author_avatar_url || null,
+            username: data.author_display_name || 'anonymous'
+          }
           
           setPost({
             ...data,
-            author: author || null
+            author: authorData
           } as any)
         }
       } else if (type === 'gainian' && id) {
@@ -235,11 +235,28 @@ export default function BlogDetail() {
 
     if (type === 'gainian' && gainianPost) {
       const content = gainianPost.content[currentLang as keyof typeof gainianPost.content]
-      return content.split('\n').map((paragraph, index) => (
-        <p key={index} className="text-theme-secondary leading-relaxed mb-4 text-base">
-          {paragraph}
-        </p>
-      ))
+      const parts = content.split(/\[图片调用指令：(\S+)\]/g)
+
+      return parts.map((part, index) => {
+        if (index % 2 === 1) {
+          return (
+            <img
+              key={index}
+              src={`/pictures/${part}`}
+              alt={part}
+              className="max-w-full h-auto rounded-xl my-6"
+            />
+          )
+        }
+        return part.split('\n').map((paragraph, pIndex) => {
+          if (!paragraph.trim()) return null
+          return (
+            <p key={`${index}-${pIndex}`} className="text-theme-secondary leading-relaxed mb-4 text-base">
+              {paragraph}
+            </p>
+          )
+        })
+      })
     }
 
     return null

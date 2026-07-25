@@ -7,7 +7,7 @@ import { useResetScroll } from '@/hooks/useResetScroll'
 export default function GameDetail() {
   const { id } = useParams<{ id: string }>()
   const { t, lang } = useI18n()
-  const currentLang = lang === 'ja' ? 'en' : lang
+  const currentLang = lang
   
   useResetScroll()
 
@@ -33,11 +33,35 @@ export default function GameDetail() {
 
   const formatDescription = (text: string) => {
     const isZhaoZha = game.id === 'game-2'
-    return text.split('\n').map((paragraph, index) => (
-      <p key={index} className={`text-gray-400 mb-4 leading-relaxed ${isZhaoZha ? 'font-bold' : ''}`}>
-        {paragraph}
-      </p>
-    ))
+    return text.split('\n').map((paragraph, index) => {
+      if (!paragraph.trim()) return null
+      
+      const parts = paragraph.split(/\[([^\]]+)\]\(([^)]+)\)/g)
+      const elements = parts.map((part, pIndex) => {
+        if (pIndex % 3 === 1) {
+          const url = parts[pIndex + 1]
+          return (
+            <a
+              key={pIndex}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {part}
+            </a>
+          )
+        }
+        if (pIndex % 3 === 2) return null
+        return part
+      })
+      
+      return (
+        <p key={index} className={`text-gray-400 mb-4 leading-relaxed ${isZhaoZha ? 'font-bold' : ''}`}>
+          {elements}
+        </p>
+      )
+    })
   }
 
   return (

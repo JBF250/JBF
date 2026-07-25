@@ -20,6 +20,8 @@ export type CommunityPost = {
   title: string
   content: string
   images: string[]
+  author_display_name: string
+  author_avatar_url: string | null
   created_at: string
   updated_at: string
 }

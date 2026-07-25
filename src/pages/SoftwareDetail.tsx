@@ -7,7 +7,7 @@ import { useResetScroll } from '@/hooks/useResetScroll'
 export default function SoftwareDetail() {
   const { id } = useParams<{ id: string }>()
   const { t, lang } = useI18n()
-  const currentLang = lang === 'ja' ? 'en' : lang
+  const currentLang = lang
   
   useResetScroll()
 

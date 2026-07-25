@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, Image, X, ArrowLeft, ThumbsUp, MessageCircle, User
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
 import { supabase, type CommunityPost } from '@/lib/supabase'
-import gainianPosts from '@/data/gainian-posts.json'
+import gainianPosts from '@/lib/gainianPosts'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export type CommunityPostWithAuthor = CommunityPost & {
@@ -35,7 +35,7 @@ export default function Blog() {
   const [uploadingImages, setUploadingImages] = useState(false)
   const [postImages, setPostImages] = useState<string[]>([])
   const { user } = useAuth()
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -71,19 +71,13 @@ export default function Blog() {
       .order('created_at', { ascending: false })
     
     if (!error && data) {
-      const userIds = [...new Set(data.map(p => p.user_id))]
-      
-      const { data: users } = await supabase
-        .from('users')
-        .select('id, display_name, avatar_url, username')
-        .in('id', userIds)
-      
-      const userMap: Record<string, { display_name: string; avatar_url: string | null; username: string }> = {}
-      users?.forEach(u => { userMap[u.id] = u })
-      
       const postsWithAuthor = data.map(post => ({
         ...post,
-        author: userMap[post.user_id] || null
+        author: {
+          display_name: post.author_display_name || '匿名用户',
+          avatar_url: post.author_avatar_url || null,
+          username: post.author_display_name || 'anonymous'
+        }
       }))
       
       setPosts(postsWithAuthor)
@@ -93,16 +87,18 @@ export default function Blog() {
   }
 
   const handleCreatePost = async () => {
-    if (!newPost.title.trim() || !newPost.content.trim()) return
+    if (!newPost.title.trim() || !newPost.content.trim() || !user) return
     
     setUploadingImages(true)
     
     try {
       await supabase.from('community_posts').insert({
-        user_id: user?.id,
+        user_id: user.id,
         title: newPost.title,
         content: newPost.content,
-        images: postImages
+        images: postImages,
+        author_display_name: user.display_name || user.username,
+        author_avatar_url: user.avatar_url
       })
       
       setShowCreateModal(false)
@@ -117,7 +113,7 @@ export default function Blog() {
   }
 
   const handleUpdatePost = async () => {
-    if (!editingPost || !newPost.title.trim() || !newPost.content.trim()) return
+    if (!editingPost || !newPost.title.trim() || !newPost.content.trim() || !user) return
     
     try {
       await supabase
@@ -125,7 +121,9 @@ export default function Blog() {
         .update({
           title: newPost.title,
           content: newPost.content,
-          images: postImages
+          images: postImages,
+          author_display_name: user.display_name || user.username,
+          author_avatar_url: user.avatar_url
         })
         .eq('id', editingPost.id)
       
@@ -206,36 +204,27 @@ export default function Blog() {
 
           <div className="flex gap-8">
             <div className="hidden lg:block w-56 flex-shrink-0">
-              <div className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-4 border border-theme-color sticky top-24">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-theme-primary font-semibold mb-3">{t('blog.community')}</h3>
-                    <div className="space-y-2 pl-2">
-                      <button
-                        onClick={() => setActiveTab('community')}
-                        className={`w-full text-left px-4 py-2.5 rounded-xl font-medium transition-all ${
-                          activeTab === 'community'
-                            ? 'bg-gradient-primary btn-primary-text'
-                            : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-hover'
-                        }`}
-                      >
-                        自由帖子
-                      </button>
-                    </div>
-                  </div>
-                  <div className="border-t border-theme-color pt-4">
-                    <button
-                      onClick={() => setActiveTab('gainian')}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl font-medium transition-all ${
-                        activeTab === 'gainian'
-                          ? 'bg-gradient-primary btn-primary-text'
-                          : 'text-theme-secondary hover:text-theme-primary hover:bg-theme-hover'
-                      }`}
-                    >
-                      {t('blog.gainian')}
-                    </button>
-                  </div>
-                </div>
+              <div className="sticky top-24 space-y-2">
+                <button
+                  onClick={() => setActiveTab('community')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
+                    activeTab === 'community'
+                      ? 'bg-gradient-primary btn-primary-text'
+                      : 'bg-theme-card/50 backdrop-blur-sm border border-theme-color text-theme-secondary hover:text-theme-primary hover:bg-theme-card/70'
+                  }`}
+                >
+                  {t('blog.community')}
+                </button>
+                <button
+                  onClick={() => setActiveTab('gainian')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
+                    activeTab === 'gainian'
+                      ? 'bg-gradient-primary btn-primary-text'
+                      : 'bg-theme-card/50 backdrop-blur-sm border border-theme-color text-theme-secondary hover:text-theme-primary hover:bg-theme-card/70'
+                  }`}
+                >
+                  {t('blog.gainian')}
+                </button>
               </div>
             </div>
 
@@ -267,7 +256,13 @@ export default function Blog() {
                 <>
                   <div className="flex justify-end mb-6">
                     <button
-                      onClick={() => setShowCreateModal(true)}
+                      onClick={() => {
+                        if (!user) {
+                          navigate('/login')
+                          return
+                        }
+                        setShowCreateModal(true)
+                      }}
                       className="flex items-center gap-2 px-6 py-3 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity"
                     >
                       <Plus className="w-5 h-5" />
@@ -357,7 +352,7 @@ export default function Blog() {
                       className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-5 border border-theme-color cursor-pointer hover:border-primary/50 hover:bg-theme-card/70 transition-all group"
                     >
                       <h3 className="font-display font-bold text-lg text-theme-primary mb-3 group-hover:text-primary transition-colors">
-                        {post.title.zh}
+                        {post.title[lang]}
                       </h3>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-theme-secondary text-sm">

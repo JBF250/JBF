@@ -1,0 +1,14 @@
+{
+  "id": "gainian-2",
+  "title": {
+    "zh": "WinUI3 桌面小组件开发实战",
+    "en": "WinUI3 Desktop Widget Development Practice",
+    "ja": "WinUI3 デスクトップウィジェット開発実践"
+  },
+  "content": {
+    "zh": "Lume 是我开发的一款 WinUI3 桌面日程小组件。在开发过程中，我遇到了很多关于 Windows 桌面应用开发的挑战。\n\n本文将分享我在开发过程中的经验，包括如何实现悬浮窗口、如何处理系统主题变化、如何优化性能等方面的内容。\n\n Tips:我还在开发中，敬请期待",
+    "en": "Lume is a WinUI3 desktop schedule widget I developed. During development, I encountered many challenges related to Windows desktop application development.\n\nThis article will share my experiences during development, including how to implement floating windows, handle system theme changes, and optimize performance.\n\nTips: I'm still developing, stay tuned",
+    "ja": "Lumeは私が開発したWinUI3デスクトップ予定ウィジェットです。開発過程で、Windowsデスクトップアプリ開発に関する多くの課題に直面しました。\n\nこの記事では、開発過程での経験を共有します。フローティングウィンドウの実装方法、システムテーマ変更の処理方法、パフォーマンスの最適化方法などの内容を含みます。\n\nTips: まだ開発中ですので、お楽しみに"
+  },
+  "date": "2026-06-15"
+}

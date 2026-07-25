@@ -18,18 +18,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const ensureUserProfile = async (authUser: any) => {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .single()
+    
+    if (profile) {
+      return profile as User
+    }
+
+    const username = authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'user'
+    const { data: newProfile } = await supabase.from('users').insert({
+      id: authUser.id,
+      username,
+      display_name: authUser.email || '用户',
+      theme_color: '#8b5cf6',
+      language: 'zh',
+      avatar_url: null
+    }).select('*').single()
+    
+    return newProfile as User || null
+  }
+
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (authUser) {
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', authUser.id)
-          .single()
-        
+        const profile = await ensureUserProfile(authUser)
         if (profile) {
-          setUser(profile as User)
+          setUser(profile)
         }
       }
       setLoading(false)
@@ -38,14 +57,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-        
+        const profile = await ensureUserProfile(session.user)
         if (profile) {
-          setUser(profile as User)
+          setUser(profile)
         }
       } else {
         setUser(null)
@@ -61,14 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
     
     if (data.session?.user) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', data.session.user.id)
-        .single()
-      
+      const profile = await ensureUserProfile(data.session.user)
       if (profile) {
-        setUser(profile as User)
+        setUser(profile)
       }
     }
   }

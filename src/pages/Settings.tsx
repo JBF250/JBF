@@ -96,16 +96,16 @@ export default function Settings() {
               </label>
               <div className="flex items-center gap-6">
                 <div className="w-24 h-24 rounded-2xl bg-theme-tertiary overflow-hidden flex items-center justify-center">
-                  {user?.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.display_name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : avatarFile ? (
+                  {avatarFile ? (
                     <img
                       src={URL.createObjectURL(avatarFile)}
                       alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : user?.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.display_name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
