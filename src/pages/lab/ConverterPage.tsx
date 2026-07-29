@@ -116,6 +116,9 @@ export default function ConverterPage() {
       })
 
       // 从 Supabase Storage 加载 ffmpeg-core，国内访问稳定
+      // 使用 ESM 版本，因为 @ffmpeg/ffmpeg v0.12.x 创建的是 module worker，
+      // module worker 中 importScripts 不可用，会 fallback 到 import()，
+      // 而 UMD 版本没有 ES module 的 default 导出，导致加载失败
       const supabaseUrl = 'https://noiebpjyskscjtmdytxj.supabase.co'
       const baseURL = `${supabaseUrl}/storage/v1/object/public/ffmpeg-core`
       
@@ -124,7 +127,7 @@ export default function ConverterPage() {
 
       // Use toBlobURL to fetch files and create blob URLs, bypassing Vite module resolution
       addLog(t('lab.converter.loadingFfmpeg'))
-      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript')
+      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core-esm.js`, 'text/javascript')
       const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
 
       const loadPromise = ffmpeg.load({ coreURL, wasmURL })
