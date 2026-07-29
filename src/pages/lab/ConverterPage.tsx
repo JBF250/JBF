@@ -115,8 +115,9 @@ export default function ConverterPage() {
         setProgress(clamped)
       })
 
-      // 从 CDN 加载 ffmpeg-core，避免本地 wasm 文件过大（30MB+）超过 Cloudflare Pages 25MB 限制
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+      // 从 Supabase Storage 加载 ffmpeg-core，国内访问稳定
+      const supabaseUrl = 'https://noiebpjyskscjtmdytxj.supabase.co'
+      const baseURL = `${supabaseUrl}/storage/v1/object/public/ffmpeg-core`
       
       const hasSharedArrayBuffer = typeof (window as any).crossOriginIsolated !== 'undefined' && (window as any).crossOriginIsolated
       addLog(`FFmpeg 初始化中... ${hasSharedArrayBuffer ? '(多线程模式)' : '(单线程模式)'}`)
