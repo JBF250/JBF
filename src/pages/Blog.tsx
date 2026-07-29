@@ -10,15 +10,7 @@ export type CommunityPostWithAuthor = CommunityPost & {
   author?: { display_name: string; avatar_url: string | null; username: string } | null
 }
 
-const getPostLikes = (postId: string): number => {
-  const likes = JSON.parse(localStorage.getItem('blog_likes') || '{}')
-  return likes[postId] || 0
-}
 
-const getPostComments = (postId: string): number => {
-  const comments = JSON.parse(localStorage.getItem('blog_comments') || '{}')
-  return comments[postId]?.length || 0
-}
 
 export default function Blog() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -45,22 +37,63 @@ export default function Blog() {
   useEffect(() => {
     if (activeTab === 'community') {
       fetchCommunityPosts()
+    } else if (activeTab === 'gainian') {
+      // 加载 gainian 帖子的统计数据
+      const gainianIds = gainianPosts.map(p => p.id)
+      if (gainianIds.length > 0) {
+        loadPostStats(gainianIds, 'gainian')
+      }
     }
-  }, [activeTab])
+  }, [activeTab, gainianPosts])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
-  const loadPostStats = (postIds: string[]) => {
+  const loadPostStats = async (postIds: string[], postType: string = 'community') => {
     const stats: Record<string, { likes: number; comments: number }> = {}
+    
+    // 初始化
     postIds.forEach(id => {
-      stats[id] = {
-        likes: getPostLikes(id),
-        comments: getPostComments(id)
-      }
+      stats[id] = { likes: 0, comments: 0 }
     })
-    setPostStats(stats)
+    
+    try {
+      // 查询点赞数
+      const { data: likesData } = await supabase
+        .from('community_likes')
+        .select('post_id')
+        .eq('post_type', postType)
+        .in('post_id', postIds)
+      
+      if (likesData) {
+        likesData.forEach(like => {
+          if (stats[like.post_id]) {
+            stats[like.post_id].likes++
+          }
+        })
+      }
+      
+      // 查询评论数
+      const { data: commentsData } = await supabase
+        .from('community_comments')
+        .select('post_id')
+        .eq('post_type', postType)
+        .in('post_id', postIds)
+      
+      if (commentsData) {
+        commentsData.forEach(comment => {
+          if (stats[comment.post_id]) {
+            stats[comment.post_id].comments++
+          }
+        })
+      }
+      
+      setPostStats(stats)
+    } catch (error) {
+      console.error('Failed to load post stats:', error)
+      setPostStats(stats)
+    }
   }
 
   const fetchCommunityPosts = async () => {
@@ -196,13 +229,39 @@ export default function Blog() {
               {t('detail.back')}
             </button>
             <div className="text-center">
-              <h1 className="font-display font-bold text-4xl text-theme-primary mb-2">{t('blog.title')}</h1>
-              <p className="text-theme-secondary">{t('blog.community')} / {t('blog.gainian')}</p>
+              <h1 className="font-display font-bold text-3xl md:text-4xl text-theme-primary mb-2">{t('blog.title')}</h1>
+              <p className="text-theme-secondary text-sm md:text-base">{t('blog.community')} / {t('blog.gainian')}</p>
             </div>
-            <div className="w-32" />
+            <div className="w-20 md:w-32" />
           </div>
 
+          {/* Mobile navigation */}
+          <div className="lg:hidden flex gap-3 mb-6">
+            <button
+              onClick={() => setActiveTab('community')}
+              className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'community'
+                  ? 'bg-gradient-primary btn-primary-text'
+                  : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
+              }`}
+            >
+              {t('blog.community')}
+            </button>
+            <button
+              onClick={() => setActiveTab('gainian')}
+              className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'gainian'
+                  ? 'bg-gradient-primary btn-primary-text'
+                  : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
+              }`}
+            >
+              {t('blog.gainian')}
+            </button>
+          </div>
+
+          {/* Desktop + Content: flex layout */}
           <div className="flex gap-8">
+            {/* Desktop sidebar */}
             <div className="hidden lg:block w-56 flex-shrink-0">
               <div className="sticky top-24 space-y-2">
                 <button
@@ -228,29 +287,7 @@ export default function Blog() {
               </div>
             </div>
 
-            <div className="lg:hidden flex gap-4 mb-8">
-              <button
-                onClick={() => setActiveTab('community')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                  activeTab === 'community'
-                    ? 'bg-gradient-primary btn-primary-text'
-                    : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
-                }`}
-              >
-                {t('blog.community')}
-              </button>
-              <button
-                onClick={() => setActiveTab('gainian')}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                  activeTab === 'gainian'
-                    ? 'bg-gradient-primary btn-primary-text'
-                    : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
-                }`}
-              >
-                {t('blog.gainian')}
-              </button>
-            </div>
-
+            {/* Content area */}
             <div className="flex-1">
               {activeTab === 'community' && (
                 <>
@@ -365,11 +402,11 @@ export default function Blog() {
                         <div className="flex items-center gap-4 text-theme-secondary text-sm">
                           <span className="flex items-center gap-1">
                             <ThumbsUp className="w-4 h-4" />
-                            {getPostLikes(post.id)}
+                            {postStats[post.id]?.likes || 0}
                           </span>
                           <span className="flex items-center gap-1">
                             <MessageCircle className="w-4 h-4" />
-                            {getPostComments(post.id)}
+                            {postStats[post.id]?.comments || 0}
                           </span>
                         </div>
                       </div>

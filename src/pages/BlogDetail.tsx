@@ -81,94 +81,166 @@ export default function BlogDetail() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const loadLikesAndComments = () => {
+  // 当用户状态变化时，重新加载点赞状态
+  useEffect(() => {
+    if (id) {
+      loadLikesAndComments()
+    }
+  }, [user, id])
+
+  const loadLikesAndComments = async () => {
     const postId = id || ''
+    const postType = type || 'community'
     
-    const allLikes = JSON.parse(localStorage.getItem('blog_likes') || '{}')
-    setLikes(allLikes[postId] || 0)
-    
-    const userLikes = JSON.parse(localStorage.getItem('user_blog_likes') || '{}')
-    const isUserLiked = user ? (userLikes[user.id]?.[postId] || false) : false
-    setIsLiked(isUserLiked)
-    
-    const allComments = JSON.parse(localStorage.getItem('blog_comments') || '{}')
-    const postComments: Comment[] = (allComments[postId] || []).map((c: any) => ({
-      ...c,
-      display_name: c.display_name || c.username || '用户',
-      avatar_url: c.avatar_url || null
-    }))
-    setComments(postComments)
+    try {
+      // 查询点赞数
+      const { count, error: countError } = await supabase
+        .from('community_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId)
+        .eq('post_type', postType)
+      
+      if (!countError) {
+        setLikes(count || 0)
+      }
+      
+      // 查询当前用户是否已点赞
+      if (user) {
+        const { data: likeData } = await supabase
+          .from('community_likes')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('post_type', postType)
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        setIsLiked(!!likeData)
+      }
+      
+      // 查询评论
+      const { data: commentsData, error: commentsError } = await supabase
+        .from('community_comments')
+        .select('*')
+        .eq('post_id', postId)
+        .eq('post_type', postType)
+        .order('created_at', { ascending: false })
+      
+      if (!commentsError && commentsData) {
+        const postComments: Comment[] = commentsData.map((c: any) => ({
+          id: c.id,
+          user_id: c.user_id,
+          username: c.display_name || c.username || '用户',
+          display_name: c.display_name || c.username || '用户',
+          avatar_url: c.avatar_url || null,
+          content: c.content,
+          created_at: c.created_at
+        }))
+        setComments(postComments)
+      }
+    } catch (error) {
+      console.error('Failed to load likes and comments:', error)
+    }
   }
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!user) {
       navigate('/login')
       return
     }
     
     const postId = id || ''
-    const allLikes = JSON.parse(localStorage.getItem('blog_likes') || '{}')
-    const userLikes = JSON.parse(localStorage.getItem('user_blog_likes') || '{}')
-    const userId = user.id
+    const postType = type || 'community'
     
-    if (!userLikes[userId]) {
-      userLikes[userId] = {}
+    try {
+      if (isLiked) {
+        // 取消点赞
+        const { error } = await supabase
+          .from('community_likes')
+          .delete()
+          .eq('post_id', postId)
+          .eq('post_type', postType)
+          .eq('user_id', user.id)
+        
+        if (!error) {
+          setLikes(likes - 1)
+          setIsLiked(false)
+        }
+      } else {
+        // 添加点赞
+        const { error } = await supabase
+          .from('community_likes')
+          .insert({
+            post_id: postId,
+            post_type: postType,
+            user_id: user.id
+          })
+        
+        if (!error) {
+          setLikes(likes + 1)
+          setIsLiked(true)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle like:', error)
     }
-    
-    if (userLikes[userId][postId]) {
-      allLikes[postId] = Math.max(0, (allLikes[postId] || 0) - 1)
-      delete userLikes[userId][postId]
-    } else {
-      allLikes[postId] = (allLikes[postId] || 0) + 1
-      userLikes[userId][postId] = true
-    }
-    
-    localStorage.setItem('blog_likes', JSON.stringify(allLikes))
-    localStorage.setItem('user_blog_likes', JSON.stringify(userLikes))
-    setLikes(allLikes[postId] || 0)
-    setIsLiked(!isLiked)
   }
 
-  const handleDeleteComment = (commentId: string) => {
+  const handleDeleteComment = async (commentId: string) => {
     if (!user) return
-    const postId = id || ''
-    const allComments = JSON.parse(localStorage.getItem('blog_comments') || '{}')
-    if (!allComments[postId]) return
-
-    const target = allComments[postId].find((c: Comment) => c.id === commentId)
-    if (!target || target.user_id !== user.id) return
 
     if (!confirm(t('blog.confirmDeleteComment'))) return
 
-    allComments[postId] = allComments[postId].filter((c: Comment) => c.id !== commentId)
-    localStorage.setItem('blog_comments', JSON.stringify(allComments))
-    setComments(allComments[postId])
+    try {
+      const { error } = await supabase
+        .from('community_comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('post_type', type || 'community')
+        .eq('user_id', user.id)
+      
+      if (!error) {
+        setComments(comments.filter(c => c.id !== commentId))
+      }
+    } catch (error) {
+      console.error('Failed to delete comment:', error)
+    }
   }
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = async () => {
     if (!newComment.trim() || !user) return
     
     const postId = id || ''
-    const allComments = JSON.parse(localStorage.getItem('blog_comments') || '{}')
+    const postType = type || 'community'
     
-    const comment: Comment = {
-      id: Date.now().toString(),
-      user_id: user.id,
-      username: user.username,
-      display_name: user.display_name || user.username,
-      avatar_url: user.avatar_url || null,
-      content: newComment.trim(),
-      created_at: new Date().toISOString()
+    try {
+      const { data, error } = await supabase
+        .from('community_comments')
+        .insert({
+          post_id: postId,
+          post_type: postType,
+          user_id: user.id,
+          content: newComment.trim(),
+          display_name: user.display_name || user.username,
+          avatar_url: user.avatar_url || null
+        })
+        .select()
+      
+      if (!error && data) {
+        const newCommentData: Comment = {
+          id: data[0].id,
+          user_id: data[0].user_id,
+          username: data[0].display_name || '用户',
+          display_name: data[0].display_name || '用户',
+          avatar_url: data[0].avatar_url || null,
+          content: data[0].content,
+          created_at: data[0].created_at
+        }
+        setComments([newCommentData, ...comments])
+        setNewComment('')
+      }
+    } catch (error) {
+      console.error('Failed to submit comment:', error)
     }
-    
-    if (!allComments[postId]) {
-      allComments[postId] = []
-    }
-    allComments[postId].unshift(comment)
-    
-    localStorage.setItem('blog_comments', JSON.stringify(allComments))
-    setComments(allComments[postId])
-    setNewComment('')
   }
 
   const scrollToTop = () => {
