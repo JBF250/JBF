@@ -12,7 +12,7 @@ export interface Translation {
 interface I18nContextType {
   lang: Language
   setLang: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
@@ -50,7 +50,15 @@ export function I18nProvider({ children, initialLang }: { children: ReactNode; i
     localStorage.setItem('language', newLang)
   }
 
-  const t = (key: string) => getTranslation(key, lang)
+  const t = (key: string, params?: Record<string, string | number>) => {
+    let result = getTranslation(key, lang)
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        result = result.replace(`{${k}}`, String(v))
+      }
+    }
+    return result
+  }
 
   return (
     <I18nContext.Provider value={{ lang, setLang, t }}>

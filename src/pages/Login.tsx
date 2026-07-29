@@ -107,7 +107,15 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-3">
+          <div>
+            <Link 
+              to="/forgot-password" 
+              className="text-gray-400 hover:text-primary text-sm"
+            >
+              {t('auth.forgotPassword')}
+            </Link>
+          </div>
           <p className="text-gray-500 text-sm">
             {t('auth.noAccount')}
             <Link 

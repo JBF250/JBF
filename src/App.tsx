@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { I18nProvider, useI18n, type Language } from '@/context/I18nContext'
@@ -12,6 +12,29 @@ import SoftwareDetail from '@/pages/SoftwareDetail'
 import Settings from '@/pages/Settings'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
+import ForgotPassword from '@/pages/ForgotPassword'
+import ResetPassword from '@/pages/ResetPassword'
+
+// Lab pages - lazy loaded for better performance
+const LabHome = lazy(() => import('@/pages/lab/LabHome'))
+const QrCodePage = lazy(() => import('@/pages/lab/QrCodePage'))
+const ConverterPage = lazy(() => import('@/pages/lab/ConverterPage'))
+const GifToolPage = lazy(() => import('@/pages/lab/GifToolPage'))
+const KeyViewerPage = lazy(() => import('@/pages/lab/KeyViewerPage'))
+const Game2048Page = lazy(() => import('@/pages/lab/Game2048Page'))
+const ReactionPage = lazy(() => import('@/pages/lab/ReactionPage'))
+const Runner3DPage = lazy(() => import('@/pages/lab/Runner3DPage'))
+
+function LabFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-foreground/60 text-sm">Loading...</span>
+      </div>
+    </div>
+  )
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -74,6 +97,17 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:type/:id" element={<BlogDetail />} />
+            
+            {/* Lab Section */}
+            <Route path="/lab" element={<Suspense fallback={<LabFallback />}><LabHome /></Suspense>} />
+            <Route path="/lab/qrcode" element={<Suspense fallback={<LabFallback />}><QrCodePage /></Suspense>} />
+            <Route path="/lab/converter" element={<Suspense fallback={<LabFallback />}><ConverterPage /></Suspense>} />
+            <Route path="/lab/gif-tool" element={<Suspense fallback={<LabFallback />}><GifToolPage /></Suspense>} />
+            <Route path="/lab/key-viewer" element={<Suspense fallback={<LabFallback />}><KeyViewerPage /></Suspense>} />
+            <Route path="/lab/game/2048" element={<Suspense fallback={<LabFallback />}><Game2048Page /></Suspense>} />
+            <Route path="/lab/game/reaction" element={<Suspense fallback={<LabFallback />}><ReactionPage /></Suspense>} />
+            <Route path="/lab/game/3d-runner" element={<Suspense fallback={<LabFallback />}><Runner3DPage /></Suspense>} />
+            
             <Route 
               path="/settings" 
               element={
@@ -86,6 +120,9 @@ function AppContent() {
             <Route path="/software/:id" element={<SoftwareDetail />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+            <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
+            <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/reset-password" element={<Navigate to="/auth/reset-password" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Layout>

@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { supabase, type CommunityPost } from '@/lib/supabase'
 import gainianPosts, { type GainianPost } from '@/lib/gainianPosts'
 import { useResetScroll } from '@/hooks/useResetScroll'
+import Avatar from '@/components/Avatar'
 
 interface Comment {
   id: string
@@ -279,7 +280,12 @@ export default function BlogDetail() {
               key={index}
               src={imageUrl}
               alt={part}
+              crossOrigin="anonymous"
               className="max-w-full h-auto rounded-xl my-6"
+              onError={(e) => {
+                console.warn('Blog image failed to load:', imageUrl)
+                ;(e.target as HTMLImageElement).style.opacity = '0.5'
+              }}
             />
           )
         }
@@ -298,7 +304,12 @@ export default function BlogDetail() {
             key={`extra-${index}`}
             src={img}
             alt={`Image ${index + 1}`}
+            crossOrigin="anonymous"
             className="max-w-full h-auto rounded-xl my-6"
+            onError={(e) => {
+              console.warn('Blog extra image failed to load:', img)
+              ;(e.target as HTMLImageElement).style.opacity = '0.5'
+            }}
           />
         ))
 
@@ -361,7 +372,7 @@ export default function BlogDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-theme-primary">
+    <div className="min-h-screen bg-theme-primary allow-select">
       <button
         onClick={() => navigate(`/blog?tab=${type}`)}
         className="fixed top-20 left-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-theme-card/80 backdrop-blur-md border border-theme-color rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-card transition-colors"
@@ -387,17 +398,11 @@ export default function BlogDetail() {
             </h1>
             <div className="flex items-center justify-center gap-6 text-theme-secondary text-sm">
               <span className="flex items-center gap-2">
-                {type === 'community' && (post as any)?.author?.avatar_url ? (
-                  <img
-                    src={(post as any).author.avatar_url}
-                    alt={postAuthor}
-                    className="w-5 h-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold">
-                    {postAuthor.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <Avatar
+                  src={type === 'community' ? (post as any)?.author?.avatar_url : undefined}
+                  alt={postAuthor}
+                  size="sm"
+                />
                 {postAuthor}
               </span>
               <span>{postDate}</span>
@@ -480,17 +485,11 @@ export default function BlogDetail() {
                     className="bg-theme-card/30 rounded-2xl p-5 border border-theme-color"
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      {comment.avatar_url ? (
-                        <img
-                          src={comment.avatar_url}
-                          alt={comment.display_name}
-                          className="w-9 h-9 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center text-white text-sm font-bold">
-                          {comment.display_name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <Avatar
+                        src={comment.avatar_url}
+                        alt={comment.display_name}
+                        size="lg"
+                      />
                       <div className="flex-1">
                         <p className="text-theme-primary font-medium text-sm">
                           {comment.display_name}

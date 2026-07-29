@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Menu, X, User, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
+import Avatar from '@/components/Avatar'
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -34,6 +35,7 @@ export function Navbar() {
     { id: 'software', href: '#software', label: t('nav.software') },
     { id: 'contact', href: '#contact', label: t('nav.contact') },
     { id: 'blog', href: '/blog', label: t('nav.blog') },
+    { id: 'lab', href: '/lab', label: t('nav.lab') },
   ]
 
   return (
@@ -91,13 +93,13 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center hover:bg-theme-hover transition-colors relative"
+                  className="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center hover:bg-theme-hover transition-colors relative overflow-hidden"
                 >
                   {user.avatar_url ? (
-                    <img 
-                      src={user.avatar_url} 
+                    <Avatar
+                      src={user.avatar_url}
                       alt={user.display_name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10"
                     />
                   ) : (
                     <User className="w-5 h-5 text-theme-secondary" />

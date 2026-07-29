@@ -6,7 +6,6 @@ import { useI18n } from '@/context/I18nContext'
 
 export default function Register() {
   const [email, setEmail] = useState('')
-  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -43,10 +42,18 @@ export default function Register() {
     setLoading(true)
 
     try {
-      await register(email, username, password)
+      await register(email, password)
       setEmailSent(true)
     } catch (err: any) {
-      setError(err?.message || t('auth.registerFailed'))
+      // 处理重复邮箱错误
+      if (err?.message === 'EMAIL_ALREADY_REGISTERED' ||
+          err?.message?.includes('already been registered') || 
+          err?.message?.includes('already exists') ||
+          err?.message?.includes('already in use')) {
+        setError(t('auth.emailAlreadyRegistered'))
+      } else {
+        setError(err?.message || t('auth.registerFailed'))
+      }
     } finally {
       setLoading(false)
     }
@@ -155,20 +162,6 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
               placeholder="email@example.com"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              {t('auth.username')}
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
-              placeholder={t('auth.username')}
               required
             />
           </div>

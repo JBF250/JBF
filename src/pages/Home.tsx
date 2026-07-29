@@ -34,7 +34,7 @@ export default function Home() {
     }, 800)
   }, [])
 
-  const currentLang = lang === 'ja' ? 'en' : lang
+  const currentLang = lang
 
   return (
     <div className="relative">

@@ -21,8 +21,12 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="text-theme-primary font-semibold mb-4">{t('nav.games')}</h3>
             <ul className="space-y-2">
+              <li>
+                <a href="#about" className="text-theme-secondary hover:text-theme-primary transition-colors text-sm">
+                  {t('nav.about')}
+                </a>
+              </li>
               <li>
                 <a href="#games" className="text-theme-secondary hover:text-theme-primary transition-colors text-sm">
                   {t('nav.games')}

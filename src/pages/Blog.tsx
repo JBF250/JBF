@@ -5,6 +5,7 @@ import { useI18n } from '@/context/I18nContext'
 import { supabase, type CommunityPost } from '@/lib/supabase'
 import gainianPosts from '@/lib/gainianPosts'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import Avatar from '@/components/Avatar'
 
 export type CommunityPostWithAuthor = CommunityPost & {
   author?: { display_name: string; avatar_url: string | null; username: string } | null
@@ -347,17 +348,11 @@ export default function Blog() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 text-theme-secondary text-sm">
                               <span className="flex items-center gap-2">
-                                {post.author?.avatar_url ? (
-                                  <img
-                                    src={post.author.avatar_url}
-                                    alt={post.author.display_name}
-                                    className="w-5 h-5 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-5 h-5 rounded-full bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold">
-                                    {(post.author?.display_name || post.author?.username || '?').charAt(0).toUpperCase()}
-                                  </div>
-                                )}
+                                <Avatar
+                                  src={post.author?.avatar_url}
+                                  alt={post.author?.display_name || post.author?.username || '匿名用户'}
+                                  size="sm"
+                                />
                                 {post.author?.display_name || post.author?.username || '匿名用户'}
                               </span>
                               <span>{new Date(post.created_at).toLocaleDateString()}</span>
@@ -464,7 +459,16 @@ export default function Blog() {
               </div>
               {postImages.map((img, index) => (
                 <div key={index} className="relative inline-block mr-2">
-                  <img src={img} alt={`Uploaded ${index}`} className="w-20 h-20 object-cover rounded-lg" />
+                  <img 
+                    src={img} 
+                    alt={`Uploaded ${index}`} 
+                    crossOrigin="anonymous"
+                    className="w-20 h-20 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.warn('Blog preview image failed to load:', img)
+                      ;(e.target as HTMLImageElement).style.opacity = '0.5'
+                    }}
+                  />
                   <button
                     onClick={() => setPostImages(prev => prev.filter((_, i) => i !== index))}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"
@@ -535,7 +539,16 @@ export default function Blog() {
               </div>
               {postImages.map((img, index) => (
                 <div key={index} className="relative inline-block mr-2">
-                  <img src={img} alt={`Uploaded ${index}`} className="w-20 h-20 object-cover rounded-lg" />
+                  <img 
+                    src={img} 
+                    alt={`Uploaded ${index}`} 
+                    crossOrigin="anonymous"
+                    className="w-20 h-20 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.warn('Blog preview image failed to load:', img)
+                      ;(e.target as HTMLImageElement).style.opacity = '0.5'
+                    }}
+                  />
                   <button
                     onClick={() => setPostImages(prev => prev.filter((_, i) => i !== index))}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"

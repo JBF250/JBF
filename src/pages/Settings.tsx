@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
 import { useTheme } from '@/context/ThemeContext'
+import Avatar from '@/components/Avatar'
 
 export default function Settings() {
   const [displayName, setDisplayName] = useState('')
@@ -53,6 +54,7 @@ export default function Settings() {
       
       await updateUserSettings(settings as Partial<any>)
       
+      setAvatarFile(null)
       setLang(language)
       setThemeMode(isDarkMode ? 'dark' : 'light')
       setSaved(true)
@@ -102,14 +104,12 @@ export default function Settings() {
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
-                  ) : user?.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt={user.display_name}
-                      className="w-full h-full object-cover"
-                    />
                   ) : (
-                    <User className="w-12 h-12 text-theme-secondary" />
+                    <Avatar
+                      src={user?.avatar_url}
+                      alt={user?.display_name || 'User'}
+                      className="w-24 h-24 text-xl"
+                    />
                   )}
                 </div>
                 <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
