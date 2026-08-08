@@ -12,6 +12,7 @@ export type User = {
   avatar_url: string | null
   theme_color: string
   language: string
+  custom_cursor: boolean
 }
 
 export type CommunityPost = {

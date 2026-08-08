@@ -21,6 +21,7 @@ const QrCodePage = lazy(() => import('@/pages/lab/QrCodePage'))
 const ConverterPage = lazy(() => import('@/pages/lab/ConverterPage'))
 const GifToolPage = lazy(() => import('@/pages/lab/GifToolPage'))
 const KeyViewerPage = lazy(() => import('@/pages/lab/KeyViewerPage'))
+const IcoConverterPage = lazy(() => import('@/pages/lab/IcoConverterPage'))
 const Game2048Page = lazy(() => import('@/pages/lab/Game2048Page'))
 const ReactionPage = lazy(() => import('@/pages/lab/ReactionPage'))
 const Runner3DPage = lazy(() => import('@/pages/lab/Runner3DPage'))
@@ -78,6 +79,12 @@ function ConfigSync() {
     if (targetTheme !== currentTheme) {
       setThemeMode(targetTheme)
     }
+    // 同步自定义光标
+    if (user.custom_cursor !== false) {
+      document.documentElement.classList.add('custom-cursor')
+    } else {
+      document.documentElement.classList.remove('custom-cursor')
+    }
   }, [user, setLang, setThemeMode, currentLang, currentTheme])
 
   return null
@@ -104,6 +111,7 @@ function AppContent() {
             <Route path="/lab/converter" element={<Suspense fallback={<LabFallback />}><ConverterPage /></Suspense>} />
             <Route path="/lab/gif-tool" element={<Suspense fallback={<LabFallback />}><GifToolPage /></Suspense>} />
             <Route path="/lab/key-viewer" element={<Suspense fallback={<LabFallback />}><KeyViewerPage /></Suspense>} />
+            <Route path="/lab/ico-converter" element={<Suspense fallback={<LabFallback />}><IcoConverterPage /></Suspense>} />
             <Route path="/lab/game/2048" element={<Suspense fallback={<LabFallback />}><Game2048Page /></Suspense>} />
             <Route path="/lab/game/reaction" element={<Suspense fallback={<LabFallback />}><ReactionPage /></Suspense>} />
             <Route path="/lab/game/3d-runner" element={<Suspense fallback={<LabFallback />}><Runner3DPage /></Suspense>} />

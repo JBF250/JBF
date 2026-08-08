@@ -12,7 +12,8 @@ export interface GameStats {
   distance: number
   speed: number
   coins: number
-  powerups: { shield: number; magnet: number; doubleScore: number }
+  combo: number
+  powerups: { shield: number; magnet: number; doubleScore: number; speed: number }
 }
 
 // ==================== 游戏配置常量 ====================
@@ -31,9 +32,12 @@ const CONFIG: {
   POWERUP_DURATION: number
   SHIELD_DURATION: number
   MAGNET_RANGE: number
+  SPEED_BOOST_DURATION: number
   BASE_SCORE_PER_SECOND: number
   TRACK_SEGMENT_LENGTH: number
   VISIBLE_SEGMENTS: number
+  SCREEN_SHAKE_DURATION: number
+  SCREEN_SHAKE_INTENSITY: number
 } = {
   LANE_WIDTH: 2.5,
   LANE_POSITIONS: [-2.5, 0, 2.5],
@@ -43,23 +47,24 @@ const CONFIG: {
   JUMP_VELOCITY: 16,
   GRAVITY: 45,
   SLIDE_DURATION: 0.6,
-  // 生成间隔调大：因障碍物从远处生成（z≈-115），到达玩家需要更长时间
-  // 调整后约 2-3 个障碍物同时在屏幕上
   SPAWN_INTERVAL: 3.5,
   DESPAWN_Z: -15,
   COIN_VALUE: 100,
   POWERUP_DURATION: 8,
-  SHIELD_DURATION: 6,
+  SHIELD_DURATION: 5,
   MAGNET_RANGE: 4,
+  SPEED_BOOST_DURATION: 5,
   BASE_SCORE_PER_SECOND: 10,
   TRACK_SEGMENT_LENGTH: 30,
-  VISIBLE_SEGMENTS: 3,
+  VISIBLE_SEGMENTS: 4,
+  SCREEN_SHAKE_DURATION: 0.5,
+  SCREEN_SHAKE_INTENSITY: 0.8,
 }
 
 interface SubwaySurferGameProps {
   onGameStateChange?: (state: GameState) => void
   onStatsUpdate?: (stats: GameStats) => void
-  onPowerupPickup?: (type: 'shield' | 'magnet' | 'double') => void
+  onPowerupPickup?: (type: 'shield' | 'magnet' | 'double' | 'speed') => void
   supabase?: any
   user?: any
 }
@@ -349,6 +354,72 @@ function createHighBar(): THREE.Group {
   return group
 }
 
+// 移动障碍物 - 在两个车道间来回滑动
+function createMovingBarrier(): THREE.Group {
+  const group = new THREE.Group()
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 1.6, 0.4),
+    new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4, metalness: 0.4, emissive: 0xff0000, emissiveIntensity: 0.2 })
+  )
+  body.position.y = 0.9
+  body.castShadow = true
+  group.add(body)
+
+  // 警示条纹
+  for (let i = -1; i <= 1; i++) {
+    const stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 1.5, 0.42),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.4 })
+    )
+    stripe.position.set(i * 0.4, 0.9, 0)
+    group.add(stripe)
+  }
+
+  // 底部移动箭头指示器
+  const arrowMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff4444, emissiveIntensity: 0.6 })
+  const arrow1 = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), arrowMat)
+  arrow1.position.set(-0.6, 0.3, 0)
+  arrow1.rotation.z = Math.PI / 2
+  group.add(arrow1)
+  const arrow2 = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), arrowMat)
+  arrow2.position.set(0.6, 0.3, 0)
+  arrow2.rotation.z = -Math.PI / 2
+  group.add(arrow2)
+
+  group.userData.type = 'movingBarrier'
+  group.userData.height = 1.7
+  return group
+}
+
+// 滚桶障碍物 - 需跳跃或换道，圆柱体沿道路滚动
+function createRollingBarrel(): THREE.Group {
+  const group = new THREE.Group()
+
+  const barrel = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.55, 1.4, 16),
+    new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.7, metalness: 0.2 })
+  )
+  barrel.rotation.z = Math.PI / 2
+  barrel.position.y = 0.6
+  barrel.castShadow = true
+  group.add(barrel)
+
+  // 金属环
+  for (let i = -1; i <= 1; i += 2) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.58, 0.06, 8, 20),
+      new THREE.MeshStandardMaterial({ color: 0x78716c, metalness: 0.9, roughness: 0.3 })
+    )
+    ring.position.set(i * 0.55, 0.6, 0)
+    group.add(ring)
+  }
+
+  group.userData.type = 'rollingBarrel'
+  group.userData.height = 1.2
+  return group
+}
+
 function createCoin(): THREE.Group {
   const group = new THREE.Group()
   const mesh = new THREE.Mesh(
@@ -368,39 +439,102 @@ function createCoin(): THREE.Group {
   return group
 }
 
-function createPowerup(type: 'shield' | 'magnet' | 'double'): THREE.Group {
+function createPowerup(type: 'shield' | 'magnet' | 'double' | 'speed'): THREE.Group {
   const group = new THREE.Group()
 
   let color: number
-  let geometry: THREE.BufferGeometry
+  let inner: THREE.Mesh
 
   switch (type) {
-    case 'shield':
+    case 'shield': {
       color = 0x00aaff
-      geometry = new THREE.OctahedronGeometry(0.45)
+      // 盾牌造型：扁圆弧 + 中心凸起
+      const shieldGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.1, 16)
+      inner = new THREE.Mesh(shieldGeo, new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.8,
+        roughness: 0.15,
+        emissive: color,
+        emissiveIntensity: 0.5,
+      }))
+      // 盾牌中央十字纹
+      const crossV = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.5, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.3 })
+      )
+      const crossH = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 0.08, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.3 })
+      )
+      inner.add(crossV, crossH)
       break
-    case 'magnet':
+    }
+    case 'magnet': {
       color = 0xff00aa
-      geometry = new THREE.TorusGeometry(0.35, 0.12, 8, 20)
-      break
-    case 'double':
+      // U形磁铁：圆环切掉一段 + 两个端头加厚
+      const magGroup = new THREE.Group()
+      const ringGeo = new THREE.TorusGeometry(0.4, 0.11, 8, 24, Math.PI)
+      const ring = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.8,
+        roughness: 0.2,
+        emissive: color,
+        emissiveIntensity: 0.4,
+      }))
+      magGroup.add(ring)
+      // 两端磁极方块
+      const poleGeo = new THREE.BoxGeometry(0.15, 0.2, 0.15)
+      const nPole = new THREE.Mesh(poleGeo, new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xff4444, emissiveIntensity: 0.5 }))
+      nPole.position.set(0.4, 0, 0)
+      const sPole = new THREE.Mesh(poleGeo, new THREE.MeshStandardMaterial({ color: 0x4444ff, emissive: 0x4444ff, emissiveIntensity: 0.5 }))
+      sPole.position.set(-0.4, 0, 0)
+      magGroup.add(nPole, sPole)
+      inner = magGroup as unknown as THREE.Mesh
+      group.add(inner)
+      group.userData.type = 'powerup'
+      group.userData.powerupType = type
+      return group
+    }
+    case 'double': {
       color = 0x00ff00
-      geometry = new THREE.IcosahedronGeometry(0.4)
+      // x2 造型：Canvas 纹理贴在平面上
+      const canvas = document.createElement('canvas')
+      canvas.width = 128
+      canvas.height = 128
+      const ctx = canvas.getContext('2d')!
+      ctx.fillStyle = '#00ff00'
+      ctx.font = 'bold 72px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('x2', 64, 64)
+      const tex = new THREE.CanvasTexture(canvas)
+      tex.minFilter = THREE.LinearFilter
+      const planeGeo = new THREE.PlaneGeometry(0.9, 0.7)
+      inner = new THREE.Mesh(planeGeo, new THREE.MeshStandardMaterial({
+        map: tex,
+        emissive: color,
+        emissiveIntensity: 0.6,
+        side: THREE.DoubleSide,
+        transparent: true,
+      }))
       break
+    }
+    case 'speed': {
+      color = 0xff6600
+      const coneGeo = new THREE.ConeGeometry(0.4, 0.8, 6)
+      inner = new THREE.Mesh(coneGeo, new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.6,
+        roughness: 0.3,
+        emissive: color,
+        emissiveIntensity: 0.5,
+      }))
+      break
+    }
   }
 
-  const mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshStandardMaterial({
-      color,
-      metalness: 0.7,
-      roughness: 0.2,
-      emissive: color,
-      emissiveIntensity: 0.5,
-    })
-  )
-  mesh.castShadow = true
-  group.add(mesh)
+  inner!.castShadow = true
+  group.add(inner!)
   group.userData.type = 'powerup'
   group.userData.powerupType = type
   return group
@@ -660,7 +794,7 @@ export default function SubwaySurferGame({
     isSliding: false,
     slideTimer: 0,
     legPhase: 0,
-    pendingSlide: false, // 跳跃中按下蹲伏，落地后立即触发滑铲
+    pendingSlide: false,
   })
 
   const gameDataRef = useRef({
@@ -669,8 +803,20 @@ export default function SubwaySurferGame({
     speed: CONFIG.PLAYER_START_SPEED,
     coinCount: 0,
     spawnTimer: 0,
-    powerupStates: { shield: 0, magnet: 0, doubleScore: 0 },
+    powerupStates: { shield: 0, magnet: 0, doubleScore: 0, speed: 0 },
+    screenShakeTimer: 0,
+    comboCount: 0,
+    comboTimer: 0,
   })
+
+  // 粒子系统
+  const particlesRef = useRef<THREE.Points | null>(null)
+  const particlePositionsRef = useRef<Float32Array>(new Float32Array(0))
+  const particleLifeRef = useRef<Float32Array>(new Float32Array(0))
+  const MAX_PARTICLES = 120
+
+  // 速度特效（运动线）
+  const speedLinesRef = useRef<THREE.Group | null>(null)
 
   // 几何体/材质缓存
   const geoCacheRef = useRef<{
@@ -678,10 +824,13 @@ export default function SubwaySurferGame({
     wideBarrier?: THREE.Group
     train?: THREE.Group
     highBar?: THREE.Group
+    movingBarrier?: THREE.Group
+    rollingBarrel?: THREE.Group
     coin?: THREE.Group
     shieldPowerup?: THREE.Group
     magnetPowerup?: THREE.Group
     doublePowerup?: THREE.Group
+    speedPowerup?: THREE.Group
     trackSegment?: THREE.Group
   }>({})
 
@@ -708,11 +857,11 @@ export default function SubwaySurferGame({
     const skyTexture = new THREE.CanvasTexture(skyCanvas)
     scene.background = skyTexture
     // 雾色与地平线匹配，远距离淡出
-    scene.fog = new THREE.Fog(0xcfe8ff, 40, 110)
+    scene.fog = new THREE.Fog(0xcfe8ff, 80, 220)
     sceneRef.current = scene
 
     // 相机
-    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 200)
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 300)
     camera.position.set(0, 4.5, 8)
     camera.lookAt(0, 1, -5)
     cameraRef.current = camera
@@ -788,54 +937,35 @@ export default function SubwaySurferGame({
     ground.receiveShadow = true
     scene.add(ground)
 
-    // 白云 - 用合并的球体组成蓬松云朵
+    // 白云 - 优化：减少云朵数量和球体数
     const cloudMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.85,
-      fog: false, // 云不受雾影响，避免消失
+      opacity: 0.8,
+      fog: false,
     })
-    const cloudGeo = new THREE.SphereGeometry(1, 8, 6)
-    for (let i = 0; i < 18; i++) {
-      // 由若干球体组合成蓬松云朵
-      const puffCount = 4 + Math.floor(Math.random() * 3)
+    const cloudGeo = new THREE.SphereGeometry(1, 6, 4)
+    for (let i = 0; i < 10; i++) {
+      const puffCount = 3 + Math.floor(Math.random() * 2)
       const cloudGroup = new THREE.Group()
       for (let p = 0; p < puffCount; p++) {
         const puff = new THREE.Mesh(cloudGeo, cloudMat)
         puff.position.set(
-          (Math.random() - 0.5) * 6,
-          (Math.random() - 0.5) * 1.5,
-          (Math.random() - 0.5) * 4
+          (Math.random() - 0.5) * 5,
+          (Math.random() - 0.5) * 1.2,
+          (Math.random() - 0.5) * 3
         )
-        puff.scale.setScalar(1 + Math.random() * 0.8)
+        puff.scale.setScalar(1.2 + Math.random() * 0.6)
         cloudGroup.add(puff)
       }
-      // 随机位置 - 高空、跑道两侧远处
       cloudGroup.position.set(
-        (Math.random() - 0.5) * 180,
-        25 + Math.random() * 15,
-        -Math.random() * 180 - 20
+        (Math.random() - 0.5) * 160,
+        22 + Math.random() * 12,
+        -Math.random() * 150 - 30
       )
       cloudGroup.scale.setScalar(2.5 + Math.random() * 2)
       scene.add(cloudGroup)
     }
-
-    // 远景城市剪影 - 浅蓝色，模拟远景天际线
-    const silhouetteGeo = new THREE.BufferGeometry()
-    const silPositions: number[] = []
-    for (let i = 0; i < 60; i++) {
-      const x = -80 + (i / 60) * 160
-      const h = 8 + Math.sin(i * 0.3) * 5 + Math.random() * 8
-      const w = 3 + Math.random() * 5
-      silPositions.push(x, h / 2, -60, x + w, h / 2, -60, x + w, 0, -60, x, 0, -60)
-    }
-    silhouetteGeo.setAttribute('position', new THREE.Float32BufferAttribute(silPositions, 3))
-    silhouetteGeo.computeVertexNormals()
-    const silhouette = new THREE.Mesh(
-      silhouetteGeo,
-      new THREE.MeshBasicMaterial({ color: 0x9eb8d6, transparent: true, opacity: 0.7, fog: false })
-    )
-    scene.add(silhouette)
 
     // 玩家
     const player = createPlayer()
@@ -849,27 +979,95 @@ export default function SubwaySurferGame({
       wideBarrier: createWideBarrier(),
       train: createTrain(),
       highBar: createHighBar(),
+      movingBarrier: createMovingBarrier(),
+      rollingBarrel: createRollingBarrel(),
       coin: createCoin(),
       shieldPowerup: createPowerup('shield'),
       magnetPowerup: createPowerup('magnet'),
       doublePowerup: createPowerup('double'),
+      speedPowerup: createPowerup('speed'),
       trackSegment: createTrackSegment(),
     }
 
-    // 跑道段
+    // 粒子系统初始化
+    const particleGeo = new THREE.BufferGeometry()
+    const positions = new Float32Array(MAX_PARTICLES * 3)
+    const colors = new Float32Array(MAX_PARTICLES * 3)
+    particlePositionsRef.current = positions
+    particleLifeRef.current = new Float32Array(MAX_PARTICLES)
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.15,
+      vertexColors: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.8,
+    })
+    const particles = new THREE.Points(particleGeo, particleMat)
+    particles.frustumCulled = false
+    particles.visible = false
+    scene.add(particles)
+    particlesRef.current = particles
+
+    // 速度线系统 - 吃到加速道具后出现的线条拖尾
+    // 多条线段跟随玩家路径，自动弯曲反映跳跃/下蹲/左右移动
+    const SPEED_LINE_COUNT = 7        // 线条数量
+    const SPEED_LINE_POINTS = 30      // 每条线的点（尾部长度）
+    const speedLineGroup = new THREE.Group()
+    const slGeos: THREE.BufferGeometry[] = []
+    const slMeshes: THREE.Line[] = []
+    for (let l = 0; l < SPEED_LINE_COUNT; l++) {
+      const geo = new THREE.BufferGeometry()
+      const pos = new Float32Array(SPEED_LINE_POINTS * 3)
+      const col = new Float32Array(SPEED_LINE_POINTS * 3)
+      // 初始全部放到视野外
+      for (let p = 0; p < SPEED_LINE_POINTS; p++) {
+        pos[p * 3] = 0; pos[p * 3 + 1] = -100; pos[p * 3 + 2] = 1000
+        col[p * 3] = 0; col[p * 3 + 1] = 0; col[p * 3 + 2] = 0
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
+      slGeos.push(geo)
+      const mat = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.9,
+      })
+      const line = new THREE.Line(geo, mat)
+      line.frustumCulled = false
+      line.visible = false
+      speedLineGroup.add(line)
+      slMeshes.push(line)
+    }
+    scene.add(speedLineGroup)
+    speedLinesRef.current = speedLineGroup
+    // 存储数据引用
+    const slTrailData = {
+      history: [] as Array<{ x: number; y: number; z: number; lane: number; jumping: boolean; sliding: boolean }>,
+      geos: slGeos,
+      meshes: slMeshes,
+      count: SPEED_LINE_COUNT,
+      points: SPEED_LINE_POINTS,
+    }
+    ;(speedLineGroup as any).userData = slTrailData
+
+    // 跑道段 - 从玩家脚下开始铺展，确保玩家周围始终有道路
     for (let i = 0; i < CONFIG.VISIBLE_SEGMENTS; i++) {
       const seg = createTrackSegment()
-      seg.position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH + 10
+      seg.position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH + 5
       scene.add(seg)
       trackSegmentsRef.current.push(seg)
     }
 
-    // 城市环境段 - 更密集的城市，立即可见
-    const CITY_SEGMENTS = 6
+    // 城市环境段 - 第0段包裹玩家出生点
+    const CITY_SEGMENTS = 8
     for (let i = 0; i < CITY_SEGMENTS; i++) {
       const { group } = createCitySegment()
-      // 从玩家前方开始（负 Z 是前方），第一个段直接在玩家面前
-      group.position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH + 5
+      group.position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH
       scene.add(group)
       citySegmentsRef.current.push(group)
     }
@@ -1043,18 +1241,60 @@ export default function SubwaySurferGame({
     const scene = sceneRef.current
     if (!scene) return
 
-    const types = ['barrier', 'train', 'highBar', 'wideBarrier'] as const
-    const type = types[Math.floor(Math.random() * types.length)]
+    const speed = gameDataRef.current.speed
+
+    // 难度递进：根据当前速度决定可用障碍物池
+    const availableTypes: string[] = []
+    // 基础障碍物始终可用
+    availableTypes.push('barrier', 'highBar')
+    // 速度 > 20 解锁列车
+    if (speed > 22) availableTypes.push('train')
+    // 速度 > 25 解锁双跑道障碍物
+    if (speed > 28) availableTypes.push('wideBarrier')
+    // 速度 > 32 解锁滚桶
+    if (speed > 35) availableTypes.push('rollingBarrel')
+    // 速度 > 38 解锁移动障碍物
+    if (speed > 40) availableTypes.push('movingBarrier')
+
+    // 高速时减少护栏比例，增加高级障碍物
+    let type: string
+    if (speed > 40) {
+      // 高速：高难度障碍物占主导
+      type = availableTypes[1 + Math.floor(Math.random() * (availableTypes.length - 1))]
+    } else if (speed > 30) {
+      type = availableTypes[Math.floor(Math.random() * availableTypes.length)]
+    } else {
+      // 低速：基础障碍物为主
+      type = Math.random() < 0.7 ? 'barrier' : (availableTypes.includes('highBar') ? 'highBar' : 'barrier')
+    }
+
+    // 高速时有概率同时生成两个障碍物
+    if (speed > 42 && Math.random() < 0.25) {
+      // 额外生成一个不同车道的障碍物
+      const extraTypes = availableTypes.filter((t) => t !== type)
+      const extraType = extraTypes[Math.floor(Math.random() * extraTypes.length)]
+      const extraLane = Math.floor(Math.random() * 3)
+      let extraTpl: THREE.Group | undefined
+      if (extraType === 'barrier') extraTpl = geoCacheRef.current.barrier
+      else if (extraType === 'train') extraTpl = geoCacheRef.current.train
+      else if (extraType === 'highBar') extraTpl = geoCacheRef.current.highBar
+      else if (extraType === 'rollingBarrel') extraTpl = geoCacheRef.current.rollingBarrel
+      if (extraTpl) {
+        const extra = extraTpl.clone(true)
+        extra.position.set(CONFIG.LANE_POSITIONS[extraLane], 0, zPos - 8)
+        extra.userData.lane = extraLane
+        extra.userData.type = extraType
+        scene.add(extra)
+        obstaclesRef.current.push(extra)
+      }
+    }
 
     if (type === 'wideBarrier') {
-      // 双跑道障碍物 - 横跨车道 0-1 或 1-2
-      const laneGroup = Math.floor(Math.random() * 2) // 0 = lanes 0,1; 1 = lanes 1,2
-      const centerLane = laneGroup === 0 ? 0 : 1 // 障碍物中心位置
+      const laneGroup = Math.floor(Math.random() * 2)
+      const centerLane = laneGroup === 0 ? 0 : 1
       const template = geoCacheRef.current.wideBarrier
       if (!template) return
-
       const obstacle = template.clone(true)
-      // 放在两条车道中间
       obstacle.position.set(
         (CONFIG.LANE_POSITIONS[centerLane] + CONFIG.LANE_POSITIONS[centerLane + 1]) / 2,
         0,
@@ -1067,14 +1307,31 @@ export default function SubwaySurferGame({
       return
     }
 
+    if (type === 'movingBarrier') {
+      const template = geoCacheRef.current.movingBarrier
+      if (!template) return
+      const obstacle = template.clone(true)
+      const lane = 1 // 始终在中间车道
+      obstacle.position.set(CONFIG.LANE_POSITIONS[lane], 0, zPos)
+      obstacle.userData.type = 'movingBarrier'
+      obstacle.userData.lane = lane
+      obstacle.userData.movePhase = 0
+      obstacle.userData.moveSpeed = 1.5 + Math.random() * 1.5
+      obstacle.userData.moveRange = 1.2 + Math.random() * 0.6
+      scene.add(obstacle)
+      obstaclesRef.current.push(obstacle)
+      return
+    }
+
     const lane = Math.floor(Math.random() * 3)
     let template: THREE.Group | undefined
     if (type === 'barrier') template = geoCacheRef.current.barrier
     else if (type === 'train') template = geoCacheRef.current.train
-    else template = geoCacheRef.current.highBar
+    else if (type === 'highBar') template = geoCacheRef.current.highBar
+    else if (type === 'rollingBarrel') template = geoCacheRef.current.rollingBarrel
+    else template = geoCacheRef.current.barrier
 
     if (!template) return
-
     const obstacle = template.clone(true)
     obstacle.position.set(CONFIG.LANE_POSITIONS[lane], 0, zPos)
     obstacle.userData.lane = lane
@@ -1107,13 +1364,14 @@ export default function SubwaySurferGame({
     if (!scene) return
 
     const lane = Math.floor(Math.random() * 3)
-    const types = ['shield', 'magnet', 'double'] as const
+    const types = ['shield', 'magnet', 'double', 'speed'] as const
     const type = types[Math.floor(Math.random() * types.length)]
 
     let template: THREE.Group | undefined
     if (type === 'shield') template = geoCacheRef.current.shieldPowerup
     else if (type === 'magnet') template = geoCacheRef.current.magnetPowerup
-    else template = geoCacheRef.current.doublePowerup
+    else if (type === 'double') template = geoCacheRef.current.doublePowerup
+    else template = geoCacheRef.current.speedPowerup
 
     if (!template) return
 
@@ -1135,26 +1393,39 @@ export default function SubwaySurferGame({
 
     const type = obstacle.userData.type
 
-    // 双跑道障碍物 - 检查玩家是否在占用的车道
+    // 宽障碍物 - 双跑道
     if (type === 'wideBarrier') {
       const lanes = obstacle.userData.lanes as number[]
       if (!lanes.includes(state.lane)) return false
-      // 需要跳跃越过
       if (state.y > 1.0) return false
       return true
     }
 
-    // 单跑道障碍物 - 检查车道匹配
+    // 移动障碍物 - 检查当前实际X位置所在车道
+    if (type === 'movingBarrier') {
+      const obsX = obstacle.position.x
+      const playerLaneX = CONFIG.LANE_POSITIONS[state.lane]
+      // 移动障碍物在车道间游走，检查X距离
+      if (Math.abs(obsX - playerLaneX) > 1.0) return false
+      if (state.y > 1.0) return false
+      return true
+    }
+
+    // 滚桶 - 滚动中，跳越通过
+    if (type === 'rollingBarrel') {
+      if (obstacle.userData.lane !== state.lane) return false
+      if (state.y > 0.6) return false
+      return true
+    }
+
+    // 单跑道障碍物
     if (obstacle.userData.lane !== state.lane) return false
 
     if (type === 'barrier') {
-      // 栏杆 - 需要跳跃
       if (state.y > 0.5) return false
     } else if (type === 'train') {
-      // 列车（高 2.5m）- 需较高跳跃越过，或换道躲避
       if (state.y > 1.2) return false
     } else if (type === 'highBar') {
-      // 高空横杆 - 需要滑铲
       if (state.isSliding) return false
     }
 
@@ -1162,6 +1433,45 @@ export default function SubwaySurferGame({
   }, [])
 
   // ==================== 动画主循环 ====================
+  const spawnParticles = useCallback((x: number, y: number, z: number, color: number, count: number) => {
+    const positions = particlePositionsRef.current
+    const life = particleLifeRef.current
+    if (positions.length === 0) return
+    
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      if (life[i] <= 0) {
+        // 找到空闲粒子槽位
+        for (let n = 0; n < count && i + n < MAX_PARTICLES; n++) {
+          const idx = (i + n) * 3
+          positions[idx] = x + (Math.random() - 0.5) * 0.3
+          positions[idx + 1] = y + (Math.random() - 0.5) * 0.3
+          positions[idx + 2] = z + (Math.random() - 0.5) * 0.3
+          life[i + n] = 0.4 + Math.random() * 0.3
+        }
+        // 更新颜色buffer
+        const r = ((color >> 16) & 0xff) / 255
+        const g = ((color >> 8) & 0xff) / 255
+        const b = (color & 0xff) / 255
+        for (let n = 0; n < count && i + n < MAX_PARTICLES; n++) {
+          const ci = (i + n) * 3
+          const colors = (particlesRef.current?.geometry.attributes.color as THREE.BufferAttribute)?.array
+          if (colors instanceof Float32Array) {
+            colors[ci] = r
+            colors[ci + 1] = g
+            colors[ci + 2] = b
+          }
+        }
+        const pts = particlesRef.current
+        if (pts) {
+          pts.visible = true
+          pts.geometry.attributes.position.needsUpdate = true
+          pts.geometry.attributes.color.needsUpdate = true
+        }
+        return
+      }
+    }
+  }, [])
+
   const animate = useCallback(() => {
     rafRef.current = requestAnimationFrame(animate)
 
@@ -1180,8 +1490,9 @@ export default function SubwaySurferGame({
       const player = playerRef.current
       const dt = delta
 
-      // 更新速度（逐步增加）
-      data.speed = Math.min(data.speed + CONFIG.SPEED_INCREMENT * dt, CONFIG.MAX_SPEED)
+      // 更新速度（逐步增加，速度道具额外加速）
+      const speedBoost = data.powerupStates.speed > 0 ? 1.4 : 1
+      data.speed = Math.min(data.speed + CONFIG.SPEED_INCREMENT * dt * speedBoost, CONFIG.MAX_SPEED * 1.3)
       const moveDistance = data.speed * dt
 
       // 更新分数
@@ -1193,6 +1504,7 @@ export default function SubwaySurferGame({
       if (data.powerupStates.shield > 0) data.powerupStates.shield -= dt
       if (data.powerupStates.magnet > 0) data.powerupStates.magnet -= dt
       if (data.powerupStates.doubleScore > 0) data.powerupStates.doubleScore -= dt
+      if (data.powerupStates.speed > 0) data.powerupStates.speed -= dt
 
       // 玩家横向移动（平滑插值，调高系数让转向更跟手）
       player.position.x += (playerState.targetX - player.position.x) * 0.3
@@ -1246,10 +1558,157 @@ export default function SubwaySurferGame({
         }
       }
 
-      // 跑道循环
+      // 连击计时器更新
+      if (data.comboTimer > 0) {
+        data.comboTimer -= dt
+        if (data.comboTimer <= 0) {
+          data.comboCount = 0
+          data.comboTimer = 0
+        }
+      }
+
+      // 粒子生命周期更新
+      {
+        const positions = particlePositionsRef.current
+        const life = particleLifeRef.current
+        let anyAlive = false
+        for (let i = 0; i < MAX_PARTICLES; i++) {
+          if (life[i] > 0) {
+            life[i] -= dt
+            const idx = i * 3
+            positions[idx + 1] += dt * 2 // 向上飘
+            positions[idx + 2] += moveDistance * 0.5 // 跟随场景移动
+            anyAlive = true
+          } else if (positions[i * 3 + 2] > -30) {
+            // 已死亡的粒子移到视野外
+            positions[i * 3 + 2] = -50
+          }
+        }
+        if (particlesRef.current) {
+          particlesRef.current.geometry.attributes.position.needsUpdate = true
+          particlesRef.current.visible = anyAlive
+        }
+      }
+
+      // 速度线效果 - 吃到加速道具后出现在角色后方的曲线拖尾
+      // 7条线跟随玩家历史路径，跳跃/下蹲/左右移动自动产生弯曲
+      {
+        const slGroup = speedLinesRef.current
+        if (slGroup) {
+          const ud = (slGroup as any).userData
+          const history = ud.history as Array<{ x: number; y: number; z: number; lane: number; jumping: boolean; sliding: boolean }>
+          const geos = ud.geos as THREE.BufferGeometry[]
+          const meshes = ud.meshes as THREE.Line[]
+          const speedActive = data.powerupStates.speed > 0 && gameStateRef.current === 'playing'
+          slGroup.visible = speedActive
+
+          // 记录玩家位置到历史（用于线条路径）
+          if (gameStateRef.current === 'playing') {
+            history.unshift({
+              x: player.position.x,
+              y: player.position.y,
+              z: player.position.z,
+              lane: playerState.lane,
+              jumping: !!playerState.isJumping,
+              sliding: !!playerState.isSliding,
+            })
+            if (history.length > ud.points + 10) history.length = ud.points + 10
+          }
+
+          if (speedActive) {
+            for (let l = 0; l < ud.count; l++) {
+              const geo = geos[l]
+              const pos = geo.attributes.position.array as Float32Array
+              const col = geo.attributes.color.array as Float32Array
+              const line = meshes[l]
+              line.visible = true
+
+              // 每条线有不同的横向/纵向偏移，形成 "一束" 速度线
+              const offsetX = (l - ud.count / 2) * 0.22
+              const offsetY = (l - ud.count / 2) * 0.15
+              const offsetZ = l * 0.08
+
+              for (let p = 0; p < ud.points; p++) {
+                const i3 = p * 3
+                const t = 1 - p / ud.points // 0 = 最旧（尾端）, 1 = 最新（靠近玩家）
+
+                if (p < history.length) {
+                  const hp = history[p]
+                  // 基础位置 = 历史位置 + 线偏移 + 向后拉伸
+                  let px = hp.x + offsetX * (1 - t * 0.5)
+                  let py = hp.y + 0.8 + offsetY
+                  // Z 向后拉伸：尾端拉得更远，营造速度线延伸感
+                  const stretchFactor = (1 - t) * 4.5 // t=1(新)拉伸0, t=0(尾)拉伸4.5
+                  let pz = hp.z + 0.3 + offsetZ * 3 + stretchFactor
+
+                  // 跳跃时线条上扬弯曲
+                  if (hp.jumping) {
+                    py += (1 - t) * 0.8
+                    pz += (1 - t) * 0.3
+                  }
+                  // 下蹲时线条压低
+                  if (hp.sliding) {
+                    py -= (1 - t) * 0.5
+                  }
+
+                  pos[i3] = px
+                  pos[i3 + 1] = py
+                  pos[i3 + 2] = pz
+
+                  // 颜色：靠近玩家时明亮（白/浅蓝），尾端渐暗
+                  const r = 0.7 + t * 0.3
+                  const g = 0.8 + t * 0.2
+                  const b = 0.5 + t * 0.5
+                  col[i3] = r
+                  col[i3 + 1] = g
+                  col[i3 + 2] = b
+                } else {
+                  // 历史不够长，放在视野外
+                  pos[i3] = 0
+                  pos[i3 + 1] = -100
+                  pos[i3 + 2] = 1000
+                  col[i3] = 0
+                  col[i3 + 1] = 0
+                  col[i3 + 2] = 0
+                }
+              }
+              geo.attributes.position.needsUpdate = true
+              geo.attributes.color.needsUpdate = true
+            }
+          } else {
+            // 速度道具结束 → 清空历史并隐藏所有线
+            history.length = 0
+            for (const line of meshes) line.visible = false
+          }
+        }
+      }
+
+      // 移动障碍物 - 来回摆动
+      for (const obs of obstaclesRef.current) {
+        if (obs.userData.type === 'movingBarrier') {
+          const baseX = CONFIG.LANE_POSITIONS[obs.userData.lane]
+          obs.userData.movePhase += dt * (obs.userData.moveSpeed as number)
+          obs.position.x = baseX + Math.sin(obs.userData.movePhase) * (obs.userData.moveRange as number)
+        }
+        if (obs.userData.type === 'rollingBarrel') {
+          // 滚桶旋转
+          const child = obs.children[0]
+          if (child) child.rotation.x += dt * (data.speed * 2)
+        }
+      }
+
+      // 屏幕震动处理
+      if (data.screenShakeTimer > 0) {
+        data.screenShakeTimer -= dt
+        const intensity = (data.screenShakeTimer / CONFIG.SCREEN_SHAKE_DURATION) * CONFIG.SCREEN_SHAKE_INTENSITY
+        camera.position.x += (Math.random() - 0.5) * intensity
+        camera.position.y += (Math.random() - 0.5) * intensity * 0.5
+      }
+
+      // 跑道循环 - 确保道路在完全离开视野后才回收
       for (const seg of trackSegmentsRef.current) {
         seg.position.z += moveDistance
-        if (seg.position.z > CONFIG.TRACK_SEGMENT_LENGTH) {
+        if (seg.position.z > CONFIG.TRACK_SEGMENT_LENGTH + 5) {
           seg.position.z -= CONFIG.TRACK_SEGMENT_LENGTH * CONFIG.VISIBLE_SEGMENTS
         }
       }
@@ -1297,6 +1756,15 @@ export default function SubwaySurferGame({
         const collisionHalfRange = Math.max(2, obsLength / 2 + 0.5)
         if (obs.position.z > -collisionHalfRange && obs.position.z < collisionHalfRange) {
           if (checkCollision(obs)) {
+            // 护盾活跃 → 护盾破碎消失，不死亡
+            if (data.powerupStates.shield > 0) {
+              data.powerupStates.shield = 0
+              gameAudio.play('click')
+              spawnParticles(player.position.x, player.position.y + 0.8, player.position.z, 0x00aaff, 20)
+              scene.remove(obs)
+              obstaclesRef.current.splice(i, 1)
+              continue
+            }
             triggerDeath()
             return
           }
@@ -1338,6 +1806,11 @@ export default function SubwaySurferGame({
           const val = CONFIG.COIN_VALUE * doubleMult
           data.score += val
           data.coinCount++
+          // 连击计数
+          data.comboCount++
+          data.comboTimer = 0.8
+          // 金币粒子
+          spawnParticles(coin.position.x, coin.position.y, coin.position.z, 0xffd700, 8)
           gameAudio.play('coin')
         }
       }
@@ -1374,6 +1847,11 @@ export default function SubwaySurferGame({
             gameAudio.play('double')
             onPowerupPickup?.('double')
           }
+          if (type === 'speed') {
+            data.powerupStates.speed = CONFIG.SPEED_BOOST_DURATION
+            gameAudio.play('magnet')
+            onPowerupPickup?.('speed')
+          }
           scene.remove(pw)
           powerupsRef.current.splice(i, 1)
         }
@@ -1388,7 +1866,7 @@ export default function SubwaySurferGame({
         const spawnZ = -100 - Math.random() * 30
         spawnObstacle(spawnZ)
         if (Math.random() < 0.7) spawnCoins(spawnZ - 5)
-        if (Math.random() < 0.15) spawnPowerup(spawnZ - 8)
+        if (Math.random() < 0.25) spawnPowerup(spawnZ - 8)
       }
 
       // 相机跟随 + 动态FOV增强速度感
@@ -1396,14 +1874,13 @@ export default function SubwaySurferGame({
       camera.position.x += (targetCamX - camera.position.x) * 0.1
       camera.lookAt(player.position.x * 0.2, 1, -5)
 
-      // 动态FOV: 速度越快视野越宽，增强速度感
+      // 动态FOV: 速度越快视野越宽，但限制在 78° 避免过度拉伸
       if (state === 'playing') {
         const speedRatio = (data.speed - CONFIG.PLAYER_START_SPEED) / (CONFIG.MAX_SPEED - CONFIG.PLAYER_START_SPEED)
-        const targetFov = 65 + speedRatio * 25 // 65° ~ 90°
+        const targetFov = 65 + speedRatio * 13 // 65° ~ 78°
         camera.fov += (targetFov - camera.fov) * 0.05
         camera.updateProjectionMatrix()
       } else {
-        // 游戏结束后缓慢恢复默认FOV
         if (camera.fov > 65) {
           camera.fov += (65 - camera.fov) * 0.02
           camera.updateProjectionMatrix()
@@ -1416,6 +1893,7 @@ export default function SubwaySurferGame({
         distance: Math.floor(data.distance),
         speed: data.speed,
         coins: data.coinCount,
+        combo: data.comboCount,
         powerups: { ...data.powerupStates },
       })
     } else if (state === 'dying' && playerRef.current) {
@@ -1445,9 +1923,18 @@ export default function SubwaySurferGame({
         coinsRef.current = []
         powerupsRef.current = []
 
+        // 清空速度线 - 隐藏所有线并清空历史
+        const slGroup = speedLinesRef.current
+        if (slGroup) {
+          const ud = (slGroup as any).userData
+          ud.history.length = 0
+          for (const line of ud.meshes) line.visible = false
+          slGroup.visible = false
+        }
+
         // 重置城市段位置 - 重新分布在玩家前方
         for (let i = 0; i < citySegmentsRef.current.length; i++) {
-          citySegmentsRef.current[i].position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH + 5
+          citySegmentsRef.current[i].position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH
         }
 
         // 重置玩家
@@ -1469,7 +1956,10 @@ export default function SubwaySurferGame({
         data.speed = CONFIG.PLAYER_START_SPEED
         data.coinCount = 0
         data.spawnTimer = 0
-        data.powerupStates = { shield: 0, magnet: 0, doubleScore: 0 }
+        data.powerupStates = { shield: 0, magnet: 0, doubleScore: 0, speed: 0 }
+        data.screenShakeTimer = 0
+        data.comboCount = 0
+        data.comboTimer = 0
 
         // 重置相机
         camera.position.set(0, 4.5, 8)
@@ -1513,7 +2003,8 @@ export default function SubwaySurferGame({
     setGameState('dying')
     gameAudio.stopBGM()
     gameAudio.play('hit')
-    // 1秒后播放 gameover 音效并切换到 gameover 状态
+    // 触发屏幕震动
+    gameDataRef.current.screenShakeTimer = CONFIG.SCREEN_SHAKE_DURATION
     deathTimerRef.current = window.setTimeout(() => {
       gameAudio.play('gameover')
       gameStateRef.current = 'gameover'
@@ -1560,7 +2051,7 @@ export default function SubwaySurferGame({
 
     // 重置城市段位置
     for (let i = 0; i < citySegmentsRef.current.length; i++) {
-      citySegmentsRef.current[i].position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH + 5
+      citySegmentsRef.current[i].position.z = -i * CONFIG.TRACK_SEGMENT_LENGTH
     }
 
     // 重置玩家
@@ -1586,7 +2077,10 @@ export default function SubwaySurferGame({
     data.speed = CONFIG.PLAYER_START_SPEED
     data.coinCount = 0
     data.spawnTimer = 0
-    data.powerupStates = { shield: 0, magnet: 0, doubleScore: 0 }
+    data.powerupStates = { shield: 0, magnet: 0, doubleScore: 0, speed: 0 }
+    data.screenShakeTimer = 0
+    data.comboCount = 0
+    data.comboTimer = 0
 
     // 重置相机
     camera.position.set(0, 4.5, 8)

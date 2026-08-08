@@ -125,7 +125,10 @@
     "english": "English",
     "japanese": "日本語",
     "save": "保存",
-    "saved": "设置已保存"
+    "saved": "设置已保存",
+    "cursor": "鼠标指针",
+    "cursorToggle": "自定义鼠标指针",
+    "cursorDesc": "启用后使用自定义SVG鼠标指针，关闭后恢复系统默认指针"
   },
   "detail": {
     "back": "返回首页",
@@ -141,6 +144,8 @@
     "gamesSection": "小游戏",
     "backToLab": "返回实验室",
     "loading": "加载中...",
+    "mobileGamesNotice": "请用电脑端访问以解锁全部功能",
+    "mobileGamesNoticeHint": "小游戏需要键盘操作，推荐在桌面端浏览器中打开",
     "leaderboardError": "排行榜加载失败",
     "noLeaderboardData": "暂无排行榜数据",
     "emptyHint2048": "成为第一个上榜的玩家吧！",
@@ -181,6 +186,10 @@
       "keyViewer": {
         "title": "键值可视化",
         "desc": "实时显示按键信息"
+      },
+      "icoConverter": {
+        "title": "ICO 图标转换器",
+        "desc": "图片转 ICO 图标"
       }
     },
     "games": {
@@ -253,7 +262,16 @@
       "processing": "处理中...",
       "inputLoaded": "文件加载完成",
       "readingOutput": "读取输出文件...",
-      "log": "日志"
+      "log": "日志",
+      "maintenanceTitle": "格式转换功能维护中",
+      "maintenanceDesc": "多线程 FFmpeg 适配期间格式转换功能暂时关闭，图片转换等其他功能不受影响。敬请期待恢复！",
+      "volumeGain": "音量增益",
+      "trimAudio": "音频裁剪",
+      "trimStart": "开始时间",
+      "trimEnd": "结束时间",
+      "trimHint": "格式: mm:ss 或秒数，留空表示不裁剪",
+      "reset": "重置",
+      "shortVideoTip": "建议使用较短视频进行转码（3分钟内），长视频可能在浏览器中内存溢出导致处理失败。"
     },
     "gif": {
       "splitTab": "GIF 拆解",
@@ -302,6 +320,25 @@
       "noLogs": "暂无按键记录",
       "cleared": "已清空",
       "mobileNotice": "注意：某些浏览器可能会阻止键盘事件，建议使用桌面浏览器测试"
+    },
+    "icoConverter": {
+      "title": "ICO 图标转换器",
+      "desc": "图片转 ICO 图标",
+      "dropFile": "点击选择或拖拽图片到此处",
+      "supportedFormats": "支持 PNG、JPG、WebP、BMP、GIF 格式",
+      "selectFile": "选择图片文件",
+      "invalidFormat": "不支持的图片格式，请使用 PNG、JPG、WebP 等格式",
+      "fileTooLarge": "文件过大，请选择 20MB 以下的图片",
+      "preview": "图片预览",
+      "selectSizes": "选择要包含的图标尺寸",
+      "sizeHint": "已选择 {count} 个尺寸",
+      "convert": "生成 ICO",
+      "processing": "生成中...",
+      "convertSuccess": "ICO 图标生成成功！",
+      "convertError": "ICO 生成失败，请重试",
+      "download": "下载 ICO",
+      "reset": "重新选择",
+      "resultInfo": "包含尺寸：{sizes}"
     },
     "games": {
       "score": "分数",
@@ -358,9 +395,11 @@
         "shield": "护盾",
         "magnet": "磁铁",
         "doubleScore": "双倍",
+        "speedBoost": "加速",
         "shieldDesc": "免疫一次碰撞伤害",
         "magnetDesc": "自动吸附附近金币",
         "doubleDesc": "得分翻倍生效中",
+        "speedDesc": "速度大幅提升，速度线拖尾出现",
         "obtained": "获得 · {name}",
         "newRecord": "🎉 新纪录！",
         "uploading": "上传中...",

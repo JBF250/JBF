@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vite/
+
+# FFmpeg MT 核心文件（仅本地开发用，生产走 Supabase Storage）
+public/ffmpeg-mt/

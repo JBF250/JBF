@@ -125,7 +125,10 @@
     "english": "English",
     "japanese": "日本語",
     "save": "Save",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "cursor": "Mouse Cursor",
+    "cursorToggle": "Custom Cursor",
+    "cursorDesc": "Enable custom SVG mouse cursors. Disable to use the system default."
   },
   "detail": {
     "back": "Back to Home",
@@ -141,6 +144,8 @@
     "gamesSection": "Mini Games",
     "backToLab": "Back to Lab",
     "loading": "Loading...",
+    "mobileGamesNotice": "Please visit on desktop to unlock all features",
+    "mobileGamesNoticeHint": "Mini games require keyboard input. Open on a desktop browser for the best experience.",
     "leaderboardError": "Failed to load leaderboard",
     "noLeaderboardData": "No leaderboard data yet",
     "emptyHint2048": "Be the first to make the leaderboard!",
@@ -252,7 +257,16 @@
       "processing": "Processing...",
       "inputLoaded": "File loaded",
       "readingOutput": "Reading output...",
-      "log": "Log"
+      "log": "Log",
+      "maintenanceTitle": "Format Converter Under Maintenance",
+      "maintenanceDesc": "The format converter is temporarily unavailable during multi-threaded FFmpeg adaptation. Image conversion and other features remain unaffected. Stay tuned!",
+      "shortVideoTip": "Short videos (under 3 minutes) are recommended for transcoding. Long videos may cause memory overflow in the browser.",
+      "volumeGain": "Volume Gain",
+      "trimAudio": "Trim Audio",
+      "trimStart": "Start Time",
+      "trimEnd": "End Time",
+      "trimHint": "Format: mm:ss or seconds, leave empty to skip",
+      "reset": "Reset"
     },
     "gif": {
       "splitTab": "Split GIF",
@@ -301,6 +315,25 @@
       "noLogs": "No key presses yet",
       "cleared": "Cleared",
       "mobileNotice": "Note: Some browsers may block keyboard events. Desktop browser recommended."
+    },
+    "icoConverter": {
+      "title": "ICO Icon Converter",
+      "desc": "Convert images to ICO icons",
+      "dropFile": "Click or drag an image here",
+      "supportedFormats": "Supports PNG, JPG, WebP, BMP, GIF",
+      "selectFile": "Select Image",
+      "invalidFormat": "Unsupported format. Please use PNG, JPG, WebP, etc.",
+      "fileTooLarge": "File too large. Please use an image under 20MB.",
+      "preview": "Preview",
+      "selectSizes": "Select icon sizes to include",
+      "sizeHint": "{count} sizes selected",
+      "convert": "Generate ICO",
+      "processing": "Generating...",
+      "convertSuccess": "ICO icon generated successfully!",
+      "convertError": "Failed to generate ICO. Please try again.",
+      "download": "Download ICO",
+      "reset": "Reset",
+      "resultInfo": "Includes sizes: {sizes}"
     },
     "games": {
       "score": "Score",
@@ -357,9 +390,11 @@
         "shield": "Shield",
         "magnet": "Magnet",
         "doubleScore": "2x Score",
+        "speedBoost": "Speed",
         "shieldDesc": "Blocks one collision",
         "magnetDesc": "Auto-collect nearby coins",
         "doubleDesc": "Double score active",
+        "speedDesc": "Speed greatly increased, trail lines appear",
         "obtained": "Got · {name}",
         "newRecord": "🎉 New Record!",
         "uploading": "Uploading...",

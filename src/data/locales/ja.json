@@ -125,7 +125,10 @@
     "english": "English",
     "japanese": "日本語",
     "save": "保存",
-    "saved": "設定が保存されました"
+    "saved": "設定が保存されました",
+    "cursor": "マウスポインター",
+    "cursorToggle": "カスタムポインター",
+    "cursorDesc": "カスタムSVGポインターを有効にします。オフにするとシステム標準に戻ります。"
   },
   "detail": {
     "back": "ホームに戻る",
@@ -141,6 +144,8 @@
     "gamesSection": "ミニゲーム",
     "backToLab": "ラボに戻る",
     "loading": "読み込み中...",
+    "mobileGamesNotice": "すべての機能を利用するにはPCでアクセスしてください",
+    "mobileGamesNoticeHint": "ミニゲームはキーボード操作が必要です。デスクトップブラウザでの開くことをおすすめします",
     "leaderboardError": "ランキングの読み込みに失敗しました",
     "noLeaderboardData": "ランキングデータがありません",
     "emptyHint2048": "最初のランカーになろう！",
@@ -252,7 +257,16 @@
       "processing": "処理中...",
       "inputLoaded": "ファイル読み込み完了",
       "readingOutput": "出力ファイルを読み込み中...",
-      "log": "ログ"
+      "log": "ログ",
+      "maintenanceTitle": "フォーマット変換メンテナンス中",
+      "maintenanceDesc": "マルチスレッド FFmpeg 対応のためフォーマット変換機能を一時停止しています。画像変換など他の機能は引き続きご利用いただけます。",
+      "shortVideoTip": "短い動画（3分以内）での変換をおすすめします。長い動画はブラウザでメモリ不足により処理に失敗する可能性があります。",
+      "volumeGain": "音量ゲイン",
+      "trimAudio": "オーディオトリム",
+      "trimStart": "開始時間",
+      "trimEnd": "終了時間",
+      "trimHint": "形式: mm:ss または秒数、空欄はトリムなし",
+      "reset": "リセット"
     },
     "gif": {
       "splitTab": "GIF分割",
@@ -301,6 +315,25 @@
       "noLogs": "キー入力がありません",
       "cleared": "クリアしました",
       "mobileNotice": "注意：一部のブラウザはキーボードイベントをブロックする場合があります。デスクトップブラウザを推奨します。"
+    },
+    "icoConverter": {
+      "title": "ICO アイコン変換",
+      "desc": "画像をICOアイコンに変換",
+      "dropFile": "クリックまたは画像をドラッグ",
+      "supportedFormats": "PNG、JPG、WebP、BMP、GIFに対応",
+      "selectFile": "画像を選択",
+      "invalidFormat": "対応していない形式です。PNG、JPG、WebPなどを使用してください",
+      "fileTooLarge": "ファイルが大きすぎます。20MB以下の画像を使用してください",
+      "preview": "プレビュー",
+      "selectSizes": "アイコンサイズを選択",
+      "sizeHint": "{count}個のサイズを選択",
+      "convert": "ICOを生成",
+      "processing": "生成中...",
+      "convertSuccess": "ICOアイコンが正常に生成されました！",
+      "convertError": "ICOの生成に失敗しました。もう一度お試しください",
+      "download": "ICOをダウンロード",
+      "reset": "リセット",
+      "resultInfo": "含まれるサイズ：{sizes}"
     },
     "games": {
       "score": "スコア",
@@ -357,9 +390,11 @@
         "shield": "シールド",
         "magnet": "マグネット",
         "doubleScore": "2倍スコア",
+        "speedBoost": "加速",
         "shieldDesc": "1回の衝突を無効化",
         "magnetDesc": "近くのコインを自動取得",
         "doubleDesc": "スコア2倍発動中",
+        "speedDesc": "速度が大幅に上昇、トレイルラインが表示",
         "obtained": "獲得 · {name}",
         "newRecord": "🎉 新記録！",
         "uploading": "アップロード中...",

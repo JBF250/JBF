@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, User, Upload, Palette, Globe, Save, Sun, Moon } from 'lucide-react'
+import { ArrowLeft, User, Upload, Palette, Globe, Save, Sun, Moon, MousePointer2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
 import { useTheme } from '@/context/ThemeContext'
 import Avatar from '@/components/Avatar'
+import Toggle from '@/components/Toggle'
 
 export default function Settings() {
   const [displayName, setDisplayName] = useState('')
@@ -13,6 +14,7 @@ export default function Settings() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [customCursor, setCustomCursor] = useState(true)
   const { user, updateUserSettings, uploadAvatar } = useAuth()
   const { t, setLang } = useI18n()
   const { setThemeMode } = useTheme()
@@ -23,6 +25,7 @@ export default function Settings() {
       setDisplayName(user.display_name || '')
       setIsDarkMode(user.theme_color !== '#ffffff')
       setLanguage((user.language || 'zh') as 'zh' | 'en' | 'ja')
+      setCustomCursor(user.custom_cursor !== false)
     }
   }, [user])
 
@@ -42,10 +45,11 @@ export default function Settings() {
         avatarUrl = await uploadAvatar(avatarFile)
       }
       
-      const settings: Partial<{ display_name: string; theme_color: string; language: string; avatar_url: string | null }> = {
+      const settings: Partial<{ display_name: string; theme_color: string; language: string; avatar_url: string | null; custom_cursor: boolean }> = {
         display_name: displayName,
         theme_color: isDarkMode ? '#8b5cf6' : '#ffffff',
-        language: language
+        language: language,
+        custom_cursor: customCursor
       }
       
       if (avatarUrl) {
@@ -53,6 +57,13 @@ export default function Settings() {
       }
       
       await updateUserSettings(settings as Partial<any>)
+      
+      // Apply custom cursor setting immediately
+      if (customCursor) {
+        document.documentElement.classList.add('custom-cursor')
+      } else {
+        document.documentElement.classList.remove('custom-cursor')
+      }
       
       setAvatarFile(null)
       setLang(language)
@@ -90,7 +101,7 @@ export default function Settings() {
             <p className="text-theme-secondary">{t('settings.profile')}</p>
           </div>
 
-          <div className="bg-theme-card/80 backdrop-blur-xl rounded-2xl p-6 space-y-6 border border-theme-color">
+          <div className="bg-theme-settings rounded-2xl p-6 space-y-6 border border-theme-color">
             <div>
               <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
                 <User className="w-5 h-5" />
@@ -206,6 +217,23 @@ export default function Settings() {
                 >
                   {t('settings.japanese')}
                 </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+                <MousePointer2 className="w-5 h-5" />
+                {t('settings.cursor')}
+              </label>
+              <div className="flex items-center justify-between p-4 bg-theme-tertiary rounded-xl border border-theme-color">
+                <div>
+                  <span className="text-theme-primary">{t('settings.cursorToggle')}</span>
+                  <p className="text-theme-secondary text-sm mt-1">{t('settings.cursorDesc')}</p>
+                </div>
+                <Toggle
+                  checked={customCursor}
+                  onChange={setCustomCursor}
+                />
               </div>
             </div>
 

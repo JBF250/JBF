@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       display_name: authUser.email || '用户',
       theme_color: '#8b5cf6',
       language: 'zh',
+      custom_cursor: true,
       avatar_url: null,
       email: authUser.email || null
     }).select('*').single()
@@ -146,7 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           display_name: '用户_' + randomId.slice(0, 4),
           email: email,
           theme_color: '#8b5cf6',
-          language: 'zh'
+          language: 'zh',
+          custom_cursor: true
         })
       } catch (e) {
         // 资料创建失败不阻塞流程，用户验证邮箱后可以补全
@@ -171,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isLocalhost = window.location.hostname === 'localhost'
     const redirectUrl = isLocalhost 
       ? 'http://localhost:5173/auth/reset-password'
-      : `${window.location.origin}/auth/reset-password`
+      : 'https://gainian.de5.net/auth/reset-password'
     
     console.log('Reset password redirectTo:', redirectUrl)
     
