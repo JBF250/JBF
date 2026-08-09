@@ -1,1 +1,15 @@
-/* /index.html 200
+# 优先放行静态资源
+/assets/*    /assets/:splat    200
+/*.js        /*.js             200
+/*.css       /*.css            200
+/*.png       /*.png            200
+/*.jpg       /*.jpg            200
+/*.jpeg      /*.jpeg           200
+/*.svg       /*.svg            200
+/*.ico       /*.ico            200
+/*.gif       /*.gif            200
+/*.woff      /*.woff           200
+/*.woff2     /*.woff2          200
+
+# SPA前端路由，其余全部交给index.html
+/*           /index.html       200
