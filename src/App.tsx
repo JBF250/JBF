@@ -14,6 +14,7 @@ import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import ForgotPassword from '@/pages/ForgotPassword'
 import ResetPassword from '@/pages/ResetPassword'
+import VerifyEmail from '@/pages/VerifyEmail'
 
 // Lab pages - lazy loaded for better performance
 const LabHome = lazy(() => import('@/pages/lab/LabHome'))
@@ -129,6 +130,7 @@ function AppContent() {
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
             <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
+            <Route path="/verify" element={<VerifyEmail />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/reset-password" element={<Navigate to="/auth/reset-password" />} />
             <Route path="*" element={<Navigate to="/" />} />

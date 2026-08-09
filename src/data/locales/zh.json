@@ -82,6 +82,17 @@
     "forgotPassword": "忘记密码？",
     "emailAlreadyRegistered": "该邮箱已被注册，请直接登录"
   },
+  "verify": {
+    "verifying": "正在验证邮箱...",
+    "verifyingDesc": "请稍候，正在完成邮箱验证",
+    "success": "邮箱验证成功",
+    "successDesc": "验证已通过，即将跳转到登录页面...",
+    "failedTitle": "验证失败",
+    "failed": "验证链接已失效或错误",
+    "expired": "验证链接已过期",
+    "missingToken": "缺少验证令牌",
+    "backToLogin": "返回登录"
+  },
   "forgotPassword": {
     "title": "忘记密码",
     "description": "输入你的邮箱地址，我们将发送重置密码的链接给你",

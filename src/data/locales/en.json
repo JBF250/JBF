@@ -82,6 +82,17 @@
     "forgotPassword": "Forgot password?",
     "emailAlreadyRegistered": "This email is already registered, please login instead"
   },
+  "verify": {
+    "verifying": "Verifying email...",
+    "verifyingDesc": "Please wait, completing email verification",
+    "success": "Email verified successfully",
+    "successDesc": "Verification passed, redirecting to login...",
+    "failedTitle": "Verification failed",
+    "failed": "The verification link is invalid or incorrect",
+    "expired": "The verification link has expired",
+    "missingToken": "Missing verification token",
+    "backToLogin": "Back to login"
+  },
   "forgotPassword": {
     "title": "Forgot Password",
     "description": "Enter your email address and we'll send you a link to reset your password",

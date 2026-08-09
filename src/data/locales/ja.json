@@ -82,6 +82,17 @@
     "forgotPassword": "パスワードを忘れましたか？",
     "emailAlreadyRegistered": "このメールアドレスは既に登録されています。ログインしてください"
   },
+  "verify": {
+    "verifying": "メールアドレスを認証中...",
+    "verifyingDesc": "しばらくお待ちください。メール認証を完了しています",
+    "success": "メール認証に成功しました",
+    "successDesc": "認証が完了しました。ログインページにリダイレクトします...",
+    "failedTitle": "認証に失敗しました",
+    "failed": "認証リンクが無効または間違っています",
+    "expired": "認証リンクの有効期限が切れています",
+    "missingToken": "認証トークンがありません",
+    "backToLogin": "ログインに戻る"
+  },
   "forgotPassword": {
     "title": "パスワードを忘れた方へ",
     "description": "メールアドレスを入力してください。パスワードリセット用のリンクを送信します。",

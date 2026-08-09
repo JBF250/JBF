@@ -64,6 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return newProfile as User || null
   }
 
+  const getRedirectUrl = (path: string) => {
+    const isLocalhost = window.location.hostname === 'localhost'
+    return isLocalhost
+      ? `http://localhost:5173${path}`
+      : `https://gainian.de5.net${path}`
+  }
+
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -121,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin
+        emailRedirectTo: getRedirectUrl('/verify')
       }
     })
 
@@ -162,23 +169,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       type: 'signup',
       email,
       options: {
-        emailRedirectTo: window.location.origin
+        emailRedirectTo: getRedirectUrl('/verify')
       }
     })
     if (error) throw error
   }
 
   const resetPassword = async (email: string) => {
-    // 根据当前环境设置正确的 redirectTo
-    const isLocalhost = window.location.hostname === 'localhost'
-    const redirectUrl = isLocalhost 
-      ? 'http://localhost:5173/auth/reset-password'
-      : 'https://gainian.de5.net/auth/reset-password'
-    
-    console.log('Reset password redirectTo:', redirectUrl)
-    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl
+      redirectTo: getRedirectUrl('/auth/reset-password')
     })
     if (error) throw error
   }
