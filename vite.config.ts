@@ -4,6 +4,7 @@ import crossOriginIsolation from 'vite-plugin-cross-origin-isolation'
 import path from 'path'
 
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     crossOriginIsolation(),
