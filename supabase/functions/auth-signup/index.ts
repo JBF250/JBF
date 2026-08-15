@@ -16,11 +16,13 @@ function json(data: Record<string, unknown>, status = 200): Response {
   })
 }
 
-async function verifyTurnstile(token: string | undefined): Promise<boolean> {
-  if (!token) return false
+type TurnstileResult = { ok: boolean; configured: boolean }
+
+async function verifyTurnstile(token: string | undefined): Promise<TurnstileResult> {
+  if (!token) return { ok: false, configured: true }
 
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
-  if (!secret) return false
+  if (!secret) return { ok: false, configured: false }
 
   const body = new URLSearchParams()
   body.set('secret', secret)
@@ -32,10 +34,10 @@ async function verifyTurnstile(token: string | undefined): Promise<boolean> {
     body,
   })
 
-  if (!res.ok) return false
+  if (!res.ok) return { ok: false, configured: true }
 
   const data = await res.json()
-  return data.success === true
+  return { ok: data.success === true, configured: true }
 }
 
 Deno.serve(async (req: Request) => {
@@ -61,9 +63,10 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'password_too_short' }, 400)
     }
 
-    // 服务端校验 Turnstile，失败直接 403
-    const turnstileOk = await verifyTurnstile(turnstileToken)
-    if (!turnstileOk) {
+    // 服务端校验 Turnstile，失败直接 403；未配置密钥则返回明确错误
+    const turnstile = await verifyTurnstile(turnstileToken)
+    if (!turnstile.ok) {
+      if (!turnstile.configured) return json({ error: 'turnstile_not_configured' }, 503)
       return json({ error: 'turnstile_failed' }, 403)
     }
 
