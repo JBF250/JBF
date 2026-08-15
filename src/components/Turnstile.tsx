@@ -83,7 +83,8 @@ const Turnstile = forwardRef<TurnstileHandle, TurnstileProps>(
 
         widgetIdRef.current = tw.render(container, {
           sitekey: TURNSTILE_SITE_KEY,
-          size: 'invisible',
+          size: 'normal',
+          theme: 'auto',
           callback: (token: string) => handlersRef.current.onSuccess(token),
           'error-callback': () => handlersRef.current.onError?.(),
           'expired-callback': () => handlersRef.current.onExpired?.(),

@@ -86,6 +86,7 @@
     "rateLimit": "请求过于频繁，请稍后再试",
     "turnstileFailed": "人机验证失败，请重试",
     "turnstileNotConfigured": "人机验证未配置，请联系管理员",
+    "turnstileRequired": "请先完成人机验证",
     "emailConfirmRequired": "请先完成邮箱验证后再进行发帖、点赞或评论操作",
     "goVerify": "去验证邮箱"
   },

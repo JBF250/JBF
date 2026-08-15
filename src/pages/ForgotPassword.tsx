@@ -74,6 +74,7 @@ export default function ForgotPassword() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
   const { resetPassword } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
@@ -91,10 +92,13 @@ export default function ForgotPassword() {
       await resetPassword(email, token)
       setSuccess(true)
       turnstileRef.current?.reset()
+      setTurnstileToken('')
     } catch (err: any) {
       const code = err?.message || ''
       if (code === 'TURNSTILE_FAILED' || code === 'TURNSTILE_NOT_CONFIGURED') {
         setError(t('auth.turnstileFailed'))
+        turnstileRef.current?.reset()
+        setTurnstileToken('')
       } else {
         // 其它错误同样显示成功，防止邮箱枚举
         setSuccess(true)
@@ -121,9 +125,13 @@ export default function ForgotPassword() {
       return
     }
 
+    if (!turnstileToken) {
+      setError(t('auth.turnstileRequired'))
+      return
+    }
+
     setError('')
-    setLoading(true)
-    turnstileRef.current?.execute()
+    doReset(turnstileToken)
   }
 
   if (success) {
@@ -189,13 +197,15 @@ export default function ForgotPassword() {
 
           <Turnstile
             ref={turnstileRef}
-            onSuccess={(token) => doReset(token)}
+            onSuccess={(token) => setTurnstileToken(token)}
             onError={() => {
               setLoading(false)
+              setTurnstileToken('')
               setError(t('auth.turnstileFailed'))
             }}
             onExpired={() => {
               setLoading(false)
+              setTurnstileToken('')
               setError(t('auth.turnstileFailed'))
             }}
           />

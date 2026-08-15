@@ -19,6 +19,7 @@ function json(data: Record<string, unknown>, status = 200): Response {
 type TurnstileResult = { ok: boolean; configured: boolean }
 
 async function verifyTurnstile(token: string | undefined): Promise<TurnstileResult> {
+  console.log('[auth-reset-password] verifyTurnstile token length =', token ? token.length : 'MISSING')
   if (!token) return { ok: false, configured: true }
 
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
@@ -34,9 +35,13 @@ async function verifyTurnstile(token: string | undefined): Promise<TurnstileResu
     body,
   })
 
-  if (!res.ok) return { ok: false, configured: true }
+  if (!res.ok) {
+    console.log('[auth-reset-password] siteverify HTTP error', res.status)
+    return { ok: false, configured: true }
+  }
 
   const data = await res.json()
+  console.log('[auth-reset-password] siteverify response:', JSON.stringify(data))
   return { ok: data.success === true, configured: true }
 }
 

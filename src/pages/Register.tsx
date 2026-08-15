@@ -16,6 +16,7 @@ export default function Register() {
   const [emailSent, setEmailSent] = useState(false)
   const [resending, setResending] = useState(false)
   const [resendMessage, setResendMessage] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
   const { register, resendVerification } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
@@ -29,12 +30,15 @@ export default function Register() {
       await register(email, password, token)
       setEmailSent(true)
       turnstileRef.current?.reset()
+      setTurnstileToken('')
     } catch (err: any) {
       const msg = err?.message || ''
       if (msg === 'EMAIL_ALREADY_REGISTERED' || msg.includes('already')) {
         setError(t('auth.emailAlreadyRegistered'))
       } else if (msg === 'TURNSTILE_FAILED') {
         setError(t('auth.turnstileFailed'))
+        turnstileRef.current?.reset()
+        setTurnstileToken('')
       } else if (msg === 'TURNSTILE_NOT_CONFIGURED') {
         setError(t('auth.turnstileNotConfigured'))
       } else if (msg === 'RATE_LIMIT' || msg.toLowerCase().includes('rate limit')) {
@@ -67,8 +71,12 @@ export default function Register() {
       return
     }
 
-    setLoading(true)
-    turnstileRef.current?.execute()
+    if (!turnstileToken) {
+      setError(t('auth.turnstileRequired'))
+      return
+    }
+
+    doRegister(turnstileToken)
   }
 
   const handleResend = async () => {
@@ -228,13 +236,15 @@ export default function Register() {
 
           <Turnstile
             ref={turnstileRef}
-            onSuccess={(token) => doRegister(token)}
+            onSuccess={(token) => setTurnstileToken(token)}
             onError={() => {
               setLoading(false)
+              setTurnstileToken('')
               setError(t('auth.turnstileFailed'))
             }}
             onExpired={() => {
               setLoading(false)
+              setTurnstileToken('')
               setError(t('auth.turnstileFailed'))
             }}
           />

@@ -86,6 +86,7 @@
     "rateLimit": "Too many requests, please try again later",
     "turnstileFailed": "Human verification failed, please try again",
     "turnstileNotConfigured": "Human verification is not configured, please contact the administrator",
+    "turnstileRequired": "Please complete the human verification first",
     "emailConfirmRequired": "Please verify your email before posting, liking, or commenting",
     "goVerify": "Verify Email"
   },

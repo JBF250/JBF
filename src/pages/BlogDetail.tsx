@@ -450,7 +450,7 @@ export default function BlogDetail() {
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="写下你的评论..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary resize-none mb-3"
+                  className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-secondary placeholder-theme-secondary focus:outline-none focus:border-primary resize-none mb-3"
                 />
                 <div className="flex justify-end">
                   <button
