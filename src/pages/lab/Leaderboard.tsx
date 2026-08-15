@@ -51,7 +51,7 @@ export function Leaderboard({ gameType, refreshKey }: LeaderboardProps) {
   if (entries.length === 0) {
     return (
       <div className="mt-6 sm:mt-8 bg-theme-tertiary rounded-xl p-4 sm:p-6 border border-theme-color">
-        <h3 className="text-base sm:text-lg font-semibold text-theme-primary mb-4 flex items-center gap-2">
+        <h3 className="text-base sm:text-lg font-semibold text-theme-on-surface mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           {t('lab.leaderboard')}
         </h3>
@@ -70,7 +70,7 @@ export function Leaderboard({ gameType, refreshKey }: LeaderboardProps) {
 
   return (
     <div className="mt-6 sm:mt-8 bg-theme-tertiary rounded-xl p-4 sm:p-6 border border-theme-color">
-      <h3 className="text-base sm:text-lg font-semibold text-theme-primary mb-3 sm:mb-4 flex items-center gap-2">
+      <h3 className="text-base sm:text-lg font-semibold text-theme-on-surface mb-3 sm:mb-4 flex items-center gap-2">
         <Trophy className="w-5 h-5 text-yellow-500" />
         {t('lab.leaderboard')}
         <span className="text-xs sm:text-sm font-normal text-theme-secondary ml-2">
@@ -106,7 +106,7 @@ export function Leaderboard({ gameType, refreshKey }: LeaderboardProps) {
                   index === 2 ? 'ring-2 ring-orange-500' : ''
                 }`}
               />
-              <span className="text-theme-primary font-medium text-sm sm:text-base truncate">
+              <span className="text-theme-on-surface font-medium text-sm sm:text-base truncate">
                 {entry.user?.display_name || t('lab.unknownPlayer')}
               </span>
             </div>

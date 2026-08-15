@@ -432,7 +432,7 @@ export default function Game2048Page() {
 
         {/* Instructions */}
         <div className="bg-theme-tertiary rounded-lg p-4 text-sm text-theme-secondary">
-          <p className="font-semibold text-theme-primary mb-2">{t('lab.games.game2048.operationTitle')}</p>
+          <p className="font-semibold text-theme-on-surface mb-2">{t('lab.games.game2048.operationTitle')}</p>
           <ul className="list-disc list-inside space-y-1">
             <li><span className="font-mono bg-theme-color px-2 py-0.5 rounded">↑ ↓ ← →</span> {t('lab.games.game2048.keyboardControl')}</li>
             <li><span className="font-mono bg-theme-color px-2 py-0.5 rounded">W A S D</span> {t('lab.games.game2048.wasdControl')}</li>

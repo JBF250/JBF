@@ -24,6 +24,8 @@ const ConverterPage = lazy(() => import('@/pages/lab/ConverterPage'))
 const GifToolPage = lazy(() => import('@/pages/lab/GifToolPage'))
 const KeyViewerPage = lazy(() => import('@/pages/lab/KeyViewerPage'))
 const IcoConverterPage = lazy(() => import('@/pages/lab/IcoConverterPage'))
+const AudioMetadataPage = lazy(() => import('@/pages/lab/AudioMetadataPage'))
+const Base64Page = lazy(() => import('@/pages/lab/Base64Page'))
 const Game2048Page = lazy(() => import('@/pages/lab/Game2048Page'))
 const ReactionPage = lazy(() => import('@/pages/lab/ReactionPage'))
 const Runner3DPage = lazy(() => import('@/pages/lab/Runner3DPage'))
@@ -114,6 +116,8 @@ function AppContent() {
             <Route path="/lab/gif-tool" element={<Suspense fallback={<LabFallback />}><GifToolPage /></Suspense>} />
             <Route path="/lab/key-viewer" element={<Suspense fallback={<LabFallback />}><KeyViewerPage /></Suspense>} />
             <Route path="/lab/ico-converter" element={<Suspense fallback={<LabFallback />}><IcoConverterPage /></Suspense>} />
+            <Route path="/lab/audio-metadata" element={<Suspense fallback={<LabFallback />}><AudioMetadataPage /></Suspense>} />
+            <Route path="/lab/base64" element={<Suspense fallback={<LabFallback />}><Base64Page /></Suspense>} />
             <Route path="/lab/game/2048" element={<Suspense fallback={<LabFallback />}><Game2048Page /></Suspense>} />
             <Route path="/lab/game/reaction" element={<Suspense fallback={<LabFallback />}><ReactionPage /></Suspense>} />
             <Route path="/lab/game/3d-runner" element={<Suspense fallback={<LabFallback />}><Runner3DPage /></Suspense>} />

@@ -27,7 +27,7 @@ export default function Blog() {
   const [newPost, setNewPost] = useState({ title: '', content: '' })
   const [uploadingImages, setUploadingImages] = useState(false)
   const [postImages, setPostImages] = useState<string[]>([])
-  const { user } = useAuth()
+  const { user, emailConfirmed } = useAuth()
   const { t, lang } = useI18n()
   const navigate = useNavigate()
 
@@ -122,6 +122,7 @@ export default function Blog() {
 
   const handleCreatePost = async () => {
     if (!newPost.title.trim() || !newPost.content.trim() || !user) return
+    if (!emailConfirmed) return
     
     setUploadingImages(true)
     
@@ -148,6 +149,7 @@ export default function Blog() {
 
   const handleUpdatePost = async () => {
     if (!editingPost || !newPost.title.trim() || !newPost.content.trim() || !user) return
+    if (!emailConfirmed) return
     
     try {
       await supabase
@@ -172,6 +174,7 @@ export default function Blog() {
   }
 
   const handleDeletePost = async (postId: string) => {
+    if (!emailConfirmed) return
     if (!confirm(t('blog.confirmDelete'))) return
     
     try {
@@ -185,6 +188,7 @@ export default function Blog() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || !user) return
+    if (!emailConfirmed) return
     
     setUploadingImages(true)
     
@@ -292,6 +296,19 @@ export default function Blog() {
             <div className="flex-1">
               {activeTab === 'community' && (
                 <>
+                  {user && !emailConfirmed && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                      <p className="text-amber-600 dark:text-amber-400 text-sm">
+                        {t('auth.emailConfirmRequired')}
+                      </p>
+                      <button
+                        onClick={() => navigate('/register')}
+                        className="shrink-0 px-4 py-2 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-sm font-medium hover:bg-amber-500/30 transition-colors"
+                      >
+                        {t('auth.goVerify')}
+                      </button>
+                    </div>
+                  )}
                   <div className="flex justify-end mb-6">
                     <button
                       onClick={() => {
@@ -299,6 +316,7 @@ export default function Blog() {
                           navigate('/login')
                           return
                         }
+                        if (!emailConfirmed) return
                         setShowCreateModal(true)
                       }}
                       className="flex items-center gap-2 px-6 py-3 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity"
@@ -418,7 +436,7 @@ export default function Blog() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-theme-card rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-theme-color">
             <div className="flex justify-between items-center p-6 border-b border-theme-color">
-              <h2 className="font-display font-bold text-xl text-theme-primary">{t('blog.newPost')}</h2>
+              <h2 className="font-display font-bold text-xl text-theme-on-surface">{t('blog.newPost')}</h2>
               <button
                 onClick={() => { setShowCreateModal(false); setNewPost({ title: '', content: '' }); setPostImages([]) }}
                 className="text-theme-secondary hover:text-theme-primary transition-colors"
@@ -432,17 +450,17 @@ export default function Blog() {
                 value={newPost.title}
                 onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                 placeholder={t('blog.titlePlaceholder')}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary"
               />
               <textarea
                 value={newPost.content}
                 onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                 placeholder={t('blog.contentPlaceholder')}
                 rows={8}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary resize-none"
+                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary resize-none"
               />
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
+                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-on-surface rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
                   <Image className="w-5 h-5" />
                   <span>上传图片</span>
                   <input
@@ -481,7 +499,7 @@ export default function Blog() {
             <div className="p-6 border-t border-theme-color flex justify-end gap-4">
               <button
                 onClick={() => { setShowCreateModal(false); setNewPost({ title: '', content: '' }); setPostImages([]) }}
-                className="px-6 py-3 bg-theme-tertiary text-theme-primary rounded-xl hover:bg-theme-hover transition-colors"
+                className="px-6 py-3 bg-theme-tertiary text-theme-on-surface rounded-xl hover:bg-theme-hover transition-colors"
               >
                 {t('blog.cancel')}
               </button>
@@ -501,7 +519,7 @@ export default function Blog() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-theme-card rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-theme-color">
             <div className="flex justify-between items-center p-6 border-b border-theme-color">
-              <h2 className="font-display font-bold text-xl text-theme-primary">{t('blog.edit')}</h2>
+              <h2 className="font-display font-bold text-xl text-theme-on-surface">{t('blog.edit')}</h2>
               <button
                 onClick={() => { setShowEditModal(false); setEditingPost(null); setNewPost({ title: '', content: '' }); setPostImages([]) }}
                 className="text-theme-secondary hover:text-theme-primary transition-colors"
@@ -515,17 +533,17 @@ export default function Blog() {
                 value={newPost.title}
                 onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                 placeholder={t('blog.titlePlaceholder')}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary"
               />
               <textarea
                 value={newPost.content}
                 onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                 placeholder={t('blog.contentPlaceholder')}
                 rows={8}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary resize-none"
+                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary resize-none"
               />
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
+                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-on-surface rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
                   <Image className="w-5 h-5" />
                   <span>上传图片</span>
                   <input
@@ -561,7 +579,7 @@ export default function Blog() {
             <div className="p-6 border-t border-theme-color flex justify-end gap-4">
               <button
                 onClick={() => { setShowEditModal(false); setEditingPost(null); setNewPost({ title: '', content: '' }); setPostImages([]) }}
-                className="px-6 py-3 bg-theme-tertiary text-theme-primary rounded-xl hover:bg-theme-hover transition-colors"
+                className="px-6 py-3 bg-theme-tertiary text-theme-on-surface rounded-xl hover:bg-theme-hover transition-colors"
               >
                 {t('blog.cancel')}
               </button>

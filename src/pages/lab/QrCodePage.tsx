@@ -173,7 +173,7 @@ export default function QrCodePage() {
         <div className="space-y-6">
           {/* Text Input */}
           <div>
-            <label className="block text-sm font-medium text-theme-primary mb-2">
+            <label className="block text-sm font-medium text-theme-on-surface mb-2">
               {t('lab.qrcode.inputLabel')}
             </label>
             <div className="relative">
@@ -181,7 +181,7 @@ export default function QrCodePage() {
                 value={text}
                 onChange={(e) => handleTextChange(e.target.value)}
                 placeholder={t('lab.qrcode.inputPlaceholder')}
-                className="w-full h-32 px-4 py-3 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary placeholder:text-theme-secondary/50 focus:outline-none focus:border-primary transition-colors resize-none"
+                className="w-full h-32 px-4 py-3 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface placeholder:text-theme-secondary/50 focus:outline-none focus:border-primary transition-colors resize-none"
                 maxLength={MAX_TEXT_LENGTH + 100}
               />
               {text && (
@@ -208,7 +208,7 @@ export default function QrCodePage() {
 
           {/* Size Control */}
           <div>
-            <label className="block text-sm font-medium text-theme-primary mb-2">
+            <label className="block text-sm font-medium text-theme-on-surface mb-2">
               {t('lab.qrcode.sizeLabel')}: {config.size}px
               <span className="text-xs text-theme-secondary ml-2">({t('lab.qrcode.exportSize')})</span>
             </label>
@@ -226,7 +226,7 @@ export default function QrCodePage() {
           {/* Color Settings */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
                 {t('lab.qrcode.fgColor')}
               </label>
               <div className="flex items-center gap-2">
@@ -240,12 +240,12 @@ export default function QrCodePage() {
                   type="text"
                   value={config.fgColor}
                   onChange={(e) => setConfig((p) => ({ ...p, fgColor: e.target.value }))}
-                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary text-sm"
+                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface text-sm"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
                 {t('lab.qrcode.bgColor')}
               </label>
               <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export default function QrCodePage() {
                   type="text"
                   value={config.bgColor}
                   onChange={(e) => setConfig((p) => ({ ...p, bgColor: e.target.value }))}
-                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary text-sm"
+                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface text-sm"
                 />
               </div>
             </div>
@@ -267,7 +267,7 @@ export default function QrCodePage() {
 
           {/* Error Level */}
           <div>
-            <label className="block text-sm font-medium text-theme-primary mb-2">
+            <label className="block text-sm font-medium text-theme-on-surface mb-2">
               {t('lab.qrcode.errorLevel')}
               <span className="text-xs font-normal text-theme-secondary ml-2">
                 {getLevelDesc(config.level)}
@@ -296,7 +296,7 @@ export default function QrCodePage() {
 
           {/* Rounded Option */}
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-theme-primary">
+            <label className="text-sm font-medium text-theme-on-surface">
               {t('lab.qrcode.rounded')}
             </label>
             <button
@@ -315,7 +315,7 @@ export default function QrCodePage() {
 
           {/* Logo Upload */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-theme-primary mb-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-theme-on-surface mb-2">
               <input
                 type="checkbox"
                 checked={showLogo}
@@ -436,7 +436,7 @@ export default function QrCodePage() {
               <button
                 onClick={() => handleDownload('svg')}
                 disabled={!text}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-theme-tertiary text-theme-primary rounded-lg hover:bg-theme-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-theme-tertiary text-theme-on-surface rounded-lg hover:bg-theme-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-5 h-5" />
                 SVG
@@ -445,7 +445,7 @@ export default function QrCodePage() {
             <button
               onClick={handleCopyToClipboard}
               disabled={!text}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-theme-tertiary text-theme-primary rounded-lg hover:bg-theme-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-theme-tertiary text-theme-on-surface rounded-lg hover:bg-theme-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Copy className="w-5 h-5" />
               {copied ? t('lab.qrcode.copied') : t('lab.qrcode.copyImage')}

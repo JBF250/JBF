@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { supabase, type User } from '@/lib/supabase'
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY, type User } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
+  emailConfirmed: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, turnstileToken: string) => Promise<void>
   resendVerification: (email: string) => Promise<void>
-  resetPassword: (email: string) => Promise<void>
+  resetPassword: (email: string, turnstileToken: string) => Promise<void>
   updatePassword: (newPassword: string) => Promise<void>
   logout: () => Promise<void>
   updateUserSettings: (settings: Partial<User>) => Promise<void>
@@ -19,6 +20,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [emailConfirmed, setEmailConfirmed] = useState(false)
+
+  // 调用 Supabase Edge Function（公共函数，服务端完成 Turnstile 校验）
+  const callEdgeFunction = async (name: string, body: Record<string, unknown>) => {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(data?.error || 'request_failed')
+    }
+    return data
+  }
 
   const ensureUserProfile = async (authUser: any) => {
     console.log('ensureUserProfile called with authUser:', authUser?.id)
@@ -75,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchUser = async () => {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (authUser) {
+        setEmailConfirmed(!!authUser.email_confirmed_at)
         const profile = await ensureUserProfile(authUser)
         if (profile) {
           setUser(profile)
@@ -86,12 +108,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        setEmailConfirmed(!!session.user.email_confirmed_at)
         const profile = await ensureUserProfile(session.user)
         if (profile) {
           setUser(profile)
         }
       } else {
         setUser(null)
+        setEmailConfirmed(false)
       }
     })
 
@@ -104,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
     
     if (data.session?.user) {
+      setEmailConfirmed(!!data.session.user.email_confirmed_at)
       const profile = await ensureUserProfile(data.session.user)
       if (profile) {
         setUser(profile)
@@ -111,8 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const register = async (email: string, password: string) => {
-    // 先检查邮箱是否已注册
+  const register = async (email: string, password: string, turnstileToken: string) => {
+    // 先检查邮箱是否已注册（用户资料在首次登录时创建，已确认邮箱的用户此处可命中）
     const { data: existingUser } = await supabase
       .from('users')
       .select('email')
@@ -120,47 +145,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .maybeSingle()
     
     if (existingUser) {
-      const error = new Error('EMAIL_ALREADY_REGISTERED')
-      throw error
+      throw new Error('EMAIL_ALREADY_REGISTERED')
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: getRedirectUrl('/auth/confirm-wait')
-      }
-    })
-
-    if (error) {
-      // 处理 Supabase 返回的重复邮箱错误
-      if (error.message?.includes('already been registered') || 
-          error.message?.includes('already exists') ||
-          error.message?.includes('already in use')) {
-        throw new Error('EMAIL_ALREADY_REGISTERED')
-      }
-      throw error
-    }
-
-    // 注册后不自动登录，等待用户验证邮箱
-    // Supabase 会自动发送验证邮件
-    if (data.user) {
-      // 生成随机ID作为初始用户名
-      const randomId = Math.random().toString(36).substring(2, 10)
-      try {
-        await supabase.from('users').insert({
-          id: data.user.id,
-          username: randomId,
-          display_name: '用户_' + randomId.slice(0, 4),
-          email: email,
-          theme_color: '#8b5cf6',
-          language: 'zh',
-          custom_cursor: true
-        })
-      } catch (e) {
-        // 资料创建失败不阻塞流程，用户验证邮箱后可以补全
-        console.warn('Failed to create user profile:', e)
-      }
+    try {
+      await callEdgeFunction('auth-signup', { email, password, turnstileToken })
+    } catch (err: any) {
+      const code = err?.message
+      if (code === 'email_already_registered') throw new Error('EMAIL_ALREADY_REGISTERED')
+      if (code === 'turnstile_failed') throw new Error('TURNSTILE_FAILED')
+      if (code === 'turnstile_not_configured') throw new Error('TURNSTILE_NOT_CONFIGURED')
+      if (code === 'rate_limit') throw new Error('RATE_LIMIT')
+      throw new Error('REGISTER_FAILED')
     }
   }
 
@@ -175,11 +171,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }
 
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getRedirectUrl('/auth/confirm-wait')
-    })
-    if (error) throw error
+  const resetPassword = async (email: string, turnstileToken: string) => {
+    try {
+      await callEdgeFunction('auth-reset-password', { email, turnstileToken })
+    } catch (err: any) {
+      const code = err?.message
+      if (code === 'turnstile_failed') throw new Error('TURNSTILE_FAILED')
+      if (code === 'turnstile_not_configured') throw new Error('TURNSTILE_NOT_CONFIGURED')
+      // 其它错误（邮箱不存在、限流等）按成功处理，防止邮箱枚举
+    }
   }
 
   const updatePassword = async (newPassword: string) => {
@@ -190,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setEmailConfirmed(false)
   }
 
   const updateUserSettings = async (settings: Partial<User>) => {
@@ -225,7 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, resendVerification, resetPassword, updatePassword, logout, updateUserSettings, uploadAvatar }}>
+    <AuthContext.Provider value={{ user, loading, emailConfirmed, login, register, resendVerification, resetPassword, updatePassword, logout, updateUserSettings, uploadAvatar }}>
       {children}
     </AuthContext.Provider>
   )

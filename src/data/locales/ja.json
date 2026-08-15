@@ -83,7 +83,11 @@
     "forgotPassword": "パスワードを忘れましたか？",
     "emailAlreadyRegistered": "このメールアドレスは既に登録されています。ログインしてください",
     "loggingIn": "ログイン中...",
-    "rateLimit": "リクエストが多すぎます。しばらくしてから再試行してください"
+    "rateLimit": "リクエストが多すぎます。しばらくしてから再試行してください",
+    "turnstileFailed": "認証に失敗しました。もう一度お試しください",
+    "turnstileNotConfigured": "認証が設定されていません。管理者にお問い合わせください",
+    "emailConfirmRequired": "投稿・いいね・コメントの前にメールアドレスの認証を完了してください",
+    "goVerify": "メールを認証する"
   },
   "verify": {
     "verifying": "メールアドレスを認証中...",
@@ -218,6 +222,18 @@
       "keyViewer": {
         "title": "キービューア",
         "desc": "リアルタイムキー表示"
+      },
+      "icoConverter": {
+        "title": "ICO アイコン変換",
+        "desc": "画像をICOアイコンに変換"
+      },
+      "audioMetadata": {
+        "title": "音声メタデータ編集",
+        "desc": "タイトル・アーティスト・アルバム・年・カバーを編集"
+      },
+      "base64": {
+        "title": "Base64 コーデック",
+        "desc": "テキストのエンコード・デコード"
       }
     },
     "games": {
@@ -267,6 +283,7 @@
       "maxFileSize": "最大ファイルサイズ：500MB",
       "fileTooLarge": "ファイルが大きすぎます。もう少し小さいファイルを選択してください",
       "outputFormat": "出力フォーマット",
+      "exportName": "出力名",
       "quality": "品質",
       "width": "幅 (px)",
       "height": "高さ (px)",
@@ -313,6 +330,7 @@
       "frameDelay": "フレーム遅延",
       "extractedFrames": "抽出されたフレーム",
       "downloadZip": "全員ダウンロード (ZIP)",
+      "exportName": "出力名",
       "downloadFrame": "フレームをダウンロード",
       "downloadGif": "GIFをダウンロード",
       "downloadAll": "全員ダウンロード",
@@ -366,6 +384,44 @@
       "download": "ICOをダウンロード",
       "reset": "リセット",
       "resultInfo": "含まれるサイズ：{sizes}"
+    },
+    "audioMetadata": {
+      "title": "音声メタデータ編集",
+      "desc": "曲名・アーティスト・アルバム・年・カバーを編集",
+      "dropFile": "クリックまたは音声ファイルをドラッグ",
+      "supportedFormats": "MP3、M4A、WAVに対応",
+      "selectFile": "音声ファイルを選択",
+      "invalidFormat": "対応していない形式です。MP3、M4A、WAVを使用してください",
+      "reading": "メタデータを読み込み中...",
+      "songTitle": "曲名",
+      "artist": "アーティスト",
+      "album": "アルバム",
+      "year": "年",
+      "cover": "アルバムカバー",
+      "uploadCover": "カバーをアップロード",
+      "changeCover": "カバーを変更",
+      "removeCover": "カバーを削除",
+      "wavNotice": "WAVはテキスト情報のみ書き込み可能で、アルバムカバーの埋め込みには対応していません",
+      "writeAndDownload": "書き込み & ダウンロード",
+      "writing": "書き込み中...",
+      "success": "メタデータの書き込みに成功しました。ダウンロードを開始しました。",
+      "writeError": "メタデータの書き込みに失敗しました"
+    },
+    "base64": {
+      "title": "Base64 コーデック",
+      "desc": "テキストのエンコード・デコード",
+      "encodeTab": "エンコード (テキスト → Base64)",
+      "decodeTab": "デコード (Base64 → テキスト)",
+      "inputLabel": "入力",
+      "outputLabel": "出力",
+      "encodePlaceholder": "エンコードするテキストを入力...",
+      "decodePlaceholder": "デコードするBase64文字列を入力...",
+      "encode": "エンコード",
+      "decode": "デコード",
+      "copy": "結果をコピー",
+      "copied": "コピーしました",
+      "invalidBase64": "無効なBase64文字列です",
+      "emptyInput": "内容を入力してください"
     },
     "games": {
       "score": "スコア",

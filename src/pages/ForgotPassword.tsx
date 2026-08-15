@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
+import Turnstile, { type TurnstileHandle } from '@/components/Turnstile'
 
 // 限流配置
 const IP_LIMIT_WINDOW = 5 * 60 * 1000 // 5分钟
@@ -76,8 +77,34 @@ export default function ForgotPassword() {
   const { resetPassword } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
+  const turnstileRef = useRef<TurnstileHandle>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const doReset = async (token: string) => {
+    setLoading(true)
+    setError('')
+
+    try {
+      // 记录请求（仅在通过人机验证后实际发送时）
+      recordRequest(email)
+
+      // 无论邮箱是否存在，都显示成功信息（防止邮箱枚举攻击）
+      await resetPassword(email, token)
+      setSuccess(true)
+      turnstileRef.current?.reset()
+    } catch (err: any) {
+      const code = err?.message || ''
+      if (code === 'TURNSTILE_FAILED' || code === 'TURNSTILE_NOT_CONFIGURED') {
+        setError(t('auth.turnstileFailed'))
+      } else {
+        // 其它错误同样显示成功，防止邮箱枚举
+        setSuccess(true)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
     // 基本格式验证
@@ -96,20 +123,7 @@ export default function ForgotPassword() {
 
     setError('')
     setLoading(true)
-
-    try {
-      // 记录请求（仅在实际发送时）
-      recordRequest(email)
-      
-      // 无论邮箱是否存在，都显示成功信息（防止邮箱枚举攻击）
-      await resetPassword(email)
-      setSuccess(true)
-    } catch {
-      // 即使发生错误，也显示成功信息（防止邮箱枚举攻击）
-      setSuccess(true)
-    } finally {
-      setLoading(false)
-    }
+    turnstileRef.current?.execute()
   }
 
   if (success) {
@@ -172,6 +186,19 @@ export default function ForgotPassword() {
           {error && (
             <p className="text-red-400 text-sm">{error}</p>
           )}
+
+          <Turnstile
+            ref={turnstileRef}
+            onSuccess={(token) => doReset(token)}
+            onError={() => {
+              setLoading(false)
+              setError(t('auth.turnstileFailed'))
+            }}
+            onExpired={() => {
+              setLoading(false)
+              setError(t('auth.turnstileFailed'))
+            }}
+          />
 
           <button
             type="submit"

@@ -1,6 +1,6 @@
 import { useI18n } from '@/context/I18nContext'
 import { Link } from 'react-router-dom'
-import { QrCode, Image, Grid3x3, Keyboard, Timer, Rocket, FileImage } from 'lucide-react'
+import { QrCode, Image, Grid3x3, Keyboard, Timer, Rocket, FileImage, Music, Binary } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const tools = [
@@ -38,6 +38,20 @@ const tools = [
     icon: FileImage,
     titleKey: 'lab.tools.icoConverter.title',
     descKey: 'lab.tools.icoConverter.desc',
+  },
+  {
+    id: 'audio-metadata',
+    path: '/lab/audio-metadata',
+    icon: Music,
+    titleKey: 'lab.tools.audioMetadata.title',
+    descKey: 'lab.tools.audioMetadata.desc',
+  },
+  {
+    id: 'base64',
+    path: '/lab/base64',
+    icon: Binary,
+    titleKey: 'lab.tools.base64.title',
+    descKey: 'lab.tools.base64.desc',
   },
 ]
 
@@ -128,7 +142,7 @@ export default function LabHome() {
           {isMobile ? (
             <div className="bg-theme-card rounded-2xl border border-theme-color p-8 sm:p-10 text-center">
               <Rocket className="w-12 h-12 mx-auto mb-4 text-theme-secondary opacity-40" />
-              <p className="text-theme-primary font-medium text-lg mb-2">
+              <p className="text-theme-on-surface font-medium text-lg mb-2">
                 {t('lab.mobileGamesNotice')}
               </p>
               <p className="text-theme-secondary text-sm">

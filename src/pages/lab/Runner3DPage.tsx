@@ -189,7 +189,7 @@ export default function Runner3DPage() {
 
               {/* 操作说明 */}
               <div className="bg-theme-tertiary/90 rounded-lg p-3 sm:p-4 max-w-md text-xs sm:text-sm text-center">
-                <p className="font-semibold text-theme-primary mb-2">{t('lab.games.runner3d.operationGuide')}</p>
+                <p className="font-semibold text-theme-on-surface mb-2">{t('lab.games.runner3d.operationGuide')}</p>
                 <ul className="text-theme-secondary space-y-1 text-left">
                   <li><kbd className="bg-theme-color px-1.5 py-0.5 rounded text-xs">←→</kbd> / <kbd className="bg-theme-color px-1.5 py-0.5 rounded text-xs">A/D</kbd>：{t('lab.games.runner3d.switchLanes')}</li>
                   <li><kbd className="bg-theme-color px-1.5 py-0.5 rounded text-xs">↑</kbd> / <kbd className="bg-theme-color px-1.5 py-0.5 rounded text-xs">Space</kbd>：{t('lab.games.runner3d.jump')}</li>
@@ -356,7 +356,7 @@ export default function Runner3DPage() {
 
                 <button
                   onClick={resetGame}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 bg-theme-tertiary text-theme-primary text-sm sm:text-base rounded-lg hover:opacity-90 border border-theme-color"
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 bg-theme-tertiary text-theme-on-surface text-sm sm:text-base rounded-lg hover:opacity-90 border border-theme-color"
                 >
                   {t('lab.games.runner3d.back')}
                 </button>

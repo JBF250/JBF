@@ -83,7 +83,11 @@
     "forgotPassword": "忘记密码？",
     "emailAlreadyRegistered": "该邮箱已被注册，请直接登录",
     "loggingIn": "登录中...",
-    "rateLimit": "请求过于频繁，请稍后再试"
+    "rateLimit": "请求过于频繁，请稍后再试",
+    "turnstileFailed": "人机验证失败，请重试",
+    "turnstileNotConfigured": "人机验证未配置，请联系管理员",
+    "emailConfirmRequired": "请先完成邮箱验证后再进行发帖、点赞或评论操作",
+    "goVerify": "去验证邮箱"
   },
   "verify": {
     "verifying": "正在验证邮箱...",
@@ -222,6 +226,14 @@
       "icoConverter": {
         "title": "ICO 图标转换器",
         "desc": "图片转 ICO 图标"
+      },
+      "audioMetadata": {
+        "title": "音频元信息编辑器",
+        "desc": "编辑标题、艺术家、专辑、年份与封面"
+      },
+      "base64": {
+        "title": "Base64 编解码",
+        "desc": "文本与 Base64 互转"
       }
     },
     "games": {
@@ -271,6 +283,7 @@
       "maxFileSize": "单文件最大 500MB",
       "fileTooLarge": "文件过大，请选择更小的文件",
       "outputFormat": "输出格式",
+      "exportName": "导出名称",
       "quality": "质量",
       "width": "宽度 (px)",
       "height": "高度 (px)",
@@ -318,6 +331,7 @@
       "frameDelay": "帧延迟",
       "extractedFrames": "提取的帧",
       "downloadZip": "全部下载 (ZIP)",
+      "exportName": "导出名称",
       "downloadFrame": "下载此帧",
       "downloadGif": "下载 GIF",
       "downloadAll": "下载全部",
@@ -371,6 +385,44 @@
       "download": "下载 ICO",
       "reset": "重新选择",
       "resultInfo": "包含尺寸：{sizes}"
+    },
+    "audioMetadata": {
+      "title": "音频元信息编辑器",
+      "desc": "编辑歌曲标题、艺术家、专辑、年份与封面",
+      "dropFile": "点击选择或拖拽音频文件到此处",
+      "supportedFormats": "支持 MP3、M4A、WAV 格式",
+      "selectFile": "选择音频文件",
+      "invalidFormat": "不支持的音频格式，请使用 MP3、M4A 或 WAV",
+      "reading": "读取元数据中...",
+      "songTitle": "歌曲标题",
+      "artist": "艺术家",
+      "album": "专辑",
+      "year": "年份",
+      "cover": "专辑封面",
+      "uploadCover": "上传封面",
+      "changeCover": "更换封面",
+      "removeCover": "移除封面",
+      "wavNotice": "WAV 格式仅支持写入文字信息，不支持嵌入专辑封面",
+      "writeAndDownload": "写入并下载",
+      "writing": "写入中...",
+      "success": "元信息写入成功，已开始下载",
+      "writeError": "写入元信息失败"
+    },
+    "base64": {
+      "title": "Base64 编解码",
+      "desc": "文本与 Base64 互转",
+      "encodeTab": "编码 (文本 → Base64)",
+      "decodeTab": "解码 (Base64 → 文本)",
+      "inputLabel": "输入",
+      "outputLabel": "输出",
+      "encodePlaceholder": "输入要编码的文本...",
+      "decodePlaceholder": "输入要解码的 Base64 字符串...",
+      "encode": "编码",
+      "decode": "解码",
+      "copy": "复制结果",
+      "copied": "已复制",
+      "invalidBase64": "无效的 Base64 字符串",
+      "emptyInput": "请输入内容"
     },
     "games": {
       "score": "分数",

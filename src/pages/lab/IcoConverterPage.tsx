@@ -170,7 +170,7 @@ export default function IcoConverterPage() {
             className="border-2 border-dashed border-theme-color rounded-2xl p-8 sm:p-12 text-center cursor-pointer hover:border-primary/50 transition-colors"
           >
             <Upload className="w-12 h-12 mx-auto mb-4 text-theme-secondary" />
-            <p className="text-theme-primary font-medium mb-2">{t('lab.icoConverter.dropFile')}</p>
+            <p className="text-theme-on-surface font-medium mb-2">{t('lab.icoConverter.dropFile')}</p>
             <p className="text-theme-secondary text-sm mb-4">{t('lab.icoConverter.supportedFormats')}</p>
             <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90">
               {t('lab.icoConverter.selectFile')}
@@ -205,7 +205,7 @@ export default function IcoConverterPage() {
 
               {/* Size Selection */}
               <div className="flex-1">
-                <p className="text-sm font-medium text-theme-primary mb-3">{t('lab.icoConverter.selectSizes')}</p>
+                <p className="text-sm font-medium text-theme-on-surface mb-3">{t('lab.icoConverter.selectSizes')}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                   {ICO_SIZES.map((size) => {
                     const selected = selectedSizes.includes(size)
@@ -257,7 +257,7 @@ export default function IcoConverterPage() {
 
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-5 py-2.5 bg-theme-tertiary text-theme-primary rounded-lg hover:opacity-90 border border-theme-color"
+                className="flex items-center gap-2 px-5 py-2.5 bg-theme-tertiary text-theme-on-surface rounded-lg hover:opacity-90 border border-theme-color"
               >
                 <XIcon className="w-4 h-4" />
                 {t('lab.icoConverter.reset')}

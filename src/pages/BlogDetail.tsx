@@ -22,7 +22,7 @@ export default function BlogDetail() {
   const { type, id } = useParams<{ type: string; id: string }>()
   const navigate = useNavigate()
   const { lang, t } = useI18n()
-  const { user } = useAuth()
+  const { user, emailConfirmed } = useAuth()
   const currentLang = lang
   const commentInputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -148,6 +148,7 @@ export default function BlogDetail() {
       navigate('/login')
       return
     }
+    if (!emailConfirmed) return
     
     const postId = id || ''
     const postType = type || 'community'
@@ -188,6 +189,7 @@ export default function BlogDetail() {
 
   const handleDeleteComment = async (commentId: string) => {
     if (!user) return
+    if (!emailConfirmed) return
 
     if (!confirm(t('blog.confirmDeleteComment'))) return
 
@@ -209,6 +211,7 @@ export default function BlogDetail() {
 
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !user) return
+    if (!emailConfirmed) return
     
     const postId = id || ''
     const postType = type || 'community'
@@ -439,7 +442,7 @@ export default function BlogDetail() {
               评论 ({comments.length})
             </h2>
 
-            {user ? (
+            {user && emailConfirmed ? (
               <div className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-4 border border-theme-color mb-8">
                 <textarea
                   ref={commentInputRef}
@@ -459,6 +462,18 @@ export default function BlogDetail() {
                     发布评论
                   </button>
                 </div>
+              </div>
+            ) : user && !emailConfirmed ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-8">
+                <p className="text-amber-600 dark:text-amber-400 text-sm">
+                  {t('auth.emailConfirmRequired')}
+                </p>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="shrink-0 px-4 py-2 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg text-sm font-medium hover:bg-amber-500/30 transition-colors"
+                >
+                  {t('auth.goVerify')}
+                </button>
               </div>
             ) : (
               <div className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-6 border border-theme-color mb-8 text-center">

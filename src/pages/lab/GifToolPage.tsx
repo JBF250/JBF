@@ -30,6 +30,7 @@ export default function GifToolPage() {
   const [gifInfo, setGifInfo] = useState({ frames: 0, width: 0, height: 0, duration: 0 })
   const [splitting, setSplitting] = useState(false)
   const [splitProgress, setSplitProgress] = useState(0)
+  const [splitExportName, setSplitExportName] = useState('')
 
   // Merge state
   const [mergeFrames, setMergeFrames] = useState<MergeFrame[]>([])
@@ -38,6 +39,7 @@ export default function GifToolPage() {
   const [quality, setQuality] = useState(10)
   const [merging, setMerging] = useState(false)
   const [resultUrl, setResultUrl] = useState('')
+  const [mergeExportName, setMergeExportName] = useState('animated')
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mergeInputRef = useRef<HTMLInputElement>(null)
@@ -55,6 +57,7 @@ export default function GifToolPage() {
     }
 
     setGifFile(file)
+    setSplitExportName(file.name.replace(/\.[^.]+$/, ''))
     setFrames([])
     setGifInfo({ frames: 0, width: 0, height: 0, duration: 0 })
     setSplitting(true)
@@ -137,7 +140,7 @@ export default function GifToolPage() {
       const url = URL.createObjectURL(content)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'frames.zip'
+      link.download = `${splitExportName.trim() || 'frames'}.zip`
       link.click()
       URL.revokeObjectURL(url)
     } catch {
@@ -165,6 +168,10 @@ export default function GifToolPage() {
         })
       }
     })
+
+    if (mergeFrames.length === 0 && newFrames.length > 0) {
+      setMergeExportName(newFrames[0].file.name.replace(/\.[^.]+$/, ''))
+    }
 
     setMergeFrames((prev) => [...prev, ...newFrames])
   }
@@ -371,7 +378,7 @@ export default function GifToolPage() {
               onChange={handleGifUpload}
             />
             <Upload className="w-12 h-12 text-theme-secondary mx-auto mb-4" />
-            <p className="text-theme-primary font-medium mb-1">
+            <p className="text-theme-on-surface font-medium mb-1">
               {gifFile ? gifFile.name : t('lab.gif.uploadGif')}
             </p>
             <p className="text-theme-secondary text-sm">
@@ -410,8 +417,25 @@ export default function GifToolPage() {
           {/* Frames Grid */}
           {frames.length > 0 && (
             <>
+              <div className="flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-theme-on-surface mb-2">
+                    {t('lab.gif.exportName')}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={splitExportName}
+                      onChange={(e) => setSplitExportName(e.target.value)}
+                      placeholder="frames"
+                      className="px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
+                    />
+                    <span className="text-theme-tertiary text-sm">.zip</span>
+                  </div>
+                </div>
+              </div>
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-theme-primary">
+                <h3 className="text-lg font-semibold text-theme-on-surface">
                   {t('lab.gif.extractedFrames')}
                 </h3>
                 <button
@@ -477,7 +501,7 @@ export default function GifToolPage() {
               onChange={handleMergeUpload}
             />
             <Upload className="w-12 h-12 text-theme-secondary mx-auto mb-4" />
-            <p className="text-theme-primary font-medium mb-1">
+            <p className="text-theme-on-surface font-medium mb-1">
               {t('lab.gif.uploadFrames')}
             </p>
             <p className="text-theme-secondary text-sm">
@@ -488,7 +512,7 @@ export default function GifToolPage() {
           {/* Frame List */}
           {mergeFrames.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-theme-primary mb-4">
+              <h3 className="text-lg font-semibold text-theme-on-surface mb-4">
                 {t('lab.gif.frameOrder')} ({mergeFrames.length}/{MAX_FRAMES})
               </h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -511,7 +535,7 @@ export default function GifToolPage() {
                       max="5000"
                       value={frame.delay}
                       onChange={(e) => updateFrameDelay(index, parseInt(e.target.value))}
-                      className="w-20 px-2 py-1 bg-theme-bg border border-theme-color rounded text-sm text-theme-primary"
+                      className="w-20 px-2 py-1 bg-theme-bg border border-theme-color rounded text-sm text-theme-on-surface"
                     />
                     <span className="text-xs text-theme-secondary">ms</span>
                     <div className="flex-1" />
@@ -544,7 +568,7 @@ export default function GifToolPage() {
           {/* Settings */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
                 {t('lab.gif.frameDelay')} (ms)
               </label>
               <input
@@ -553,17 +577,17 @@ export default function GifToolPage() {
                 max="5000"
                 value={frameDelay}
                 onChange={(e) => setFrameDelay(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary"
+                className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
                 {t('lab.gif.loopCount')}
               </label>
               <select
                 value={loopCount}
                 onChange={(e) => setLoopCount(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary"
+                className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
               >
                 <option value={0}>{t('lab.gif.infiniteLoop')}</option>
                 <option value={1}>1</option>
@@ -573,7 +597,7 @@ export default function GifToolPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-primary mb-2">
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
                 {t('lab.gif.quality')}: {quality}
               </label>
               <input
@@ -585,12 +609,27 @@ export default function GifToolPage() {
                 className="w-full h-2 bg-theme-tertiary rounded-lg appearance-none cursor-pointer"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-theme-on-surface mb-2">
+                {t('lab.gif.exportName')}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={mergeExportName}
+                  onChange={(e) => setMergeExportName(e.target.value)}
+                  placeholder="animated"
+                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
+                />
+                <span className="text-theme-tertiary text-sm">.gif</span>
+              </div>
+            </div>
           </div>
 
           {/* Preview */}
           {mergeFrames.length > 1 && (
             <div>
-              <h3 className="text-lg font-semibold text-theme-primary mb-4">
+              <h3 className="text-lg font-semibold text-theme-on-surface mb-4">
                 {t('lab.gif.preview')}
               </h3>
               <div className="bg-theme-tertiary rounded-lg p-4 flex justify-center">
@@ -630,7 +669,7 @@ export default function GifToolPage() {
               </div>
               <a
                 href={resultUrl}
-                download="generated.gif"
+                download={`${mergeExportName.trim() || 'animated'}.gif`}
                 className="block w-full text-center py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
                 {t('lab.gif.downloadGif')}

@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, EyeOff, MailCheck, Send } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
+import Turnstile, { type TurnstileHandle } from '@/components/Turnstile'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -18,8 +19,35 @@ export default function Register() {
   const { register, resendVerification } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
+  const turnstileRef = useRef<TurnstileHandle>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const doRegister = async (token: string) => {
+    setLoading(true)
+    setError('')
+
+    try {
+      await register(email, password, token)
+      setEmailSent(true)
+      turnstileRef.current?.reset()
+    } catch (err: any) {
+      const msg = err?.message || ''
+      if (msg === 'EMAIL_ALREADY_REGISTERED' || msg.includes('already')) {
+        setError(t('auth.emailAlreadyRegistered'))
+      } else if (msg === 'TURNSTILE_FAILED') {
+        setError(t('auth.turnstileFailed'))
+      } else if (msg === 'TURNSTILE_NOT_CONFIGURED') {
+        setError(t('auth.turnstileNotConfigured'))
+      } else if (msg === 'RATE_LIMIT' || msg.toLowerCase().includes('rate limit')) {
+        setError(t('auth.rateLimit'))
+      } else {
+        setError(t('auth.registerFailed'))
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -40,25 +68,7 @@ export default function Register() {
     }
 
     setLoading(true)
-
-    try {
-      await register(email, password)
-      setEmailSent(true)
-    } catch (err: any) {
-      // 处理重复邮箱错误
-      if (err?.message === 'EMAIL_ALREADY_REGISTERED' ||
-          err?.message?.includes('already been registered') || 
-          err?.message?.includes('already exists') ||
-          err?.message?.includes('already in use')) {
-        setError(t('auth.emailAlreadyRegistered'))
-      } else if (err?.message?.toLowerCase().includes('rate limit')) {
-        setError(t('auth.rateLimit'))
-      } else {
-        setError(t('auth.registerFailed'))
-      }
-    } finally {
-      setLoading(false)
-    }
+    turnstileRef.current?.execute()
   }
 
   const handleResend = async () => {
@@ -215,6 +225,19 @@ export default function Register() {
           {error && (
             <p className="text-red-400 text-sm">{error}</p>
           )}
+
+          <Turnstile
+            ref={turnstileRef}
+            onSuccess={(token) => doRegister(token)}
+            onError={() => {
+              setLoading(false)
+              setError(t('auth.turnstileFailed'))
+            }}
+            onExpired={() => {
+              setLoading(false)
+              setError(t('auth.turnstileFailed'))
+            }}
+          />
 
           <button
             type="submit"

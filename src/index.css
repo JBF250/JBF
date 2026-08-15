@@ -380,3 +380,36 @@ body {
 .animate-tile-merge {
   animation: tile-merge 0.2s ease-out;
 }
+
+/* ===== 用户头像下拉菜单进场/退场动画 ===== */
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+.dropdown-enter {
+  animation: dropdown-in 0.18s ease-out forwards;
+  transform-origin: top right;
+}
+
+.dropdown-exit {
+  animation: dropdown-out 0.16s ease-in forwards;
+  transform-origin: top right;
+}

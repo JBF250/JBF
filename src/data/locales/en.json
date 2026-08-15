@@ -83,7 +83,11 @@
     "forgotPassword": "Forgot password?",
     "emailAlreadyRegistered": "This email is already registered, please login instead",
     "loggingIn": "Logging in...",
-    "rateLimit": "Too many requests, please try again later"
+    "rateLimit": "Too many requests, please try again later",
+    "turnstileFailed": "Human verification failed, please try again",
+    "turnstileNotConfigured": "Human verification is not configured, please contact the administrator",
+    "emailConfirmRequired": "Please verify your email before posting, liking, or commenting",
+    "goVerify": "Verify Email"
   },
   "verify": {
     "verifying": "Verifying email...",
@@ -218,6 +222,18 @@
       "keyViewer": {
         "title": "Key Viewer",
         "desc": "Real-time key visualization"
+      },
+      "icoConverter": {
+        "title": "ICO Icon Converter",
+        "desc": "Convert images to ICO icons"
+      },
+      "audioMetadata": {
+        "title": "Audio Metadata Editor",
+        "desc": "Edit title, artist, album, year & cover"
+      },
+      "base64": {
+        "title": "Base64 Codec",
+        "desc": "Encode & decode text"
       }
     },
     "games": {
@@ -267,6 +283,7 @@
       "maxFileSize": "Max file size: 500MB",
       "fileTooLarge": "File too large, please select a smaller file",
       "outputFormat": "Output Format",
+      "exportName": "Export Name",
       "quality": "Quality",
       "width": "Width (px)",
       "height": "Height (px)",
@@ -313,6 +330,7 @@
       "frameDelay": "Frame Delay",
       "extractedFrames": "Extracted Frames",
       "downloadZip": "Download All (ZIP)",
+      "exportName": "Export Name",
       "downloadFrame": "Download Frame",
       "downloadGif": "Download GIF",
       "downloadAll": "Download All",
@@ -366,6 +384,44 @@
       "download": "Download ICO",
       "reset": "Reset",
       "resultInfo": "Includes sizes: {sizes}"
+    },
+    "audioMetadata": {
+      "title": "Audio Metadata Editor",
+      "desc": "Edit song title, artist, album, year & cover",
+      "dropFile": "Click or drag an audio file here",
+      "supportedFormats": "Supports MP3, M4A, WAV",
+      "selectFile": "Select Audio File",
+      "invalidFormat": "Unsupported audio format. Please use MP3, M4A or WAV.",
+      "reading": "Reading metadata...",
+      "songTitle": "Song Title",
+      "artist": "Artist",
+      "album": "Album",
+      "year": "Year",
+      "cover": "Album Cover",
+      "uploadCover": "Upload Cover",
+      "changeCover": "Change Cover",
+      "removeCover": "Remove Cover",
+      "wavNotice": "WAV only supports text metadata and does not support embedding album covers.",
+      "writeAndDownload": "Write & Download",
+      "writing": "Writing...",
+      "success": "Metadata written successfully. Download started.",
+      "writeError": "Failed to write metadata"
+    },
+    "base64": {
+      "title": "Base64 Codec",
+      "desc": "Encode & decode text",
+      "encodeTab": "Encode (Text → Base64)",
+      "decodeTab": "Decode (Base64 → Text)",
+      "inputLabel": "Input",
+      "outputLabel": "Output",
+      "encodePlaceholder": "Enter text to encode...",
+      "decodePlaceholder": "Enter Base64 string to decode...",
+      "encode": "Encode",
+      "decode": "Decode",
+      "copy": "Copy Result",
+      "copied": "Copied",
+      "invalidBase64": "Invalid Base64 string",
+      "emptyInput": "Please enter some content"
     },
     "games": {
       "score": "Score",

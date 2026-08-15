@@ -122,7 +122,7 @@ export default function KeyViewerPage() {
         <div className="bg-theme-tertiary rounded-xl p-6 border border-theme-color">
           <div className="flex items-center gap-4 mb-4">
             <Keyboard className="w-8 h-8 text-primary" />
-            <h3 className="text-lg font-semibold text-theme-primary">
+            <h3 className="text-lg font-semibold text-theme-on-surface">
               {t('lab.keyViewer.currentKey')}
             </h3>
           </div>

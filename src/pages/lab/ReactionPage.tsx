@@ -239,7 +239,7 @@ export default function ReactionPage() {
         {/* Round Times */}
         {rounds.length > 0 && gameState === 'result' && (
           <div className="bg-theme-tertiary rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-theme-primary mb-2">
+            <h3 className="text-lg font-semibold text-theme-on-surface mb-2">
               {t('lab.games.reaction.roundTimes')}
             </h3>
             <div className="flex flex-wrap gap-2">

@@ -32,7 +32,7 @@ export default function ConverterPage() {
   const [progress, setProgress] = useState(0)
   const [logs, setLogs] = useState<string[]>([])
   const [result, setResult] = useState<Blob | null>(null)
-  const [resultName, setResultName] = useState('')
+  const [exportName, setExportName] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   // 两个独立的 FFmpeg 实例：mt 用于音频/提取（多线程高速），st 用于视频转码（完整编码器）
@@ -169,6 +169,7 @@ export default function ConverterPage() {
       setError(''); setResult(null); setProgress(0); setLogs([]); logBufferRef.current = []
       if (selected.size > 500 * 1024 * 1024) { setError(t('lab.converter.fileTooLarge')); return }
       setFile(selected)
+      setExportName(selected.name.replace(/\.[^.]+$/, ''))
       const ext = selected.name.split('.').pop()?.toLowerCase()
       setOutputFormat(getDefaultOutputFormat(activeTab, ext))
     }
@@ -181,6 +182,7 @@ export default function ConverterPage() {
       setError(''); setResult(null); setProgress(0); setLogs([]); logBufferRef.current = []
       if (dropped.size > 500 * 1024 * 1024) { setError(t('lab.converter.fileTooLarge')); return }
       setFile(dropped)
+      setExportName(dropped.name.replace(/\.[^.]+$/, ''))
       const ext = dropped.name.split('.').pop()?.toLowerCase()
       setOutputFormat(getDefaultOutputFormat(activeTab, ext))
     }
@@ -220,7 +222,7 @@ export default function ConverterPage() {
       URL.revokeObjectURL(url)
       addLog(t('lab.converter.processing'))
       const blob = await new Promise<Blob>((resolve) => { canvas.toBlob((b) => resolve(b!), `image/${outputFormat}`, quality) })
-      setResult(blob); setResultName(`converted.${outputFormat}`); setProgress(100)
+      setResult(blob); setProgress(100)
       addLog(t('lab.converter.conversionComplete'))
     } catch (err: any) {
       setError(err.message || t('lab.converter.conversionFailed'))
@@ -361,7 +363,7 @@ export default function ConverterPage() {
       setProgress(95)
       await ffmpeg.deleteFile(inputName)
       await ffmpeg.deleteFile(outputName)
-      setResult(blob); setResultName(`converted.${outputFormat}`); setProgress(100)
+      setResult(blob); setProgress(100)
       addLog(t('lab.converter.conversionComplete'))
     } catch (err: any) {
       setError(err.message || t('lab.converter.conversionFailed'))
@@ -376,11 +378,13 @@ export default function ConverterPage() {
     }
   }
 
+  const getResultName = () => `${exportName.trim() || 'converted'}.${outputFormat}`
+
   const handleDownloadResult = () => {
     if (!result) return
     const url = URL.createObjectURL(result)
     const a = document.createElement('a')
-    a.href = url; a.download = resultName
+    a.href = url; a.download = getResultName()
     a.click(); URL.revokeObjectURL(url)
   }
 
@@ -480,7 +484,7 @@ export default function ConverterPage() {
               <div className="flex items-center justify-center gap-3">
                 {activeTab === 'image' ? <FileImage className="w-6 h-6 text-blue-400" /> : activeTab === 'audio' ? <Music className="w-6 h-6 text-purple-400" /> : activeTab === 'video' ? <Video className="w-6 h-6 text-orange-400" /> : <Scissors className="w-6 h-6 text-green-400" />}
                 <div className="text-left">
-                  <p className="text-theme-primary text-sm font-medium truncate max-w-[300px]">{file.name}</p>
+                  <p className="text-theme-on-surface text-sm font-medium truncate max-w-[300px]">{file.name}</p>
                   <p className="text-theme-tertiary text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <button
@@ -509,7 +513,7 @@ export default function ConverterPage() {
             <div>
               <label className="text-sm font-medium text-theme-secondary mb-2 block">{t('lab.converter.outputFormat')}</label>
               {activeTab === 'image' ? (
-                <select value={outputFormat} onChange={(e) => setOutputFormat(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary">
+                <select value={outputFormat} onChange={(e) => setOutputFormat(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface">
                   {formatOptions.image.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
                 </select>
               ) : (
@@ -526,6 +530,20 @@ export default function ConverterPage() {
               )}
             </div>
 
+            <div>
+              <label className="text-sm font-medium text-theme-secondary mb-2 block">{t('lab.converter.exportName')}</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={exportName}
+                  onChange={(e) => setExportName(e.target.value)}
+                  placeholder="converted"
+                  className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
+                />
+                <span className="text-theme-tertiary text-sm shrink-0">.{outputFormat}</span>
+              </div>
+            </div>
+
             {activeTab === 'image' && (
               <div className="space-y-3">
                 <div>
@@ -536,11 +554,11 @@ export default function ConverterPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.width')}</label>
-                    <input type="number" value={scaleWidth} onChange={(e) => setScaleWidth(e.target.value)} placeholder="auto" className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary" />
+                    <input type="number" value={scaleWidth} onChange={(e) => setScaleWidth(e.target.value)} placeholder="auto" className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface" />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.height')}</label>
-                    <input type="number" value={scaleHeight} onChange={(e) => setScaleHeight(e.target.value)} placeholder="auto" className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary" />
+                    <input type="number" value={scaleHeight} onChange={(e) => setScaleHeight(e.target.value)} placeholder="auto" className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface" />
                   </div>
                 </div>
               </div>
@@ -551,7 +569,7 @@ export default function ConverterPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.bitrate')}</label>
-                    <select value={audioBitrate} onChange={(e) => setAudioBitrate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary">
+                    <select value={audioBitrate} onChange={(e) => setAudioBitrate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface">
                       <option value="128k">128 kbps</option>
                       <option value="192k">192 kbps</option>
                       <option value="256k">256 kbps</option>
@@ -560,7 +578,7 @@ export default function ConverterPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.sampleRate')}</label>
-                    <select value={audioSampleRate} onChange={(e) => setAudioSampleRate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary">
+                    <select value={audioSampleRate} onChange={(e) => setAudioSampleRate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface">
                       <option value="44100">44100 Hz</option>
                       <option value="48000">48000 Hz</option>
                     </select>
@@ -583,7 +601,7 @@ export default function ConverterPage() {
                         />
                         <button
                           onClick={() => setVolumeGain(0)}
-                          className="text-xs text-theme-tertiary hover:text-theme-primary px-2 py-1 rounded border border-theme-color"
+                          className="text-xs text-theme-tertiary hover:text-theme-on-surface px-2 py-1 rounded border border-theme-color"
                         >{t('lab.converter.reset')}</button>
                       </div>
                     </div>
@@ -599,7 +617,7 @@ export default function ConverterPage() {
                             value={trimStart}
                             onChange={(e) => setTrimStart(e.target.value)}
                             placeholder="0:00"
-                            className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary text-sm"
+                            className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface text-sm"
                           />
                         </div>
                         <div>
@@ -609,7 +627,7 @@ export default function ConverterPage() {
                             value={trimEnd}
                             onChange={(e) => setTrimEnd(e.target.value)}
                             placeholder="3:00"
-                            className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary text-sm"
+                            className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface text-sm"
                           />
                         </div>
                       </div>
@@ -624,7 +642,7 @@ export default function ConverterPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.videoQuality')}</label>
-                  <select value={videoQuality} onChange={(e) => setVideoQuality(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary">
+                  <select value={videoQuality} onChange={(e) => setVideoQuality(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface">
                     <option value="fast">{t('lab.converter.fast')}</option>
                     <option value="medium">{t('lab.converter.medium')}</option>
                     <option value="slow">{t('lab.converter.slow')}</option>
@@ -632,7 +650,7 @@ export default function ConverterPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.videoBitrate')}</label>
-                  <select value={videoBitrate} onChange={(e) => setVideoBitrate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-primary" disabled={videoQuality !== 'slow'}>
+                  <select value={videoBitrate} onChange={(e) => setVideoBitrate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface" disabled={videoQuality !== 'slow'}>
                     <option value="2M">2 Mbps</option>
                     <option value="5M">5 Mbps</option>
                     <option value="10M">10 Mbps</option>
@@ -675,7 +693,7 @@ export default function ConverterPage() {
           <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 flex items-center justify-between">
             <div className="flex items-center gap-2 truncate">
               <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-              <span className="text-green-400 text-sm truncate">{resultName}</span>
+              <span className="text-green-400 text-sm truncate">{getResultName()}</span>
               <span className="text-theme-tertiary text-xs">({(result.size / 1024 / 1024).toFixed(2)} MB)</span>
             </div>
             <button onClick={handleDownloadResult} className="flex items-center gap-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:opacity-90 transition-opacity text-sm">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Menu, X, User, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -8,7 +8,10 @@ import Avatar from '@/components/Avatar'
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  // 用户菜单：isUserMenuOpen 控制动画方向，menuMounted 控制是否挂载（退场动画期间保持挂载）
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [menuMounted, setMenuMounted] = useState(false)
+  const menuTimerRef = useRef<number | null>(null)
   const { user, logout } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
@@ -22,10 +25,44 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (menuTimerRef.current !== null) {
+        clearTimeout(menuTimerRef.current)
+      }
+    }
+  }, [])
+
+  const openUserMenu = () => {
+    if (menuTimerRef.current !== null) {
+      clearTimeout(menuTimerRef.current)
+      menuTimerRef.current = null
+    }
+    setMenuMounted(true)
+    requestAnimationFrame(() => setIsUserMenuOpen(true))
+  }
+
+  const closeUserMenu = () => {
+    setIsUserMenuOpen(false)
+    if (menuTimerRef.current !== null) clearTimeout(menuTimerRef.current)
+    menuTimerRef.current = window.setTimeout(() => {
+      setMenuMounted(false)
+      menuTimerRef.current = null
+    }, 180)
+  }
+
+  const toggleUserMenu = () => {
+    if (isUserMenuOpen) {
+      closeUserMenu()
+    } else {
+      openUserMenu()
+    }
+  }
+
   const handleLogout = async () => {
     await logout()
     navigate('/')
-    setIsUserMenuOpen(false)
+    closeUserMenu()
   }
 
   const navLinks = [
@@ -89,7 +126,7 @@ export function Navbar() {
             {user ? (
               <div className="relative">
                 <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onClick={toggleUserMenu}
                   className="w-10 h-10 rounded-full bg-theme-tertiary flex items-center justify-center hover:bg-theme-hover transition-colors relative overflow-hidden"
                 >
                   {user.avatar_url ? (
@@ -103,14 +140,14 @@ export function Navbar() {
                   )}
                 </button>
                 
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-theme-card rounded-xl border border-theme-color shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                {menuMounted && (
+                  <div className={`absolute right-0 top-full mt-2 w-48 bg-theme-card rounded-xl border border-theme-color shadow-2xl py-2 z-50 ${isUserMenuOpen ? 'dropdown-enter' : 'dropdown-exit'}`}>
                     <div className="px-4 py-2 border-b border-theme-color">
                       <p className="text-sm text-theme-on-surface font-medium">{user.display_name}</p>
                       <p className="text-xs text-theme-tertiary">{user.username}</p>
                     </div>
                     <button
-                      onClick={() => { navigate('/settings'); setIsUserMenuOpen(false) }}
+                      onClick={() => { navigate('/settings'); closeUserMenu() }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-theme-secondary hover:text-theme-primary hover:bg-theme-hover transition-colors text-sm"
                     >
                       <Settings className="w-4 h-4" />
