@@ -81,7 +81,13 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'supabase_not_configured' }, 500)
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        // flowType 必须在客户端构造函数中设置才会生效（方法参数里设置会被忽略）
+        // PKCE 流程：邮件链接携带 token_hash 与 type=email，由前端 ConfirmWait 页调用 verifyOtp 完成验证
+        flowType: 'pkce',
+      },
+    })
 
     // 自动生成随机用户名（系统生成随机 ID，注册仅需邮箱+密码）
     const randomId = Math.random().toString(36).substring(2, 10)
@@ -95,9 +101,6 @@ Deno.serve(async (req: Request) => {
       options: {
         emailRedirectTo,
         data: { username: randomId },
-        // 使用 PKCE 流程，邮件链接携带 token_hash 与 type=email，
-        // 由前端 ConfirmWait 页调用 verifyOtp 完成验证，避免 implicit 流程自动建立会话
-        flowType: 'pkce',
       },
     })
 
