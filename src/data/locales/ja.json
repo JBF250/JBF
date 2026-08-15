@@ -34,6 +34,7 @@
     "github": "GitHub",
     "qqEmail": "QQメール",
     "outlookEmail": "Outlookメール",
+    "bilibili": "ビリビリ",
     "message": "質問や協力の意向があれば、いつでもお気軽にご連絡ください！"
   },
   "blog": {
@@ -80,7 +81,9 @@
     "emailNotVerified": "ログイン前にメールアドレスを認証してください",
     "loginFailed": "メールアドレスまたはパスワードが正しくありません",
     "forgotPassword": "パスワードを忘れましたか？",
-    "emailAlreadyRegistered": "このメールアドレスは既に登録されています。ログインしてください"
+    "emailAlreadyRegistered": "このメールアドレスは既に登録されています。ログインしてください",
+    "loggingIn": "ログイン中...",
+    "rateLimit": "リクエストが多すぎます。しばらくしてから再試行してください"
   },
   "verify": {
     "verifying": "メールアドレスを認証中...",
@@ -92,6 +95,19 @@
     "expired": "認証リンクの有効期限が切れています",
     "missingToken": "認証トークンがありません",
     "backToLogin": "ログインに戻る"
+  },
+  "confirmWait": {
+    "title": "メールアドレスを確認し、下のボタンをクリックして認証を完了してください",
+    "confirmButton": "メールを確認",
+    "verifying": "認証中...",
+    "success": "認証成功",
+    "successDesc": "ホームページにリダイレクトします...",
+    "failedTitle": "認証に失敗しました",
+    "failed": "認証リンクが無効または間違っています",
+    "expired": "認証リンクの有効期限が切れています",
+    "missingToken": "認証パラメータが不足しています。メール内の完全なリンクを使用してください",
+    "resend": "メールを再送信",
+    "backHome": "ホームに戻る"
   },
   "forgotPassword": {
     "title": "パスワードを忘れた方へ",
@@ -122,7 +138,12 @@
     "successDesc": "パスワードが更新されました。ホームにリダイレクトしています...",
     "invalidLink": "リンクが無効または期限切れです",
     "linkExpired": "リンクの有効期限が切れました",
-    "requestNewLink": "新しいリセットリンクを要求"
+    "requestNewLink": "新しいリセットリンクを要求",
+    "invalidResetLink": "無効なリセットリンクです。パスワードリセットを再度リクエストしてください。",
+    "missingAccessToken": "無効なリセットリンクです。アクセストークンがありません。パスワードリセットを再度リクエストしてください。",
+    "sessionExpired": "リンクの有効期限が切れているか無効です。パスワードリセットを再度リクエストしてください。",
+    "sessionError": "エラーが発生しました。後でもう一度お試しください。",
+    "passwordSame": "新しいパスワードは古いパスワードと異なる必要があります"
   },
   "settings": {
     "title": "アカウント設定",

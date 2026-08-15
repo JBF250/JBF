@@ -51,11 +51,8 @@ export function Navbar() {
             className="flex items-center gap-2 group"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">J</span>
-            </div>
             <span className="font-display font-bold text-xl text-theme-primary group-hover:text-gradient transition-all">
-              JBF250
+              JBF个人站
             </span>
           </Link>
 
@@ -109,7 +106,7 @@ export function Navbar() {
                 {isUserMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-theme-card rounded-xl border border-theme-color shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
                     <div className="px-4 py-2 border-b border-theme-color">
-                      <p className="text-sm text-theme-primary font-medium">{user.display_name}</p>
+                      <p className="text-sm text-theme-on-surface font-medium">{user.display_name}</p>
                       <p className="text-xs text-theme-tertiary">{user.username}</p>
                     </div>
                     <button

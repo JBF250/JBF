@@ -27,8 +27,10 @@ export default function Login() {
       // Supabase 未验证邮箱的错误
       if (errMsg.toLowerCase().includes('email not confirmed')) {
         setError(t('auth.emailNotVerified'))
+      } else if (errMsg.toLowerCase().includes('rate limit')) {
+        setError(t('auth.rateLimit'))
       } else {
-        setError(err?.message || t('auth.loginFailed') || '邮箱或密码错误')
+        setError(t('auth.loginFailed'))
       }
     } finally {
       setLoading(false)
@@ -43,10 +45,7 @@ export default function Login() {
             to="/" 
             className="inline-flex items-center gap-2 mb-4 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold">J</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">JBF250</span>
+            <span className="font-display font-bold text-2xl text-white">JBF个人站</span>
           </Link>
           <h1 className="text-2xl font-display font-bold text-white mb-2">
             {t('auth.login')}
@@ -59,7 +58,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
-              邮箱
+              {t('auth.email')}
             </label>
             <input
               type="email"
@@ -103,7 +102,7 @@ export default function Login() {
             disabled={loading}
             className="w-full py-3 bg-gradient-primary text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {loading ? '登录中...' : t('auth.login')}
+            {loading ? t('auth.loggingIn') : t('auth.login')}
           </button>
         </form>
 
@@ -133,7 +132,7 @@ export default function Login() {
             className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回首页
+            {t('auth.backHome')}
           </button>
         </div>
       </div>

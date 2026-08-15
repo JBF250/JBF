@@ -103,7 +103,7 @@ export default function Settings() {
 
           <div className="bg-theme-settings rounded-2xl p-6 space-y-6 border border-theme-color">
             <div>
-              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+              <label className="flex items-center gap-2 text-theme-on-surface font-medium mb-4">
                 <User className="w-5 h-5" />
                 {t('settings.avatar')}
               </label>
@@ -123,7 +123,7 @@ export default function Settings() {
                     />
                   )}
                 </div>
-                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
+                <label className="flex items-center gap-2 px-4 py-2 bg-theme-tertiary text-theme-on-surface rounded-lg cursor-pointer hover:bg-theme-hover transition-colors">
                   <Upload className="w-5 h-5" />
                   <span>上传头像</span>
                   <input
@@ -137,7 +137,7 @@ export default function Settings() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+              <label className="flex items-center gap-2 text-theme-on-surface font-medium mb-4">
                 <User className="w-5 h-5" />
                 {t('settings.displayName')}
               </label>
@@ -146,12 +146,12 @@ export default function Settings() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder={t('settings.displayName')}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-primary placeholder-theme-secondary focus:outline-none focus:border-primary"
+                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+              <label className="flex items-center gap-2 text-theme-on-surface font-medium mb-4">
                 <Palette className="w-5 h-5" />
                 {t('settings.color')}
               </label>
@@ -165,7 +165,7 @@ export default function Settings() {
                   }`}
                 >
                   <Moon className="w-6 h-6 text-theme-secondary" />
-                  <span className="text-theme-primary font-medium">深色模式</span>
+                  <span className="text-theme-on-surface font-medium">深色模式</span>
                 </button>
                 <button
                   onClick={() => setIsDarkMode(false)}
@@ -176,13 +176,13 @@ export default function Settings() {
                   }`}
                 >
                   <Sun className="w-6 h-6 text-yellow-400" />
-                  <span className="text-theme-primary font-medium">浅色模式</span>
+                  <span className="text-theme-on-surface font-medium">浅色模式</span>
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+              <label className="flex items-center gap-2 text-theme-on-surface font-medium mb-4">
                 <Globe className="w-5 h-5" />
                 {t('settings.language')}
               </label>
@@ -192,7 +192,7 @@ export default function Settings() {
                   className={`p-4 rounded-xl border transition-all ${
                     language === 'zh'
                       ? 'bg-gradient-primary border-primary btn-primary-text'
-                      : 'bg-theme-tertiary border-theme-color text-theme-primary hover:border-primary'
+                      : 'bg-theme-tertiary border-theme-color text-theme-on-surface hover:border-primary'
                   }`}
                 >
                   {t('settings.chinese')}
@@ -202,7 +202,7 @@ export default function Settings() {
                   className={`p-4 rounded-xl border transition-all ${
                     language === 'en'
                       ? 'bg-gradient-primary border-primary btn-primary-text'
-                      : 'bg-theme-tertiary border-theme-color text-theme-primary hover:border-primary'
+                      : 'bg-theme-tertiary border-theme-color text-theme-on-surface hover:border-primary'
                   }`}
                 >
                   {t('settings.english')}
@@ -212,7 +212,7 @@ export default function Settings() {
                   className={`p-4 rounded-xl border transition-all ${
                     language === 'ja'
                       ? 'bg-gradient-primary border-primary btn-primary-text'
-                      : 'bg-theme-tertiary border-theme-color text-theme-primary hover:border-primary'
+                      : 'bg-theme-tertiary border-theme-color text-theme-on-surface hover:border-primary'
                   }`}
                 >
                   {t('settings.japanese')}
@@ -221,13 +221,13 @@ export default function Settings() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-theme-primary font-medium mb-4">
+              <label className="flex items-center gap-2 text-theme-on-surface font-medium mb-4">
                 <MousePointer2 className="w-5 h-5" />
                 {t('settings.cursor')}
               </label>
               <div className="flex items-center justify-between p-4 bg-theme-tertiary rounded-xl border border-theme-color">
                 <div>
-                  <span className="text-theme-primary">{t('settings.cursorToggle')}</span>
+                  <span className="text-theme-on-surface">{t('settings.cursorToggle')}</span>
                   <p className="text-theme-secondary text-sm mt-1">{t('settings.cursorDesc')}</p>
                 </div>
                 <Toggle
@@ -240,7 +240,7 @@ export default function Settings() {
             <div className="flex justify-end gap-4 pt-4 border-t border-theme-color">
               <button
                 onClick={() => navigate('/')}
-                className="px-6 py-3 bg-theme-tertiary text-theme-primary rounded-xl hover:bg-theme-hover transition-colors"
+                className="px-6 py-3 bg-theme-tertiary text-theme-on-surface rounded-xl hover:bg-theme-hover transition-colors"
               >
                 {t('detail.back')}
               </button>

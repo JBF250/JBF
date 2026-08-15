@@ -26,7 +26,7 @@ export default function ResetPassword() {
         console.log('Reset password - URL hash:', hash)
 
         if (!hash || hash === '#') {
-          setSessionError('无效的重置链接，请重新发起密码重置请求。')
+          setSessionError(t('resetPassword.invalidResetLink'))
           setLoading(false)
           return
         }
@@ -45,7 +45,7 @@ export default function ResetPassword() {
         })
 
         if (!accessToken) {
-          setSessionError('无效的重置链接，缺少访问令牌。请重新发起密码重置请求。')
+          setSessionError(t('resetPassword.missingAccessToken'))
           setLoading(false)
           return
         }
@@ -58,14 +58,14 @@ export default function ResetPassword() {
 
         if (error) {
           console.error('Set session error:', error)
-          setSessionError('链接已过期或无效，请重新发起密码重置请求。')
+          setSessionError(t('resetPassword.sessionExpired'))
         } else {
           // 成功设置会话，清除 URL 中的 hash
           window.history.replaceState(null, '', window.location.pathname)
         }
       } catch (err: any) {
         console.error('Reset password error:', err)
-        setSessionError('发生错误，请稍后重试。')
+        setSessionError(t('resetPassword.sessionError'))
       } finally {
         setLoading(false)
       }
@@ -97,7 +97,14 @@ export default function ResetPassword() {
         navigate('/')
       }, 2000)
     } catch (err: any) {
-      setError(err?.message || t('resetPassword.updateFailed'))
+      const errMsg = err?.message?.toLowerCase() || ''
+      if (errMsg.includes('different') || errMsg.includes('same as')) {
+        setError(t('resetPassword.passwordSame'))
+      } else if (errMsg.includes('rate limit')) {
+        setError(t('auth.rateLimit'))
+      } else {
+        setError(t('resetPassword.updateFailed'))
+      }
     } finally {
       setSubmitting(false)
     }
@@ -158,10 +165,7 @@ export default function ResetPassword() {
             to="/" 
             className="inline-flex items-center gap-2 mb-4 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold">J</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">JBF250</span>
+            <span className="font-display font-bold text-2xl text-white">JBF个人站</span>
           </Link>
           <h1 className="text-2xl font-display font-bold text-white mb-2">
             {t('resetPassword.title')}

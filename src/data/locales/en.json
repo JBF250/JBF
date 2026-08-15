@@ -34,6 +34,7 @@
     "github": "GitHub",
     "qqEmail": "QQ Email",
     "outlookEmail": "Outlook Email",
+    "bilibili": "Bilibili",
     "message": "Have any questions or collaboration opportunities? Feel free to reach out!"
   },
   "blog": {
@@ -80,7 +81,9 @@
     "emailNotVerified": "Please verify your email before logging in",
     "loginFailed": "Invalid email or password",
     "forgotPassword": "Forgot password?",
-    "emailAlreadyRegistered": "This email is already registered, please login instead"
+    "emailAlreadyRegistered": "This email is already registered, please login instead",
+    "loggingIn": "Logging in...",
+    "rateLimit": "Too many requests, please try again later"
   },
   "verify": {
     "verifying": "Verifying email...",
@@ -92,6 +95,19 @@
     "expired": "The verification link has expired",
     "missingToken": "Missing verification token",
     "backToLogin": "Back to login"
+  },
+  "confirmWait": {
+    "title": "Please confirm your email and click the button below to complete verification",
+    "confirmButton": "Confirm Email",
+    "verifying": "Verifying...",
+    "success": "Verification successful",
+    "successDesc": "Redirecting to homepage...",
+    "failedTitle": "Verification failed",
+    "failed": "The verification link is invalid or incorrect",
+    "expired": "The verification link has expired",
+    "missingToken": "Missing verification parameters, please use the full link from the email",
+    "resend": "Resend email",
+    "backHome": "Back to Home"
   },
   "forgotPassword": {
     "title": "Forgot Password",
@@ -122,7 +138,12 @@
     "successDesc": "Your password has been updated. Redirecting to home...",
     "invalidLink": "Invalid or expired link",
     "linkExpired": "Link Expired",
-    "requestNewLink": "Request a new reset link"
+    "requestNewLink": "Request a new reset link",
+    "invalidResetLink": "Invalid reset link. Please request a new password reset.",
+    "missingAccessToken": "Invalid reset link, missing access token. Please request a new password reset.",
+    "sessionExpired": "The link has expired or is invalid. Please request a new password reset.",
+    "sessionError": "An error occurred. Please try again later.",
+    "passwordSame": "New password must be different from the old password"
   },
   "settings": {
     "title": "Account Settings",

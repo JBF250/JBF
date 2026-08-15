@@ -144,10 +144,7 @@ export default function ForgotPassword() {
             to="/" 
             className="inline-flex items-center gap-2 mb-4 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold">J</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">JBF250</span>
+            <span className="font-display font-bold text-2xl text-white">JBF个人站</span>
           </Link>
           <h1 className="text-2xl font-display font-bold text-white mb-2">
             {t('forgotPassword.title')}

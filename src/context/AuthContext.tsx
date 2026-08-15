@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: getRedirectUrl('/verify')
+        emailRedirectTo: getRedirectUrl('/auth/confirm-wait')
       }
     })
 
@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       type: 'signup',
       email,
       options: {
-        emailRedirectTo: getRedirectUrl('/verify')
+        emailRedirectTo: getRedirectUrl('/auth/confirm-wait')
       }
     })
     if (error) throw error
@@ -177,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getRedirectUrl('/auth/reset-password')
+      redirectTo: getRedirectUrl('/auth/confirm-wait')
     })
     if (error) throw error
   }

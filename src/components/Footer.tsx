@@ -10,10 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">J</span>
-              </div>
-              <span className="font-display font-bold text-xl text-theme-primary">JBF250</span>
+              <span className="font-display font-bold text-xl text-theme-primary">JBF个人站</span>
             </div>
             <p className="text-theme-secondary text-sm">
               {t('about.intro')}
@@ -58,7 +55,7 @@ export function Footer() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.578 9.578 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"/>
                   </svg>
-                  GitHub
+                  {t('contact.github')}
                 </a>
               </li>
               <li>
@@ -66,7 +63,7 @@ export function Footer() {
                   href="mailto:2686156845@qq.com" 
                   className="text-theme-secondary hover:text-theme-primary transition-colors text-sm"
                 >
-                  QQ邮箱
+                  {t('contact.qqEmail')}
                 </a>
               </li>
               <li>
@@ -74,7 +71,17 @@ export function Footer() {
                   href="mailto:jiangbaofeng250@outlook.com" 
                   className="text-theme-secondary hover:text-theme-primary transition-colors text-sm"
                 >
-                  Outlook邮箱
+                  {t('contact.outlookEmail')}
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://space.bilibili.com/1016636140?spm_id_from=333.1007.0.0" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-theme-secondary hover:text-theme-primary transition-colors text-sm"
+                >
+                  {t('contact.bilibili')}
                 </a>
               </li>
             </ul>

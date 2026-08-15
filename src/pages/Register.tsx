@@ -51,8 +51,10 @@ export default function Register() {
           err?.message?.includes('already exists') ||
           err?.message?.includes('already in use')) {
         setError(t('auth.emailAlreadyRegistered'))
+      } else if (err?.message?.toLowerCase().includes('rate limit')) {
+        setError(t('auth.rateLimit'))
       } else {
-        setError(err?.message || t('auth.registerFailed'))
+        setError(t('auth.registerFailed'))
       }
     } finally {
       setLoading(false)
@@ -67,7 +69,8 @@ export default function Register() {
       await resendVerification(email)
       setResendMessage(t('auth.resendSuccess'))
     } catch (err: any) {
-      setResendMessage(err?.message || t('auth.resendFailed'))
+      const errMsg = err?.message?.toLowerCase() || ''
+      setResendMessage(errMsg.includes('rate limit') ? t('auth.rateLimit') : t('auth.resendFailed'))
     } finally {
       setResending(false)
     }
@@ -138,10 +141,7 @@ export default function Register() {
             to="/" 
             className="inline-flex items-center gap-2 mb-4 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold">J</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">JBF250</span>
+            <span className="font-display font-bold text-2xl text-white">JBF个人站</span>
           </Link>
           <h1 className="text-2xl font-display font-bold text-white mb-2">
             {t('auth.register')}

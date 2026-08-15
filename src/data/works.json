@@ -41,6 +41,27 @@
             "tech": ["RPGMV", "JavaScript", "Visual Novel"],
             "status": "completed",
             "thumbnail": "pictures/ZZ.png"
+        },
+        {
+            "id": "game-3",
+            "title": {
+                "zh": "CS起源重制",
+                "en": "CS:S Remaster",
+                "ja": "CS:S リマスター"
+            },
+            "description": {
+                "zh": "用现代技术与工具重新烘焙CS起源官方地图。",
+                "en": "Rebaking official CS:Source maps with modern technology and tools.",
+                "ja": "現代の技術とツールでCS:S公式マップを再ベイク。"
+            },
+            "fullDescription": {
+                "zh": "CS起源是我童年非常喜欢的游戏，但是从现在的眼光看它，总感觉画面十分过时，地图的渲染精度并不高，此前我一直在思考如何用现有的技术如何重制它，让现代电脑游玩CS起源这个老游戏有一个更好的体验，所以我反编译并用hammer++和新的编译工具重新处理并烘焙了大部分官方地图，大幅度拉高了光照贴图分辨率，虽然地图体积和显存占用明显增加，但是考虑到我的GTX 960 4GB游玩重制地图和官方地图帧数都是300多，没什么太大变化，所以我认为，你完全不必担心，当然我只是一个hammer新手，眼尖的你应该发现了些许问题，如果有大佬想改改，可以私我，我发你VMF文件，下载链接：[点击下载](https://1849303945.share.123865.com/123pan/jYnEvd-Xamld?pwd=9178#) 提取码：9178",
+                "en": "CS:Source was a game I loved dearly in my childhood, but looking at it with today's eyes, the graphics feel quite outdated and the map rendering precision is not high. I had been thinking for a while about how to remake it with existing technology, so that modern computers could play this old classic with a better experience. So I decompiled it and reprocessed and rebaked most of the official maps using Hammer++ and new compile tools, greatly increasing the lightmap resolution. Although the map file size and VRAM usage increased noticeably, considering that my GTX 960 4GB runs both the remastered maps and the official maps at over 300 FPS with little difference, I think you have nothing to worry about. Of course, I'm just a Hammer beginner, and the sharp-eyed among you may have noticed a few issues. If any expert wants to improve it, feel free to message me and I'll send you the VMF file. Download link: [Click to download](https://1849303945.share.123865.com/123pan/jYnEvd-Xamld?pwd=9178#) Extraction code: 9178",
+                "ja": "CS:Sourceは幼い頃に大好きだったゲームですが、今の目で見ると画面が非常に古く、マップのレンダリング精度も高くありません。これまで私は、既存の技術でどうリメイクすれば、現代のPCでこの古いゲームをより良い体験で遊べるかを考え続けてきました。そこで、Hammer++と新しいコンパイルツールを使って逆コンパイルし、ほとんどの公式マップを再処理・再ベイクして、ライトマップ解像度を大幅に引き上げました。マップ容量とビデオメモリ使用量は明らかに増えましたが、私のGTX 960 4GBではリメイクマップも公式マップも300FPS以上で、ほとんど差がないため、全く心配する必要はないと思います。もちろん私はHammerの初心者に過ぎず、目の肥えた方ならいくつか問題に気づくかもしれません。改良したい方がいれば、私にメッセージをいただければVMFファイルをお送りします。ダウンロードリンク：[クリックしてダウンロード](https://1849303945.share.123865.com/123pan/jYnEvd-Xamld?pwd=9178#) 抽出コード：9178"
+            },
+            "tech": ["Source Engine", "Hammer++"],
+            "status": "completed",
+            "thumbnail": "pictures/CSS.png"
         }
     ],
     "software": [

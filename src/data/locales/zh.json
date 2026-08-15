@@ -34,6 +34,7 @@
     "github": "GitHub",
     "qqEmail": "QQ邮箱",
     "outlookEmail": "Outlook邮箱",
+    "bilibili": "哔哩哔哩",
     "message": "有任何问题或合作意向，欢迎随时联系！"
   },
   "blog": {
@@ -80,7 +81,9 @@
     "emailNotVerified": "请先验证邮箱后再登录",
     "loginFailed": "邮箱或密码错误",
     "forgotPassword": "忘记密码？",
-    "emailAlreadyRegistered": "该邮箱已被注册，请直接登录"
+    "emailAlreadyRegistered": "该邮箱已被注册，请直接登录",
+    "loggingIn": "登录中...",
+    "rateLimit": "请求过于频繁，请稍后再试"
   },
   "verify": {
     "verifying": "正在验证邮箱...",
@@ -92,6 +95,19 @@
     "expired": "验证链接已过期",
     "missingToken": "缺少验证令牌",
     "backToLogin": "返回登录"
+  },
+  "confirmWait": {
+    "title": "请确认你的邮箱，点击下方按钮完成身份验证",
+    "confirmButton": "确认邮箱",
+    "verifying": "验证中...",
+    "success": "验证成功",
+    "successDesc": "即将跳转到首页...",
+    "failedTitle": "验证失败",
+    "failed": "验证链接已失效或错误",
+    "expired": "验证链接已过期",
+    "missingToken": "缺少验证参数，请从邮件中的完整链接进入",
+    "resend": "重新发送邮件",
+    "backHome": "返回首页"
   },
   "forgotPassword": {
     "title": "忘记密码",
@@ -122,7 +138,12 @@
     "successDesc": "你的密码已成功更新，正在跳转回首页...",
     "invalidLink": "链接无效或已过期",
     "linkExpired": "链接已过期",
-    "requestNewLink": "请求新的重置链接"
+    "requestNewLink": "请求新的重置链接",
+    "invalidResetLink": "无效的重置链接，请重新发起密码重置请求。",
+    "missingAccessToken": "无效的重置链接，缺少访问令牌。请重新发起密码重置请求。",
+    "sessionExpired": "链接已过期或无效，请重新发起密码重置请求。",
+    "sessionError": "发生错误，请稍后重试。",
+    "passwordSame": "新密码不能与旧密码相同"
   },
   "settings": {
     "title": "账户设置",

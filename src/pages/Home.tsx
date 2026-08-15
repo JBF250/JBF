@@ -184,7 +184,7 @@ export default function Home() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-theme-primary/90 via-theme-primary/20 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6">
+                    <div className="absolute bottom-6 left-6 right-6 text-center">
                       <h3 className="font-display font-bold text-2xl text-theme-primary mb-2">
                         {game.title[currentLang]}
                       </h3>
@@ -194,11 +194,11 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-6 justify-center">
                       {game.tech.map((tech) => (
                         <span 
                           key={tech}
-                          className="px-4 py-1.5 bg-theme-tertiary text-theme-primary text-xs rounded-full border border-theme-color"
+                          className="px-4 py-1.5 bg-theme-tertiary text-theme-on-surface text-xs rounded-full border border-theme-color"
                         >
                           {tech}
                         </span>
@@ -240,9 +240,9 @@ export default function Home() {
             </AnimatedElement>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center gap-8">
             {works.software.map((software, index) => (
-              <AnimatedElement key={software.id} delay={400 + index * 150}>
+              <AnimatedElement key={software.id} delay={400 + index * 150} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)]">
                 <div 
                   className="group bg-theme-card/50 backdrop-blur-sm rounded-3xl overflow-hidden hover:scale-105 transition-all duration-700 cursor-pointer border border-theme-color"
                 >
@@ -267,7 +267,7 @@ export default function Home() {
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-theme-primary/90 via-theme-primary/20 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-r from-secondary/10 to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6">
+                    <div className="absolute bottom-6 left-6 right-6 text-center">
                       <h3 className="font-display font-bold text-2xl text-theme-primary mb-2">
                         {software.title[currentLang]}
                       </h3>
@@ -277,11 +277,11 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-6 justify-center">
                       {software.tech.map((tech) => (
                         <span 
                           key={tech}
-                          className="px-4 py-1.5 bg-theme-card text-theme-primary text-xs rounded-full border border-theme-color"
+                          className="px-4 py-1.5 bg-theme-card text-theme-on-surface text-xs rounded-full border border-theme-color"
                         >
                           {tech}
                         </span>
@@ -353,7 +353,7 @@ export default function Home() {
                   <Mail className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-theme-primary font-semibold text-lg">QQ邮箱</h3>
+                  <h3 className="text-theme-primary font-semibold text-lg">{t('contact.qqEmail')}</h3>
                   <p className="text-theme-secondary text-sm">2686156845@qq.com</p>
                 </div>
               </a>
@@ -368,8 +368,27 @@ export default function Home() {
                   <Mail className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-theme-primary font-semibold text-lg">Outlook邮箱</h3>
+                  <h3 className="text-theme-primary font-semibold text-lg">{t('contact.outlookEmail')}</h3>
                   <p className="text-theme-secondary text-sm">jiangbaofeng250@outlook.com</p>
+                </div>
+              </a>
+            </AnimatedElement>
+
+            <AnimatedElement delay={700}>
+              <a 
+                href="https://space.bilibili.com/1016636140?spm_id_from=333.1007.0.0" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-center gap-4 p-8 bg-theme-card/50 backdrop-blur-sm rounded-2xl hover:bg-theme-hover transition-all hover:scale-105 border border-theme-color"
+              >
+                <div className="w-14 h-14 bg-theme-tertiary rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <svg className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.32.124-.622.35-.846.226-.226.53-.35.846-.35.32 0 .624.124.85.35L8.32 4.533h7.307l2.267-2.267c.227-.226.53-.35.85-.35.32 0 .624.124.846.35a1.234 1.234 0 0 1 .35.906c0 .32-.124.622-.35.846l-1.127 1.08zM2.4 8.133v9.2c.027 1.027.4 1.907 1.12 2.64.734.734 1.614 1.107 2.64 1.134h11.68c1.027-.027 1.907-.4 2.64-1.134.734-.733 1.107-1.613 1.134-2.64v-9.2c-.027-1.027-.4-1.907-1.134-2.64-.733-.734-1.613-1.107-2.64-1.134H6.16c-1.026.027-1.906.4-2.64 1.134-.733.733-1.107 1.613-1.12 2.64zM8.4 8.8h1.2v1.2H8.4V8.8zm6 0h1.2v1.2h-1.2V8.8zM8.4 11.2h1.2v1.2H8.4v-1.2zm6 0h1.2v1.2h-1.2v-1.2z"/>
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <h3 className="text-theme-primary font-semibold text-lg">{t('contact.bilibili')}</h3>
+                  <p className="text-theme-secondary text-sm">1016636140</p>
                 </div>
               </a>
             </AnimatedElement>
