@@ -95,6 +95,9 @@ Deno.serve(async (req: Request) => {
       options: {
         emailRedirectTo,
         data: { username: randomId },
+        // 使用 PKCE 流程，邮件链接携带 token_hash 与 type=email，
+        // 由前端 ConfirmWait 页调用 verifyOtp 完成验证，避免 implicit 流程自动建立会话
+        flowType: 'pkce',
       },
     })
 

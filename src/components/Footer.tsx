@@ -12,9 +12,6 @@ export function Footer() {
             <div className="flex items-center gap-2 mb-4">
               <span className="font-display font-bold text-xl text-theme-primary">JBF个人站</span>
             </div>
-            <p className="text-theme-secondary text-sm">
-              {t('about.intro')}
-            </p>
           </div>
           
           <div>
