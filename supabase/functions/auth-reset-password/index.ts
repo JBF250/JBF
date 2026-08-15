@@ -76,17 +76,13 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'supabase_not_configured' }, 500)
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        // flowType 必须在客户端构造函数中设置才会生效（方法参数里设置会被忽略）
-        // PKCE 流程：邮件链接携带 token_hash 与 type=recovery
-        flowType: 'pkce',
-      },
-    })
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
     const origin = req.headers.get('origin') || 'https://gainian.de5.net'
-    const redirectTo = `${origin}/auth/confirm-wait`
+    const redirectTo = `${origin}/auth/reset-password`
 
+    // 隐式流程：默认邮件模板 {{ .ConfirmationURL }} 会跳转到 redirectTo 并携带 access_token，
+    // 由 ResetPassword 页面手动 setSession 后更新密码。
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     })

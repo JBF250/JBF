@@ -1,302 +1,119 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MailCheck, XCircle, Loader2, Send, ArrowLeft, Eye, EyeOff, CheckCircle, KeyRound } from 'lucide-react'
+import { MailCheck, XCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from '@/context/I18nContext'
-
-// 从 URL 读取 token_hash 与 type（优先 hash 片段，其次 query，兼容两种邮件模板）
-function readTokenParams(): { token_hash: string | null; type: string } {
-  const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : ''
-  const hashParams = new URLSearchParams(hash)
-  const searchParams = new URLSearchParams(window.location.search)
-
-  return {
-    token_hash: hashParams.get('token_hash') || searchParams.get('token_hash'),
-    type: hashParams.get('type') || searchParams.get('type') || 'email',
-  }
-}
 
 export default function ConfirmWait() {
   const navigate = useNavigate()
   const { t } = useI18n()
 
-  const { token_hash, type } = readTokenParams()
-  const isRecovery = type === 'recovery'
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [errorMsg, setErrorMsg] = useState('')
 
-  // 邮箱确认状态
-  const [verifying, setVerifying] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
+  useEffect(() => {
+    let cancelled = false
 
-  // 重置密码表单状态
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+    const confirm = async () => {
+      // 隐式流程：点击邮件链接后，Supabase 会把 access_token 放在 URL hash 中重定向回来
+      const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : ''
+      const params = new URLSearchParams(hash)
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
 
-  // 用户手动点击按钮才执行邮箱验证，禁止自动调用 verifyOtp
-  const handleConfirmEmail = async () => {
-    if (!token_hash) {
-      setError(t('confirmWait.missingToken'))
-      return
-    }
-
-    setVerifying(true)
-    setError('')
-
-    try {
-      // 传入 URL 解析得到的原始 type，禁止写死 'email'
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: type as any,
-      })
-
-      if (error) {
-        if (error.message?.includes('expired') || error.message?.includes('Token has expired')) {
-          setError(t('confirmWait.expired'))
-        } else {
-          setError(t('confirmWait.failed'))
+      if (!accessToken) {
+        if (!cancelled) {
+          setStatus('error')
+          setErrorMsg(t('confirmWait.missingToken'))
         }
         return
       }
 
-      setSuccess(true)
-      setTimeout(() => {
-        navigate('/', { replace: true })
-      }, 1500)
-    } catch {
-      setError(t('confirmWait.failed'))
-    } finally {
-      setVerifying(false)
-    }
-  }
+      try {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || '',
+        })
 
-  // 重置密码：先 verifyOtp 建立会话，再更新密码
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+        if (cancelled) return
 
-    if (!token_hash) {
-      setError(t('confirmWait.missingToken'))
-      return
-    }
-
-    if (password.length < 6) {
-      setError(t('resetPassword.passwordTooShort'))
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError(t('resetPassword.passwordMismatch'))
-      return
-    }
-
-    setSubmitting(true)
-
-    try {
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: 'recovery',
-      })
-
-      if (verifyError) {
-        if (verifyError.message?.includes('expired')) {
-          setError(t('resetPassword.sessionExpired'))
-        } else {
-          setError(t('resetPassword.updateFailed'))
+        if (error) {
+          setStatus('error')
+          setErrorMsg(t('confirmWait.failed'))
+          return
         }
-        return
-      }
 
-      const { error: updateError } = await supabase.auth.updateUser({ password })
-
-      if (updateError) {
-        const msg = updateError.message?.toLowerCase() || ''
-        if (msg.includes('different') || msg.includes('same as')) {
-          setError(t('resetPassword.passwordSame'))
-        } else if (msg.includes('rate limit')) {
-          setError(t('auth.rateLimit'))
-        } else {
-          setError(t('resetPassword.updateFailed'))
+        // 清除 URL 中的 hash，避免刷新页面时重复处理
+        window.history.replaceState(null, '', window.location.pathname)
+        setStatus('success')
+        setTimeout(() => {
+          navigate('/', { replace: true })
+        }, 1500)
+      } catch {
+        if (!cancelled) {
+          setStatus('error')
+          setErrorMsg(t('confirmWait.failed'))
         }
-        return
       }
-
-      setSuccess(true)
-      setTimeout(() => {
-        navigate('/', { replace: true })
-      }, 2000)
-    } catch {
-      setError(t('resetPassword.updateFailed'))
-    } finally {
-      setSubmitting(false)
     }
+
+    confirm()
+
+    return () => {
+      cancelled = true
+    }
+  }, [navigate, t])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-theme-tertiary flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-theme-primary animate-spin" />
+          </div>
+          <h1 className="text-2xl font-display font-bold text-theme-primary mb-4">
+            {t('confirmWait.verifying')}
+          </h1>
+        </div>
+      </div>
+    )
   }
 
-  const handleResend = () => {
-    navigate(isRecovery ? '/forgot-password' : '/register')
-  }
-
-  if (success) {
+  if (status === 'success') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-            {isRecovery ? <CheckCircle className="w-8 h-8 text-green-500" /> : <MailCheck className="w-8 h-8 text-green-500" />}
+            <MailCheck className="w-8 h-8 text-green-500" />
           </div>
           <h1 className="text-2xl font-display font-bold text-theme-primary mb-4">
-            {isRecovery ? t('resetPassword.success') : t('confirmWait.success')}
+            {t('confirmWait.success')}
           </h1>
           <p className="text-theme-secondary">
-            {isRecovery ? t('resetPassword.successDesc') : t('confirmWait.successDesc')}
+            {t('confirmWait.successDesc')}
           </p>
         </div>
       </div>
     )
   }
 
-  // 重置密码流程
-  if (isRecovery) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-theme-tertiary flex items-center justify-center">
-              <KeyRound className="w-8 h-8 text-theme-primary" />
-            </div>
-            <h1 className="text-2xl font-display font-bold text-theme-primary mb-2">
-              {t('resetPassword.title')}
-            </h1>
-            <p className="text-theme-secondary">
-              {t('resetPassword.description')}
-            </p>
-          </div>
-
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-theme-secondary">
-                {t('resetPassword.newPassword')}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary transition-colors"
-                  placeholder={t('resetPassword.passwordPlaceholder')}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-secondary hover:text-theme-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-theme-secondary">
-                {t('resetPassword.confirmPassword')}
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-theme-tertiary border border-theme-color rounded-xl text-theme-on-surface placeholder-theme-secondary focus:outline-none focus:border-primary transition-colors"
-                placeholder={t('resetPassword.passwordPlaceholder')}
-                required
-              />
-            </div>
-
-            {error && (
-              <p className="text-red-400 text-sm">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-3 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  {t('resetPassword.updating')}
-                </>
-              ) : (
-                t('resetPassword.updateButton')
-              )}
-            </button>
-          </form>
-
-          <button
-            onClick={handleResend}
-            className="mt-6 w-full py-3 bg-theme-tertiary text-theme-on-surface font-medium rounded-xl hover:bg-theme-hover transition-colors flex items-center justify-center gap-2"
-          >
-            <Send className="w-4 h-4" />
-            {t('resetPassword.requestNewLink')}
-          </button>
-
-          <button
-            onClick={() => navigate('/')}
-            className="mt-6 inline-flex items-center gap-2 text-theme-secondary hover:text-theme-primary transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('confirmWait.backHome')}
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // 邮箱确认流程
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-theme-tertiary flex items-center justify-center">
-          <MailCheck className="w-8 h-8 text-theme-primary" />
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+          <XCircle className="w-8 h-8 text-red-500" />
         </div>
         <h1 className="text-2xl font-display font-bold text-theme-primary mb-4">
-          {t('confirmWait.title')}
+          {t('confirmWait.failedTitle')}
         </h1>
-
-        {error ? (
-          <div className="mb-6">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-red-500/20 flex items-center justify-center">
-              <XCircle className="w-6 h-6 text-red-500" />
-            </div>
-            <p className="text-red-400 mb-6">{error}</p>
-            <button
-              onClick={handleResend}
-              className="w-full py-3 mb-3 bg-theme-tertiary text-theme-on-surface font-medium rounded-xl hover:bg-theme-hover transition-colors flex items-center justify-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              {t('confirmWait.resend')}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleConfirmEmail}
-            disabled={verifying}
-            className="w-full py-3 mb-4 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {verifying ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                {t('confirmWait.verifying')}
-              </>
-            ) : (
-              t('confirmWait.confirmButton')
-            )}
-          </button>
-        )}
-
+        <p className="text-theme-secondary mb-8">
+          {errorMsg}
+        </p>
         <button
           onClick={() => navigate('/')}
-          className="mt-6 inline-flex items-center gap-2 text-theme-secondary hover:text-theme-primary transition-colors text-sm"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-theme-tertiary text-theme-primary rounded-xl hover:bg-theme-hover transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-5 h-5" />
           {t('confirmWait.backHome')}
         </button>
       </div>

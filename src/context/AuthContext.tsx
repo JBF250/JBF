@@ -64,11 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Only create new profile if user doesn't exist yet
     console.log('Creating new user profile for:', authUser.id)
-    const username = authUser.user_metadata?.username || authUser.email?.split('@')[0] || 'user'
     const { data: newProfile, error: insertError } = await supabase.from('users').insert({
       id: authUser.id,
-      username,
-      display_name: authUser.email || '用户',
+      username: authUser.email || 'user',
+      display_name: '游客',
       theme_color: '#8b5cf6',
       language: 'zh',
       custom_cursor: true,
