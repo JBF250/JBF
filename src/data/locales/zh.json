@@ -131,6 +131,7 @@
   "resetPassword": {
     "title": "重置密码",
     "description": "设置你的新密码",
+    "confirmLink": "确认并重置密码",
     "newPassword": "新密码",
     "confirmPassword": "确认新密码",
     "passwordPlaceholder": "至少6位字符",

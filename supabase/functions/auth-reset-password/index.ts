@@ -76,13 +76,15 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'supabase_not_configured' }, 500)
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    // PKCE 流程：resetPasswordForEmail 携带 code_challenge，邮件模板中 {{ .TokenHash }} 才有值，
+    // 用于前端 verifyOtp 手动兑换会话。
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { flowType: 'pkce' },
+    })
 
     const origin = req.headers.get('origin') || 'https://gainian.de5.net'
     const redirectTo = `${origin}/auth/reset-password`
 
-    // 隐式流程：默认邮件模板 {{ .ConfirmationURL }} 会跳转到 redirectTo 并携带 access_token，
-    // 由 ResetPassword 页面手动 setSession 后更新密码。
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     })

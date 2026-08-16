@@ -131,6 +131,7 @@
   "resetPassword": {
     "title": "Reset Password",
     "description": "Set your new password",
+    "confirmLink": "Confirm and reset password",
     "newPassword": "New Password",
     "confirmPassword": "Confirm New Password",
     "passwordPlaceholder": "At least 6 characters",

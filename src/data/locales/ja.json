@@ -131,6 +131,7 @@
   "resetPassword": {
     "title": "パスワードのリセット",
     "description": "新しいパスワードを設定してください",
+    "confirmLink": "確認してパスワードをリセット",
     "newPassword": "新しいパスワード",
     "confirmPassword": "パスワードの確認",
     "passwordPlaceholder": "6文字以上",

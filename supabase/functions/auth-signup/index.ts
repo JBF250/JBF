@@ -81,13 +81,16 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'supabase_not_configured' }, 500)
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    // PKCE 流程：signUp 携带 code_challenge，邮件模板中 {{ .TokenHash }} 才有值，
+    // 用于前端 verifyOtp 手动兑换会话（避免邮箱安全自检消耗一次性 token）。
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { flowType: 'pkce' },
+    })
 
     const origin = req.headers.get('origin') || 'https://gainian.de5.net'
-    const emailRedirectTo = `${origin}/auth/confirm-wait`
+    // emailRedirectTo 对应邮件模板中的 {{ .RedirectTo }}，作为确认后的跳转目标（首页）
+    const emailRedirectTo = `${origin}/`
 
-    // 隐式流程：默认邮件模板 {{ .ConfirmationURL }} 会跳转到 emailRedirectTo 并携带 access_token。
-    // 新用户档案由数据库触发器 handle_new_user 创建（username=邮箱，display_name=游客）。
     const { error } = await supabase.auth.signUp({
       email,
       password,

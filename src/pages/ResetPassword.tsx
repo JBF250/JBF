@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, Eye, EyeOff, CheckCircle, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/context/I18nContext'
@@ -11,68 +11,51 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [sessionError, setSessionError] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const [ready, setReady] = useState(false)
   const { updatePassword } = useAuth()
   const { t } = useI18n()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
+  const tokenHash = searchParams.get('token_hash')
+  const tokenType = searchParams.get('type') || 'recovery'
+
+  // 进入页面：缺少 token_hash 时直接报错
   useEffect(() => {
-    const handleResetPassword = async () => {
-      try {
-        // 手动解析 URL hash 中的参数（不用 useSearchParams，因为 token 在 hash 中）
-        const hash = window.location.hash
-        console.log('Reset password - URL hash:', hash)
-
-        if (!hash || hash === '#') {
-          setSessionError(t('resetPassword.invalidResetLink'))
-          setLoading(false)
-          return
-        }
-
-        // 解析 hash 参数，格式可能是 #access_token=xxx&refresh_token=xxx&type=recovery
-        const hashStr = hash.startsWith('#') ? hash.substring(1) : hash
-        const params = new URLSearchParams(hashStr)
-        const accessToken = params.get('access_token')
-        const refreshToken = params.get('refresh_token')
-        const tokenType = params.get('type')
-
-        console.log('Reset password - parsed params:', { 
-          hasAccessToken: !!accessToken, 
-          hasRefreshToken: !!refreshToken,
-          tokenType 
-        })
-
-        if (!accessToken) {
-          setSessionError(t('resetPassword.missingAccessToken'))
-          setLoading(false)
-          return
-        }
-
-        // 使用 setSession 设置会话
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || ''
-        })
-
-        if (error) {
-          console.error('Set session error:', error)
-          setSessionError(t('resetPassword.sessionExpired'))
-        } else {
-          // 成功设置会话，清除 URL 中的 hash
-          window.history.replaceState(null, '', window.location.pathname)
-        }
-      } catch (err: any) {
-        console.error('Reset password error:', err)
-        setSessionError(t('resetPassword.sessionError'))
-      } finally {
-        setLoading(false)
-      }
+    if (!tokenHash) {
+      setSessionError(t('resetPassword.missingAccessToken'))
     }
+  }, [tokenHash, t])
 
-    handleResetPassword()
-  }, [])
+  // 用户手动点击确认后才兑换恢复会话，避免邮箱安全自检提前消耗一次性 token
+  const handleConfirmToken = async () => {
+    if (!tokenHash) return
+    setConfirming(true)
+    setSessionError('')
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: tokenType as any,
+      })
+
+      if (error) {
+        console.error('Verify recovery token error:', error)
+        setSessionError(t('resetPassword.sessionExpired'))
+      } else {
+        // 清除 URL 中的 token，进入改密表单
+        window.history.replaceState(null, '', window.location.pathname)
+        setReady(true)
+      }
+    } catch (err: any) {
+      console.error('Reset password verify error:', err)
+      setSessionError(t('resetPassword.sessionError'))
+    } finally {
+      setConfirming(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,15 +93,27 @@ export default function ResetPassword() {
     }
   }
 
-  if (loading) {
+  // 成功
+  if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-green-500" />
+          </div>
+          <h1 className="text-2xl font-display font-bold text-white mb-4">
+            {t('resetPassword.success')}
+          </h1>
+          <p className="text-gray-400">
+            {t('resetPassword.successDesc')}
+          </p>
+        </div>
       </div>
     )
   }
 
-  if (sessionError) {
+  // 链接错误
+  if (sessionError && !ready) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4">
         <div className="w-full max-w-md text-center">
@@ -139,24 +134,34 @@ export default function ResetPassword() {
     )
   }
 
-  if (success) {
+  // 需要先手动确认 token
+  if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4">
         <div className="w-full max-w-md text-center">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-green-500" />
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-primary flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-display font-bold text-white mb-4">
-            {t('resetPassword.success')}
+            {t('resetPassword.title')}
           </h1>
-          <p className="text-gray-400">
-            {t('resetPassword.successDesc')}
+          <p className="text-gray-400 mb-8">
+            {t('resetPassword.description')}
           </p>
+          <button
+            onClick={handleConfirmToken}
+            disabled={confirming}
+            className="w-full py-3 bg-gradient-primary text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {confirming ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+            {t('resetPassword.confirmLink')}
+          </button>
         </div>
       </div>
     )
   }
 
+  // 已确认，展示改密表单
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4">
       <div className="w-full max-w-md">

@@ -164,7 +164,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       type: 'signup',
       email,
       options: {
-        emailRedirectTo: getRedirectUrl('/auth/confirm-wait')
+        // PKCE 流程下对应邮件模板 {{ .RedirectTo }}，作为确认后的跳转目标（首页）
+        emailRedirectTo: getRedirectUrl('/')
       }
     })
     if (error) throw error

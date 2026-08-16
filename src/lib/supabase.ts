@@ -5,11 +5,10 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    // 隐式流程：邮件链接经 Supabase /verify 重定向后携带 access_token，
-    // 由 ConfirmWait / ResetPassword 页面手动 setSession 完成登录与邮箱确认。
-    flowType: 'implicit',
-    // 关闭自动从 URL 解析会话，避免与页面手动 setSession 产生竞态
-    detectSessionInUrl: false,
+    // PKCE 流程：邮件使用 token_hash 链接跳转到本站页面，
+    // 用户手动点击确认按钮后调用 verifyOtp 兑换会话，避免邮箱安全自检预先消耗一次性 token。
+    flowType: 'pkce',
+    detectSessionInUrl: true,
   },
 })
 
