@@ -1,9 +1,5 @@
 User-agent: *
-Allow: /$
-Allow: /sitemap.xml
-Allow: /assets/
-Allow: /pictures/
-Allow: /svg/
-Disallow: /
+Allow: /
+Disallow: /auth/
 
 Sitemap: https://gainian.de5.net/sitemap.xml
