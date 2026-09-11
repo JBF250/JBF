@@ -13,6 +13,9 @@ export default function HeroCanvas() {
   const isMobile = useRef(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
   const planetRotationY = useRef(0)
   const planetRotationVelocity = useRef(0)
+  // 任务6：滚动冲量 + 惯性滑行。记录最后一次滚动时间与上一帧时间，用于自适应减速。
+  const lastWheelTimeRef = useRef(-Infinity)
+  const lastFrameTimeRef = useRef(performance.now())
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isMobile.current) return
@@ -27,7 +30,14 @@ export default function HeroCanvas() {
 
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault()
-    planetRotationVelocity.current += e.deltaY * 0.0005
+    const now = performance.now()
+    // 频率感知：两次滚动间隔越短（滚得越快），冲量加成越大
+    const dt = now - lastWheelTimeRef.current
+    const freqBoost = Math.min(1 + 360 / Math.max(dt, 16), 2.6)
+    const magnitude = Math.min(Math.abs(e.deltaY), 160)
+    // 幅度越大、频率越快 → 冲量越大（冲量系数适当调小，避免惯性过大）
+    planetRotationVelocity.current += Math.sign(e.deltaY) * magnitude * 0.0009 * freqBoost
+    lastWheelTimeRef.current = now
   }, [])
 
   useEffect(() => {
@@ -45,8 +55,8 @@ export default function HeroCanvas() {
     camera.position.z = 5
 
     const isLight = themeMode === 'light'
-    const particleColor1 = isLight ? 0xf472b6 : 0x8b5cf6
-    const particleColor2 = isLight ? 0xffffff : 0x06b6d4
+    const particleColor1 = isLight ? 0xf472b6 : 0xa9b8c7
+    const particleColor2 = isLight ? 0xffffff : 0x22d3ee
 
     const particlesGeometry = new THREE.BufferGeometry()
     const particlesCount = 5000
@@ -117,10 +127,10 @@ export default function HeroCanvas() {
       gradient.addColorStop(0.6, '#fecfef')
       gradient.addColorStop(1, '#ffecd2')
     } else {
-      gradient.addColorStop(0, '#667eea')
-      gradient.addColorStop(0.3, '#764ba2')
-      gradient.addColorStop(0.6, '#2d1b69')
-      gradient.addColorStop(1, '#1a0f3c')
+      gradient.addColorStop(0, '#5f7387')
+      gradient.addColorStop(0.3, '#8ca2b5')
+      gradient.addColorStop(0.6, '#4a5a6a')
+      gradient.addColorStop(1, '#2a3542')
     }
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, 1024, 512)
@@ -172,7 +182,7 @@ export default function HeroCanvas() {
 
     const glowGeometry = new THREE.SphereGeometry(0.85, 32, 32)
     const glowMaterial = new THREE.MeshBasicMaterial({
-      color: isLight ? 0xf472b6 : 0x8b5cf6,
+      color: isLight ? 0xf472b6 : 0x22d3ee,
       transparent: true,
       opacity: 0,
     })
@@ -196,6 +206,33 @@ export default function HeroCanvas() {
     const animate = () => {
       requestAnimationFrame(animate)
       animationTime += 0.016
+
+      // ── 任务6：行星旋转惯性 ──
+      const now = performance.now()
+      const frameDt = Math.min((now - lastFrameTimeRef.current) / 1000, 0.05)
+      lastFrameTimeRef.current = now
+      const stoppedFor = now - lastWheelTimeRef.current
+
+      const velocity = planetRotationVelocity.current
+      if (stoppedFor > 120) {
+        // 停止滚动后：惯性滑行，约 1 秒内归零（时间常数取较小值）
+        const absV = Math.abs(velocity)
+        if (absV < 0.001) {
+          planetRotationVelocity.current = 0
+        } else {
+          const stopDuration = absV > 0.02 ? 0.42 : 0.3
+          planetRotationVelocity.current *= Math.exp(-frameDt / stopDuration)
+        }
+      } else {
+        // 持续滚动中：轻微阻尼防失控，冲量仍可累积
+        planetRotationVelocity.current *= Math.exp(-frameDt * 0.45)
+      }
+      // 限速，避免极端冲量导致转速失控
+      planetRotationVelocity.current = Math.max(
+        -0.09, Math.min(0.09, planetRotationVelocity.current)
+      )
+      planetRotationY.current += planetRotationVelocity.current
+      planet.rotation.y = planetRotationY.current
 
       if (!isMobile.current) {
         targetCameraX += (mouseX.current.value - targetCameraX) * 0.05
@@ -244,9 +281,6 @@ export default function HeroCanvas() {
       planet.scale.set(planetScale, planetScale, planetScale)
       ;(planetMaterial as THREE.MeshBasicMaterial).transparent = true
       ;(planetMaterial as THREE.MeshBasicMaterial).opacity = planetOpacity
-      planetRotationVelocity.current *= 0.98
-      planetRotationY.current += planetRotationVelocity.current
-      planet.rotation.y = planetRotationY.current
 
       glow.scale.set(glowScale, glowScale, glowScale)
       ;(glowMaterial as THREE.MeshBasicMaterial).opacity = glowOpacity

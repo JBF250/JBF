@@ -1,0 +1,19 @@
+{
+  "certificates": [
+    {
+      "id": "cert-1",
+      "date": "2026-09-11",
+      "image": "/pictures/Certificate1.png",
+      "title": {
+        "zh": "游戏开发类证书",
+        "en": "Game Development Certificate",
+        "ja": "ゲーム開発資格証明書"
+      },
+      "description": {
+        "zh": "我游戏开发之路上的第一份重要证明。",
+        "en": "My first key credential on the journey of game development.",
+        "ja": "ゲーム開発の道のりにおける最初の重要な証明です。"
+      }
+    }
+  ]
+}

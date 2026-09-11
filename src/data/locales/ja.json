@@ -19,7 +19,9 @@
   "about": {
     "title": "私について",
     "intro": "別名「概念1」といい、ゲーム開発とソフトウェアプログラミングに情熱を注ぐ開発者です。",
-    "description": "AIの時代において、私たちに最も必要なのは継続的な学習と勇気ある探求の精神です。高校時代からプログラミングに触れ、現在まで長年の開発経験があります。ゲームやソフトウェアの開発を楽しみ、有意義なデジタル製品の創造に取り組んでいます。"
+    "description": "AIの時代において、私たちに最も必要なのは継続的な学習と勇気ある探求の精神です。高校時代からプログラミングに触れ、現在まで長年の開発経験があります。ゲームやソフトウェアの開発を楽しみ、有意義なデジタル製品の創造に取り組んでいます。",
+    "certificates": "資格証明",
+    "certificatesDesc": "成長の瞬間を証した重要なマイルストーン"
   },
   "games": {
     "title": "ゲーム開発",
@@ -172,7 +174,12 @@
     "back": "ホームに戻る",
     "overview": "プロジェクト概要",
     "aboutGame": "このゲームについて",
-    "aboutSoftware": "このソフトウェアについて"
+    "aboutSoftware": "このソフトウェアについて",
+    "engineUpdates": "エンジン更新",
+    "visitOfficial": "公式サイトを訪問",
+    "download": "ダウンロード",
+    "downloadCode": "抽出コード：{code}",
+    "watchBilibili": "Bilibiliデモ"
   },
   "lab": {
     "title": "ラボ",
@@ -233,9 +240,13 @@
         "title": "音声メタデータ編集",
         "desc": "タイトル・アーティスト・アルバム・年・カバーを編集"
       },
-      "base64": {
-        "title": "Base64 コーデック",
-        "desc": "テキストのエンコード・デコード"
+      "imageText": {
+        "title": "画像文字抽出",
+        "desc": "画像を読み込み、文字を抽出"
+      },
+      "recorder": {
+        "title": "レコーダー",
+        "desc": "録音してリバーブ・ノイズ低減を適用"
       }
     },
     "games": {
@@ -409,21 +420,44 @@
       "success": "メタデータの書き込みに成功しました。ダウンロードを開始しました。",
       "writeError": "メタデータの書き込みに失敗しました"
     },
-    "base64": {
-      "title": "Base64 コーデック",
-      "desc": "テキストのエンコード・デコード",
-      "encodeTab": "エンコード (テキスト → Base64)",
-      "decodeTab": "デコード (Base64 → テキスト)",
-      "inputLabel": "入力",
-      "outputLabel": "出力",
-      "encodePlaceholder": "エンコードするテキストを入力...",
-      "decodePlaceholder": "デコードするBase64文字列を入力...",
-      "encode": "エンコード",
-      "decode": "デコード",
-      "copy": "結果をコピー",
+    "imageText": {
+      "dropFile": "クリックまたは画像をドラッグ",
+      "supportedFormats": "PNG、JPG、WebP、BMPに対応",
+      "selectFile": "画像を選択",
+      "invalidFormat": "対応していない形式です。PNG、JPG、WebP、BMPを使用してください",
+      "fileTooLarge": "ファイルが大きすぎます。20MB以下の画像を使用してください",
+      "languageLabel": "認識言語",
+      "langZh": "簡体字中国語",
+      "langEn": "英語",
+      "langJa": "日本語",
+      "firstTimeNotice": "初回は言語モデル（約15MB）のダウンロードが必要です。しばらくお待ちください",
+      "recognize": "文字を抽出",
+      "recognizing": "認識中",
+      "resultLabel": "認識結果",
+      "copy": "コピー",
       "copied": "コピーしました",
-      "invalidBase64": "無効なBase64文字列です",
-      "emptyInput": "内容を入力してください"
+      "download": "テキストをエクスポート",
+      "recognizeError": "文字認識に失敗しました。もう一度お試しください"
+    },
+    "recorder": {
+      "startRecord": "録音開始",
+      "stopRecord": "録音停止",
+      "recording": "録音中...",
+      "recordedPreview": "録音プレビュー",
+      "reRecord": "録音し直す",
+      "effects": "エフェクト",
+      "effectNone": "なし",
+      "effectReverb": "リバーブ",
+      "effectDenoise": "ノイズ低減",
+      "volume": "音量",
+      "reverbMix": "リバーブ量",
+      "denoiseStrength": "ノイズ低減強度",
+      "export": "書き出し・ダウンロード",
+      "exporting": "処理中...",
+      "exportHint": "WAV形式で書き出します。リバーブ・ノイズ低減・音量はすべてブラウザ内で処理されます",
+      "micError": "マイクにアクセスできません。ブラウザの権限設定を確認してください",
+      "noRecording": "先に音声を録音してください",
+      "exportError": "音声処理に失敗しました。もう一度お試しください"
     },
     "games": {
       "score": "スコア",

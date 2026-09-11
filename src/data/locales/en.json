@@ -19,7 +19,9 @@
   "about": {
     "title": "About Me",
     "intro": "I also have an alias called Gainian1, a developer passionate about game development and software programming.",
-    "description": "In the era of AI, what we need most is the spirit of continuous learning and daring exploration. I started programming in high school and have years of development experience. I enjoy developing games and software, dedicated to creating meaningful digital products."
+    "description": "In the era of AI, what we need most is the spirit of continuous learning and daring exploration. I started programming in high school and have years of development experience. I enjoy developing games and software, dedicated to creating meaningful digital products.",
+    "certificates": "Certificates",
+    "certificatesDesc": "Key milestones that witnessed my growth"
   },
   "games": {
     "title": "Game Development",
@@ -172,7 +174,12 @@
     "back": "Back to Home",
     "overview": "Project Overview",
     "aboutGame": "About This Game",
-    "aboutSoftware": "About This Software"
+    "aboutSoftware": "About This Software",
+    "engineUpdates": "Engine Updates",
+    "visitOfficial": "Visit Official Site",
+    "download": "Download",
+    "downloadCode": "Code: {code}",
+    "watchBilibili": "Bilibili Demo"
   },
   "lab": {
     "title": "Lab",
@@ -233,9 +240,13 @@
         "title": "Audio Metadata Editor",
         "desc": "Edit title, artist, album, year & cover"
       },
-      "base64": {
-        "title": "Base64 Codec",
-        "desc": "Encode & decode text"
+      "imageText": {
+        "title": "Image Text Extractor",
+        "desc": "Import an image and extract its text"
+      },
+      "recorder": {
+        "title": "Recorder",
+        "desc": "Record audio with reverb or denoise"
       }
     },
     "games": {
@@ -409,21 +420,44 @@
       "success": "Metadata written successfully. Download started.",
       "writeError": "Failed to write metadata"
     },
-    "base64": {
-      "title": "Base64 Codec",
-      "desc": "Encode & decode text",
-      "encodeTab": "Encode (Text → Base64)",
-      "decodeTab": "Decode (Base64 → Text)",
-      "inputLabel": "Input",
-      "outputLabel": "Output",
-      "encodePlaceholder": "Enter text to encode...",
-      "decodePlaceholder": "Enter Base64 string to decode...",
-      "encode": "Encode",
-      "decode": "Decode",
-      "copy": "Copy Result",
+    "imageText": {
+      "dropFile": "Click or drag an image here",
+      "supportedFormats": "Supports PNG, JPG, WebP, BMP",
+      "selectFile": "Select Image",
+      "invalidFormat": "Unsupported image format. Please use PNG, JPG, WebP or BMP.",
+      "fileTooLarge": "File too large. Please use an image under 20MB.",
+      "languageLabel": "Recognition Language",
+      "langZh": "Simplified Chinese",
+      "langEn": "English",
+      "langJa": "Japanese",
+      "firstTimeNotice": "First-time recognition requires downloading a language model (~15MB). Please be patient.",
+      "recognize": "Extract Text",
+      "recognizing": "Recognizing",
+      "resultLabel": "Result",
+      "copy": "Copy",
       "copied": "Copied",
-      "invalidBase64": "Invalid Base64 string",
-      "emptyInput": "Please enter some content"
+      "download": "Export Text",
+      "recognizeError": "Text recognition failed, please try again"
+    },
+    "recorder": {
+      "startRecord": "Start Recording",
+      "stopRecord": "Stop Recording",
+      "recording": "Recording...",
+      "recordedPreview": "Recording Preview",
+      "reRecord": "Re-record",
+      "effects": "Effects",
+      "effectNone": "None",
+      "effectReverb": "Reverb",
+      "effectDenoise": "Denoise",
+      "volume": "Volume",
+      "reverbMix": "Reverb Amount",
+      "denoiseStrength": "Denoise Strength",
+      "export": "Export & Download",
+      "exporting": "Processing...",
+      "exportHint": "Exports as WAV. Reverb, denoise and volume are all processed locally in your browser.",
+      "micError": "Cannot access the microphone, please check browser permissions",
+      "noRecording": "Please record some audio first",
+      "exportError": "Audio processing failed, please try again"
     },
     "games": {
       "score": "Score",

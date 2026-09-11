@@ -112,11 +112,11 @@ html {
   --text-on-surface: #ffffff;
   --border-color: #27272a;
   --nav-bg: rgba(10, 10, 15, 0.9);
-  --btn-primary: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  --btn-primary-text: #ffffff;
-  --accent-pink: #f472b6;
-  --accent-cyan: #06b6d4;
-  --accent-purple: #8b5cf6;
+  --btn-primary: linear-gradient(135deg, #8ca2b5, #22d3ee);
+  --btn-primary-text: #0c1620;
+  --accent-pink: #8ca2b5;
+  --accent-cyan: #22d3ee;
+  --accent-purple: #8ca2b5;
 }
 
 body {
@@ -165,11 +165,11 @@ body {
   }
 
   .glow-primary {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.25);
   }
 
   .glow-secondary {
-    box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 30px rgba(148, 163, 184, 0.3);
   }
 
   .glass {
@@ -190,8 +190,8 @@ body {
   }
 
   .text-stroke-thick {
-    -webkit-text-stroke: 2px rgba(139, 92, 246, 0.5);
-    text-stroke: 2px rgba(139, 92, 246, 0.5);
+    -webkit-text-stroke: 2px rgba(148, 163, 184, 0.5);
+    text-stroke: 2px rgba(148, 163, 184, 0.5);
   }
 
   .animate-fade-in {
@@ -381,15 +381,17 @@ body {
   animation: tile-merge 0.2s ease-out;
 }
 
-/* ===== 用户头像下拉菜单进场/退场动画 ===== */
+/* ===== 用户头像下拉菜单进场/退场动画（参考 react-bits CardNav：淡入 + 轻微缩放 + 上移） ===== */
 @keyframes dropdown-in {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    transform: translateY(-8px) scale(0.96);
+    transform-origin: top right;
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    transform-origin: top right;
   }
 }
 
@@ -397,19 +399,90 @@ body {
   from {
     opacity: 1;
     transform: translateY(0) scale(1);
+    transform-origin: top right;
   }
   to {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    transform: translateY(-8px) scale(0.96);
+    transform-origin: top right;
   }
 }
 
 .dropdown-enter {
-  animation: dropdown-in 0.18s ease-out forwards;
-  transform-origin: top right;
+  animation: dropdown-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .dropdown-exit {
-  animation: dropdown-out 0.16s ease-in forwards;
-  transform-origin: top right;
+  animation: dropdown-out 0.22s ease-in forwards;
+}
+
+/* ===== 任务3：悬停态指针与默认态一致，并缩小为原来的 2/3（32 → 21px） ===== */
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor.dark,
+  html.custom-cursor.dark * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='21' height='21'%3E%3Cg transform='translate(-110,-12)'%3E%3Cpath d='M847.127273 633.018182L195.490909 32.581818C181.527273 18.618182 158.254545 13.963636 144.290909 23.272727c-18.618182 9.309091-32.581818 23.272727-32.581818 46.545455v884.363636c0 18.618182 13.963636 41.890909 32.581818 46.545455 4.654545 0 13.963636 4.654545 18.618182 4.654545 13.963636 0 27.927273-4.654545 37.236364-18.618182l246.690909-269.963636 367.709091 4.654545c18.618182 0 37.236364-13.963636 46.545454-32.581818 4.654545-18.618182 0-41.890909-13.963636-55.854545z' fill='%23ffffff'/%3E%3C/g%3E%3C/svg%3E") 1 1, auto;
+  }
+
+  html.custom-cursor.dark a,
+  html.custom-cursor.dark button,
+  html.custom-cursor.dark [role="button"],
+  html.custom-cursor.dark .cursor-pointer,
+  html.custom-cursor.dark input[type="submit"],
+  html.custom-cursor.dark input[type="reset"],
+  html.custom-cursor.dark input[type="button"],
+  html.custom-cursor.dark select,
+  html.custom-cursor.dark summary,
+  html.custom-cursor.dark label[for],
+  html.custom-cursor.dark [onclick]:not([onclick=""]),
+  html.custom-cursor.dark a *,
+  html.custom-cursor.dark button *,
+  html.custom-cursor.dark [role="button"] *,
+  html.custom-cursor.dark [onclick]:not([onclick=""]) * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='21' height='21'%3E%3Cg transform='translate(-110,-12)'%3E%3Cpath d='M847.127273 633.018182L195.490909 32.581818C181.527273 18.618182 158.254545 13.963636 144.290909 23.272727c-18.618182 9.309091-32.581818 23.272727-32.581818 46.545455v884.363636c0 18.618182 13.963636 41.890909 32.581818 46.545455 4.654545 0 13.963636 4.654545 18.618182 4.654545 13.963636 0 27.927273-4.654545 37.236364-18.618182l246.690909-269.963636 367.709091 4.654545c18.618182 0 37.236364-13.963636 46.545454-32.581818 4.654545-18.618182 0-41.890909-13.963636-55.854545z' fill='%23ffffff'/%3E%3C/g%3E%3C/svg%3E") 1 1, pointer;
+  }
+
+  html.custom-cursor.light,
+  html.custom-cursor.light * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='21' height='21'%3E%3Cg transform='translate(-110,-12)'%3E%3Cpath d='M847.127273 633.018182L195.490909 32.581818C181.527273 18.618182 158.254545 13.963636 144.290909 23.272727c-18.618182 9.309091-32.581818 23.272727-32.581818 46.545455v884.363636c0 18.618182 13.963636 41.890909 32.581818 46.545455 4.654545 0 13.963636 4.654545 18.618182 4.654545 13.963636 0 27.927273-4.654545 37.236364-18.618182l246.690909-269.963636 367.709091 4.654545c18.618182 0 37.236364-13.963636 46.545454-32.581818 4.654545-18.618182 0-41.890909-13.963636-55.854545z' fill='%234b5563'/%3E%3C/g%3E%3C/svg%3E") 1 1, auto;
+  }
+
+  html.custom-cursor.light a,
+  html.custom-cursor.light button,
+  html.custom-cursor.light [role="button"],
+  html.custom-cursor.light .cursor-pointer,
+  html.custom-cursor.light input[type="submit"],
+  html.custom-cursor.light input[type="reset"],
+  html.custom-cursor.light input[type="button"],
+  html.custom-cursor.light select,
+  html.custom-cursor.light summary,
+  html.custom-cursor.light label[for],
+  html.custom-cursor.light [onclick]:not([onclick=""]),
+  html.custom-cursor.light a *,
+  html.custom-cursor.light button *,
+  html.custom-cursor.light [role="button"] *,
+  html.custom-cursor.light [onclick]:not([onclick=""]) * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024' width='21' height='21'%3E%3Cg transform='translate(-110,-12)'%3E%3Cpath d='M847.127273 633.018182L195.490909 32.581818C181.527273 18.618182 158.254545 13.963636 144.290909 23.272727c-18.618182 9.309091-32.581818 23.272727-32.581818 46.545455v884.363636c0 18.618182 13.963636 41.890909 32.581818 46.545455 4.654545 0 13.963636 4.654545 18.618182 4.654545 13.963636 0 27.927273-4.654545 37.236364-18.618182l246.690909-269.963636 367.709091 4.654545c18.618182 0 37.236364-13.963636 46.545454-32.581818 4.654545-18.618182 0-41.890909-13.963636-55.854545z' fill='%234b5563'/%3E%3C/g%3E%3C/svg%3E") 1 1, auto;
+  }
+}
+
+/* ===== 任务5：证书展示 - 漂浮动画 ===== */
+@keyframes float-animate {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.float-animate {
+  animation: float-animate 4s ease-in-out infinite;
+}
+
+/* 证书图片：不改显示比例，完整展示全图 */
+.cert-card .tilted-card-img {
+  object-fit: contain !important;
 }

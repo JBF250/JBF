@@ -6,6 +6,7 @@ import { supabase, type CommunityPost } from '@/lib/supabase'
 import gainianPosts from '@/lib/gainianPosts'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '@/components/Avatar'
+import BorderGlow from '@/components/BorderGlow'
 
 export type CommunityPostWithAuthor = CommunityPost & {
   author?: { display_name: string; avatar_url: string | null; username: string } | null
@@ -242,26 +243,48 @@ export default function Blog() {
 
           {/* Mobile navigation */}
           <div className="lg:hidden flex gap-3 mb-6">
-            <button
-              onClick={() => setActiveTab('community')}
-              className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
-                activeTab === 'community'
-                  ? 'bg-gradient-primary btn-primary-text'
-                  : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
-              }`}
+            <BorderGlow
+              backgroundColor="var(--bg-card)"
+              glowColor="180 40 70"
+              colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+              borderRadius={12}
+              glowRadius={14}
+              glowIntensity={0.9}
+              coneSpread={28}
+              className="flex-1"
             >
-              {t('blog.community')}
-            </button>
-            <button
-              onClick={() => setActiveTab('gainian')}
-              className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
-                activeTab === 'gainian'
-                  ? 'bg-gradient-primary btn-primary-text'
-                  : 'bg-theme-tertiary text-theme-secondary hover:text-theme-primary'
-              }`}
+              <button
+                onClick={() => setActiveTab('community')}
+                className={`w-full px-4 py-3 rounded-xl font-medium transition-all ${
+                  activeTab === 'community'
+                    ? 'bg-gradient-primary btn-primary-text'
+                    : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                }`}
+              >
+                {t('blog.community')}
+              </button>
+            </BorderGlow>
+            <BorderGlow
+              backgroundColor="var(--bg-card)"
+              glowColor="180 40 70"
+              colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+              borderRadius={12}
+              glowRadius={14}
+              glowIntensity={0.9}
+              coneSpread={28}
+              className="flex-1"
             >
-              {t('blog.gainian')}
-            </button>
+              <button
+                onClick={() => setActiveTab('gainian')}
+                className={`w-full px-4 py-3 rounded-xl font-medium transition-all ${
+                  activeTab === 'gainian'
+                    ? 'bg-gradient-primary btn-primary-text'
+                    : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                }`}
+              >
+                {t('blog.gainian')}
+              </button>
+            </BorderGlow>
           </div>
 
           {/* Desktop + Content: flex layout */}
@@ -269,26 +292,46 @@ export default function Blog() {
             {/* Desktop sidebar */}
             <div className="hidden lg:block w-56 flex-shrink-0">
               <div className="sticky top-24 space-y-2">
-                <button
-                  onClick={() => setActiveTab('community')}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
-                    activeTab === 'community'
-                      ? 'bg-gradient-primary btn-primary-text'
-                      : 'bg-theme-card/50 backdrop-blur-sm border border-theme-color text-theme-secondary hover:text-theme-primary hover:bg-theme-card/70'
-                  }`}
+                <BorderGlow
+                  backgroundColor="var(--bg-card)"
+                  glowColor="180 40 70"
+                  colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+                  borderRadius={12}
+                  glowRadius={14}
+                  glowIntensity={0.9}
+                  coneSpread={28}
                 >
-                  {t('blog.community')}
-                </button>
-                <button
-                  onClick={() => setActiveTab('gainian')}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
-                    activeTab === 'gainian'
-                      ? 'bg-gradient-primary btn-primary-text'
-                      : 'bg-theme-card/50 backdrop-blur-sm border border-theme-color text-theme-secondary hover:text-theme-primary hover:bg-theme-card/70'
-                  }`}
+                  <button
+                    onClick={() => setActiveTab('community')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
+                      activeTab === 'community'
+                        ? 'bg-gradient-primary btn-primary-text'
+                        : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                    }`}
+                  >
+                    {t('blog.community')}
+                  </button>
+                </BorderGlow>
+                <BorderGlow
+                  backgroundColor="var(--bg-card)"
+                  glowColor="180 40 70"
+                  colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+                  borderRadius={12}
+                  glowRadius={14}
+                  glowIntensity={0.9}
+                  coneSpread={28}
                 >
-                  {t('blog.gainian')}
-                </button>
+                  <button
+                    onClick={() => setActiveTab('gainian')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
+                      activeTab === 'gainian'
+                        ? 'bg-gradient-primary btn-primary-text'
+                        : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                    }`}
+                  >
+                    {t('blog.gainian')}
+                  </button>
+                </BorderGlow>
               </div>
             </div>
 
@@ -337,11 +380,20 @@ export default function Blog() {
                   ) : (
                     <div className="space-y-4">
                       {posts.map((post) => (
-                        <div
+                        <BorderGlow
                           key={post.id}
-                          onClick={() => navigate(`/blog/community/${post.id}`)}
-                          className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-5 border border-theme-color cursor-pointer hover:border-primary/50 hover:bg-theme-card/70 transition-all group"
+                          backgroundColor="var(--bg-card)"
+                          glowColor="180 40 70"
+                          colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+                          borderRadius={16}
+                          glowRadius={16}
+                          glowIntensity={0.9}
+                          coneSpread={28}
                         >
+                          <div
+                            onClick={() => navigate(`/blog/community/${post.id}`)}
+                            className="p-5 cursor-pointer group"
+                          >
                           <div className="flex justify-between items-start mb-3">
                             <h3 className="font-display font-bold text-lg text-theme-primary group-hover:text-primary transition-colors">
                               {post.title}
@@ -386,7 +438,8 @@ export default function Blog() {
                               </span>
                             </div>
                           </div>
-                        </div>
+                          </div>
+                        </BorderGlow>
                       ))}
                     </div>
                   )}
@@ -396,34 +449,44 @@ export default function Blog() {
               {activeTab === 'gainian' && (
                 <div className="space-y-4">
                   {gainianPosts.map((post) => (
-                    <div
+                    <BorderGlow
                       key={post.id}
-                      onClick={() => navigate(`/blog/gainian/${post.id}`)}
-                      className="bg-theme-card/50 backdrop-blur-sm rounded-2xl p-5 border border-theme-color cursor-pointer hover:border-primary/50 hover:bg-theme-card/70 transition-all group"
+                      backgroundColor="var(--bg-card)"
+                      glowColor="180 40 70"
+                      colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+                      borderRadius={16}
+                      glowRadius={16}
+                      glowIntensity={0.9}
+                      coneSpread={28}
                     >
-                      <h3 className="font-display font-bold text-lg text-theme-primary mb-3 group-hover:text-primary transition-colors">
-                        {post.title[lang]}
-                      </h3>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-theme-secondary text-sm">
-                          <span className="flex items-center gap-1">
-                            <User className="w-4 h-4" />
-                            概念1
-                          </span>
-                          <span>{post.date}</span>
-                        </div>
-                        <div className="flex items-center gap-4 text-theme-secondary text-sm">
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="w-4 h-4" />
-                            {postStats[post.id]?.likes || 0}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="w-4 h-4" />
-                            {postStats[post.id]?.comments || 0}
-                          </span>
+                      <div
+                        onClick={() => navigate(`/blog/gainian/${post.id}`)}
+                        className="p-5 cursor-pointer group"
+                      >
+                        <h3 className="font-display font-bold text-lg text-theme-primary mb-3 group-hover:text-primary transition-colors">
+                          {post.title[lang]}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-theme-secondary text-sm">
+                            <span className="flex items-center gap-1">
+                              <User className="w-4 h-4" />
+                              概念1
+                            </span>
+                            <span>{post.date}</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-theme-secondary text-sm">
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="w-4 h-4" />
+                              {postStats[post.id]?.likes || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MessageCircle className="w-4 h-4" />
+                              {postStats[post.id]?.comments || 0}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </BorderGlow>
                   ))}
                 </div>
               )}

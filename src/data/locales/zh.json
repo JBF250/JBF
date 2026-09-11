@@ -19,7 +19,9 @@
   "about": {
     "title": "关于我",
     "intro": "我还有一个别名叫概念1，是一名热爱游戏开发和软件编程的开发者。",
-    "description": "AI来临的时代，我们最需要的是不断学习和敢于探索的精神。我从高中时期开始接触编程，至今已有多年开发经验。我喜欢进行游戏和软件的开发，致力于打造有意义的数字产品。"
+    "description": "AI来临的时代，我们最需要的是不断学习和敢于探索的精神。我从高中时期开始接触编程，至今已有多年开发经验。我喜欢进行游戏和软件的开发，致力于打造有意义的数字产品。",
+    "certificates": "证书展示",
+    "certificatesDesc": "见证我成长时刻的重要里程碑"
   },
   "games": {
     "title": "游戏开发",
@@ -172,7 +174,12 @@
     "back": "返回首页",
     "overview": "项目概述",
     "aboutGame": "关于这款游戏",
-    "aboutSoftware": "关于这款软件"
+    "aboutSoftware": "关于这款软件",
+    "engineUpdates": "引擎技术更新",
+    "visitOfficial": "访问官网",
+    "download": "下载",
+    "downloadCode": "提取码：{code}",
+    "watchBilibili": "B站演示"
   },
   "lab": {
     "title": "实验室",
@@ -233,9 +240,13 @@
         "title": "音频元信息编辑器",
         "desc": "编辑标题、艺术家、专辑、年份与封面"
       },
-      "base64": {
-        "title": "Base64 编解码",
-        "desc": "文本与 Base64 互转"
+      "imageText": {
+        "title": "图片文字导出",
+        "desc": "导入图片，提取其中的文字"
+      },
+      "recorder": {
+        "title": "录音器",
+        "desc": "录音并添加混响或降噪效果"
       }
     },
     "games": {
@@ -410,21 +421,44 @@
       "success": "元信息写入成功，已开始下载",
       "writeError": "写入元信息失败"
     },
-    "base64": {
-      "title": "Base64 编解码",
-      "desc": "文本与 Base64 互转",
-      "encodeTab": "编码 (文本 → Base64)",
-      "decodeTab": "解码 (Base64 → 文本)",
-      "inputLabel": "输入",
-      "outputLabel": "输出",
-      "encodePlaceholder": "输入要编码的文本...",
-      "decodePlaceholder": "输入要解码的 Base64 字符串...",
-      "encode": "编码",
-      "decode": "解码",
-      "copy": "复制结果",
+    "imageText": {
+      "dropFile": "点击选择或拖拽图片到此处",
+      "supportedFormats": "支持 PNG、JPG、WebP、BMP 格式",
+      "selectFile": "选择图片文件",
+      "invalidFormat": "不支持的图片格式，请使用 PNG、JPG、WebP、BMP 等格式",
+      "fileTooLarge": "文件过大，请选择 20MB 以下的图片",
+      "languageLabel": "识别语言",
+      "langZh": "简体中文",
+      "langEn": "英文",
+      "langJa": "日文",
+      "firstTimeNotice": "首次识别需加载语言模型（约 15MB），请耐心等待",
+      "recognize": "提取文字",
+      "recognizing": "识别中",
+      "resultLabel": "识别结果",
+      "copy": "复制",
       "copied": "已复制",
-      "invalidBase64": "无效的 Base64 字符串",
-      "emptyInput": "请输入内容"
+      "download": "导出文本",
+      "recognizeError": "文字识别失败，请重试"
+    },
+    "recorder": {
+      "startRecord": "开始录音",
+      "stopRecord": "停止录音",
+      "recording": "录音中...",
+      "recordedPreview": "录音预览",
+      "reRecord": "重新录音",
+      "effects": "效果",
+      "effectNone": "无",
+      "effectReverb": "混响",
+      "effectDenoise": "降噪",
+      "volume": "音量",
+      "reverbMix": "混响强度",
+      "denoiseStrength": "降噪强度",
+      "export": "导出下载",
+      "exporting": "处理中...",
+      "exportHint": "导出为 WAV 格式，混响/降噪/音量调整均在本地浏览器完成",
+      "micError": "无法访问麦克风，请检查浏览器权限设置",
+      "noRecording": "请先录制一段音频",
+      "exportError": "音频处理失败，请重试"
     },
     "games": {
       "score": "分数",

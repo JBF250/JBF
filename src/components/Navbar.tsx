@@ -48,7 +48,7 @@ export function Navbar() {
     menuTimerRef.current = window.setTimeout(() => {
       setMenuMounted(false)
       menuTimerRef.current = null
-    }, 180)
+    }, 260)
   }
 
   const toggleUserMenu = () => {
@@ -103,10 +103,11 @@ export function Navbar() {
                       const element = document.querySelector(link.href)
                       element?.scrollIntoView({ behavior: 'smooth' })
                     } else {
-                      navigate('/')
+                      // 先回到欢迎页，再自动滚动到对应区块
+                      navigate('/', { state: { scrollTo: link.href } })
                     }
                   }}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors text-sm font-medium"
+                  className="inline-block text-theme-secondary hover:text-theme-primary hover:scale-110 transition-all duration-200 text-sm font-medium"
                 >
                   {link.label}
                 </button>
@@ -114,7 +115,7 @@ export function Navbar() {
                 <Link
                   key={link.id}
                   to={link.href}
-                  className="text-theme-secondary hover:text-theme-primary transition-colors text-sm font-medium"
+                  className="inline-block text-theme-secondary hover:text-theme-primary hover:scale-110 transition-all duration-200 text-sm font-medium"
                 >
                   {link.label}
                 </Link>
@@ -203,7 +204,7 @@ export function Navbar() {
                       const element = document.querySelector(link.href)
                       element?.scrollIntoView({ behavior: 'smooth' })
                     } else {
-                      navigate('/')
+                      navigate('/', { state: { scrollTo: link.href } })
                     }
                   }}
                   className="block w-full text-left text-theme-secondary hover:text-theme-primary transition-colors py-2"

@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useI18n } from '@/context/I18nContext'
 import works from '@/data/works.json'
 import { useResetScroll } from '@/hooks/useResetScroll'
+import TiltedCard from '@/components/TiltedCard'
 
 export default function SoftwareDetail() {
   const { id } = useParams<{ id: string }>()
@@ -68,13 +69,19 @@ export default function SoftwareDetail() {
           </div>
 
           {software.thumbnail && (
-            <div className="relative rounded-2xl overflow-hidden mb-8 glow-secondary">
-              <img
-                src={`/${software.thumbnail}`}
-                alt={software.title[currentLang]}
-                className="w-full h-80 md:h-96 object-cover"
+            <div className="rounded-2xl overflow-hidden mb-8">
+              <TiltedCard
+                imageSrc={`/${software.thumbnail}`}
+                altText={software.title[currentLang]}
+                captionText={software.title[currentLang]}
+                containerHeight="340px"
+                containerWidth="100%"
+                imageHeight="340px"
+                imageWidth="100%"
+                rotateAmplitude={12}
+                scaleOnHover={1.03}
+                showMobileWarning={false}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark-900/60 to-transparent" />
             </div>
           )}
 
