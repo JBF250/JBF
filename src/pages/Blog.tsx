@@ -395,7 +395,7 @@ export default function Blog() {
                             className="p-5 cursor-pointer group"
                           >
                           <div className="flex justify-between items-start mb-3">
-                            <h3 className="font-display font-bold text-lg text-theme-primary group-hover:text-primary transition-colors">
+                            <h3 className="font-display font-bold text-lg text-theme-on-surface group-hover:text-primary transition-colors">
                               {post.title}
                             </h3>
                             {post.user_id === user?.id && (
@@ -463,7 +463,7 @@ export default function Blog() {
                         onClick={() => navigate(`/blog/gainian/${post.id}`)}
                         className="p-5 cursor-pointer group"
                       >
-                        <h3 className="font-display font-bold text-lg text-theme-primary mb-3 group-hover:text-primary transition-colors">
+                        <h3 className="font-display font-bold text-lg text-theme-on-surface mb-3 group-hover:text-primary transition-colors">
                           {post.title[lang]}
                         </h3>
                         <div className="flex items-center justify-between">

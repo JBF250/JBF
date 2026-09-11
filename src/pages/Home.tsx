@@ -378,7 +378,7 @@ export default function Home() {
                     <Github className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-theme-primary font-semibold text-lg">{t('contact.github')}</h3>
+                    <h3 className="text-theme-on-surface font-semibold text-lg">{t('contact.github')}</h3>
                     <p className="text-theme-secondary text-sm">@JBF250</p>
                   </div>
                 </a>
@@ -395,7 +395,7 @@ export default function Home() {
                     <Mail className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-theme-primary font-semibold text-lg">{t('contact.qqEmail')}</h3>
+                    <h3 className="text-theme-on-surface font-semibold text-lg">{t('contact.qqEmail')}</h3>
                     <p className="text-theme-secondary text-sm">2686156845@qq.com</p>
                   </div>
                 </a>
@@ -412,7 +412,7 @@ export default function Home() {
                     <Mail className="w-7 h-7 text-theme-secondary group-hover:text-primary transition-colors" />
                   </div>
                   <div className="text-left">
-                    <h3 className="text-theme-primary font-semibold text-lg">{t('contact.outlookEmail')}</h3>
+                    <h3 className="text-theme-on-surface font-semibold text-lg">{t('contact.outlookEmail')}</h3>
                     <p className="text-theme-secondary text-sm">jiangbaofeng250@outlook.com</p>
                   </div>
                 </a>
@@ -433,7 +433,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="text-left">
-                    <h3 className="text-theme-primary font-semibold text-lg">{t('contact.bilibili')}</h3>
+                    <h3 className="text-theme-on-surface font-semibold text-lg">{t('contact.bilibili')}</h3>
                     <p className="text-theme-secondary text-sm">1016636140</p>
                   </div>
                 </a>
