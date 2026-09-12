@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useI18n } from '@/context/I18nContext'
 import { LabLayout } from './LabLayout'
-import { Mic, Square, Download, Loader2, RotateCcw, Info } from 'lucide-react'
+import { Mic, Square, Download, Loader2, RotateCcw, Info, AudioWaveform } from 'lucide-react'
 
 type EffectType = 'none' | 'reverb' | 'denoise'
 
@@ -118,12 +118,73 @@ function encodeWav(buffer: AudioBuffer): Blob {
   return new Blob([arrayBuffer], { type: 'audio/wav' })
 }
 
+/** Max amplitude-envelope slots retained during recording (extra gets merged). */
+const WAVE_MAX = 480
+
+/**
+ * Draw an amplitude waveform (audio-workstation style) centred on the mid line.
+ * Each slot is a column whose height is the peak amplitude for that time slice.
+ * When `progressRatio` (0..1) is supplied, a playhead cursor is drawn on top.
+ */
+function drawWaveform(canvas: HTMLCanvasElement | null, points: readonly number[], progressRatio?: number): void {
+  if (!canvas) return
+  const g = canvas.getContext('2d')
+  if (!g) return
+  const dpr = window.devicePixelRatio || 1
+  const w = canvas.clientWidth || 320
+  const h = canvas.clientHeight || 96
+  if (canvas.width !== Math.round(w * dpr)) canvas.width = Math.round(w * dpr)
+  if (canvas.height !== Math.round(h * dpr)) canvas.height = Math.round(h * dpr)
+  g.setTransform(dpr, 0, 0, dpr, 0, 0)
+  g.clearRect(0, 0, w, h)
+
+  const cs = getComputedStyle(document.documentElement)
+  const accent = (cs.getPropertyValue('--accent-cyan') || '#22d3ee').trim()
+  const mid = h / 2
+
+  if (points.length > 0) {
+    const barW = w / points.length
+    const grad = g.createLinearGradient(0, 0, 0, h)
+    grad.addColorStop(0, accent + '55')
+    grad.addColorStop(0.5, accent)
+    grad.addColorStop(1, accent + '55')
+    g.fillStyle = grad
+    for (let i = 0; i < points.length; i++) {
+      const bh = Math.max(1, points[i] * h * 0.9)
+      const x = i * barW + barW * 0.03
+      const bw = Math.max(1, barW * 0.94)
+      g.fillRect(x, mid - bh / 2, bw, bh)
+    }
+  }
+
+  // centre baseline
+  g.strokeStyle = accent + '44'
+  g.lineWidth = 1
+  g.beginPath()
+  g.moveTo(0, mid)
+  g.lineTo(w, mid)
+  g.stroke()
+
+  // moving playhead cursor
+  if (typeof progressRatio === 'number') {
+    const x = Math.max(0, Math.min(w, progressRatio * w))
+    g.strokeStyle = '#ffffff'
+    g.lineWidth = 2
+    g.beginPath()
+    g.moveTo(x, 0)
+    g.lineTo(x, h)
+    g.stroke()
+  }
+}
+
 export default function RecorderPage() {
   const { t } = useI18n()
   const [recording, setRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null)
+  const [previewRendering, setPreviewRendering] = useState(false)
   const [volume, setVolume] = useState(0)
   const [effect, setEffect] = useState<EffectType>('none')
   const [reverbMix, setReverbMix] = useState(0.35)
@@ -135,15 +196,27 @@ export default function RecorderPage() {
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<number | null>(null)
-  const audioUrlRef = useRef<string | null>(null)
+  const previewUrlRef = useRef<string | null>(null)
+
+  const recordCanvasRef = useRef<HTMLCanvasElement>(null)
+  const previewAudioRef = useRef<HTMLAudioElement>(null)
+  const recCtxRef = useRef<AudioContext | null>(null)
+  const recAnalyserRef = useRef<AnalyserNode | null>(null)
+  const recRafRef = useRef<number | null>(null)
+  // Amplitude envelope accumulated while recording (left -> right growth).
+  const waveformRef = useRef<number[]>([])
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      if (recRafRef.current) cancelAnimationFrame(recRafRef.current)
       streamRef.current?.getTracks().forEach((track) => track.stop())
-      if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
+      recCtxRef.current?.close().catch(() => undefined)
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
     }
   }, [])
+
+  /* ---------------- Recording ---------------- */
 
   const startRecording = async () => {
     setError(null)
@@ -159,16 +232,64 @@ export default function RecorderPage() {
       mediaRecorderRef.current = recorder
       chunksRef.current = []
 
+      // Accumulate a live amplitude envelope that grows from left to right,
+      // like an audio-workstation waveform, while the recording is running.
+      const ctx = new AudioContext()
+      const source = ctx.createMediaStreamSource(stream)
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 1024
+      const silentOut = ctx.createGain()
+      silentOut.gain.value = 0
+      source.connect(analyser)
+      analyser.connect(silentOut)
+      silentOut.connect(ctx.destination)
+      recCtxRef.current = ctx
+      recAnalyserRef.current = analyser
+
+      const waveform = waveformRef.current
+      waveform.length = 0
+      const sampleBuf = new Uint8Array(analyser.fftSize)
+      const accumulate = () => {
+        analyser.getByteTimeDomainData(sampleBuf)
+        let peak = 0
+        for (let j = 0; j < sampleBuf.length; j++) {
+          const v = Math.abs(sampleBuf[j] - 128) / 128
+          if (v > peak) peak = v
+        }
+        // Merge oldest slots in half so the envelope tracks long recordings.
+        if (waveform.length >= WAVE_MAX) {
+          const half = Math.ceil(waveform.length / 2)
+          for (let k = 0; k < half; k++) {
+            const a = waveform[k * 2] ?? 0
+            const b = waveform[k * 2 + 1] ?? 0
+            waveform[k] = Math.max(a, b)
+          }
+          waveform.length = half
+        }
+        waveform.push(peak)
+        drawWaveform(recordCanvasRef.current, waveform)
+        recRafRef.current = requestAnimationFrame(accumulate)
+      }
+      accumulate()
+
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data)
       }
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        // Tear down the live analyzer
+        if (recRafRef.current) cancelAnimationFrame(recRafRef.current)
+        recRafRef.current = null
+        source.disconnect()
+        analyser.disconnect()
+        silentOut.disconnect()
+        recCtxRef.current?.close().catch(() => undefined)
+        recCtxRef.current = null
+        recAnalyserRef.current = null
+
         setAudioBlob(blob)
-        if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
-        const url = URL.createObjectURL(blob)
-        audioUrlRef.current = url
-        setAudioUrl(url)
+        setPreviewUrl(null)
+        setPreviewBlob(null)
         stream.getTracks().forEach((track) => track.stop())
         streamRef.current = null
       }
@@ -194,16 +315,97 @@ export default function RecorderPage() {
   }
 
   const resetRecording = () => {
-    stopRecording()
+    if (recording) stopRecording()
     setAudioBlob(null)
-    setAudioUrl(null)
+    setPreviewUrl(null)
+    setPreviewBlob(null)
     setError(null)
     setProcessing(false)
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current)
-      audioUrlRef.current = null
+    waveformRef.current.length = 0
+    drawWaveform(recordCanvasRef.current, waveformRef.current)
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current)
+      previewUrlRef.current = null
     }
   }
+
+  /* ---------------- Effect preview (renders the final result) ---------------- */
+
+  const renderPreview = useCallback(
+    async (blob: Blob) => {
+      try {
+        setPreviewRendering(true)
+        const arrayBuffer = await blob.arrayBuffer()
+        const ctx = new AudioContext()
+        const decoded = await ctx.decodeAudioData(arrayBuffer)
+        const processed = await processAudio(decoded, { volumeDb: volume, effect, reverbMix, denoiseStrength })
+        const wavBlob = encodeWav(processed)
+        await ctx.close().catch(() => undefined)
+        if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+        const url = URL.createObjectURL(wavBlob)
+        previewUrlRef.current = url
+        setPreviewUrl(url)
+        setPreviewBlob(wavBlob)
+      } catch {
+        /* preview errors are non-fatal */
+      } finally {
+        setPreviewRendering(false)
+      }
+    },
+    [volume, effect, reverbMix, denoiseStrength]
+  )
+
+  // Debounced re-render whenever the recording or any effect parameter changes
+  useEffect(() => {
+    if (!audioBlob) return
+    const id = window.setTimeout(() => {
+      renderPreview(audioBlob)
+    }, 400)
+    return () => clearTimeout(id)
+  }, [audioBlob, volume, effect, reverbMix, denoiseStrength, renderPreview])
+
+  /* ---------------- Playback: static waveform + moving playhead cursor ---------------- */
+
+  useEffect(() => {
+    if (!previewUrl || !previewAudioRef.current) return
+    const audioEl = previewAudioRef.current
+    const canvas = recordCanvasRef.current
+    const points = waveformRef.current
+
+    let raf = 0
+    let playing = false
+    const render = () => {
+      const dur = audioEl.duration || 0
+      const ratio = dur > 0 ? audioEl.currentTime / dur : 0
+      drawWaveform(canvas, points, ratio)
+      if (playing) raf = requestAnimationFrame(render)
+    }
+    const start = () => {
+      playing = true
+      cancelAnimationFrame(raf)
+      render()
+    }
+    const stop = () => {
+      playing = false
+      cancelAnimationFrame(raf)
+      render() // freeze playhead at pause/end position
+    }
+
+    audioEl.addEventListener('play', start)
+    audioEl.addEventListener('pause', stop)
+    audioEl.addEventListener('ended', stop)
+    render() // draw the full waveform once a preview exists
+
+    return () => {
+      playing = false
+      cancelAnimationFrame(raf)
+      audioEl.removeEventListener('play', start)
+      audioEl.removeEventListener('pause', stop)
+      audioEl.removeEventListener('ended', stop)
+    }
+  }, [previewUrl])
+
+  /* ---------------- Export ---------------- */
 
   const handleExport = async () => {
     if (!audioBlob) {
@@ -212,18 +414,17 @@ export default function RecorderPage() {
     }
     setProcessing(true)
     setError(null)
-    const audioCtx = new AudioContext()
     try {
-      const arrayBuffer = await audioBlob.arrayBuffer()
-      const decoded = await audioCtx.decodeAudioData(arrayBuffer)
-      const processed = await processAudio(decoded, {
-        volumeDb: volume,
-        effect,
-        reverbMix,
-        denoiseStrength,
-      })
-      const wavBlob = encodeWav(processed)
-      const url = URL.createObjectURL(wavBlob)
+      let blob = previewBlob
+      if (!blob) {
+        const arrayBuffer = await audioBlob.arrayBuffer()
+        const ctx = new AudioContext()
+        const decoded = await ctx.decodeAudioData(arrayBuffer)
+        const processed = await processAudio(decoded, { volumeDb: volume, effect, reverbMix, denoiseStrength })
+        blob = encodeWav(processed)
+        await ctx.close().catch(() => undefined)
+      }
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = 'recording.wav'
@@ -232,7 +433,6 @@ export default function RecorderPage() {
     } catch {
       setError(t('lab.recorder.exportError'))
     } finally {
-      await audioCtx.close().catch(() => undefined)
       setProcessing(false)
     }
   }
@@ -247,6 +447,12 @@ export default function RecorderPage() {
         {/* Record control */}
         <div className="bg-theme-tertiary rounded-xl p-6 text-center">
           <div className="text-3xl font-mono text-theme-on-surface mb-4">{formatTime(recordingTime)}</div>
+
+          <canvas
+            ref={recordCanvasRef}
+            className="w-full h-24 mb-4 rounded-lg bg-black/40"
+            aria-hidden="true"
+          />
 
           {recording ? (
             <button
@@ -275,10 +481,11 @@ export default function RecorderPage() {
         </div>
 
         {/* Preview */}
-        {audioUrl && !recording && (
+        {previewUrl && !recording && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-theme-on-surface">
+              <label className="text-sm font-medium text-theme-on-surface flex items-center gap-2">
+                <AudioWaveform className="w-4 h-4 text-primary" />
                 {t('lab.recorder.recordedPreview')}
               </label>
               <button
@@ -289,12 +496,18 @@ export default function RecorderPage() {
                 {t('lab.recorder.reRecord')}
               </button>
             </div>
-            <audio controls src={audioUrl} className="w-full" />
+            {previewRendering && (
+              <p className="text-sm text-theme-secondary flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('lab.recorder.previewProcessing')}
+              </p>
+            )}
+            <audio key={previewUrl} ref={previewAudioRef} controls src={previewUrl} className="w-full" />
           </div>
         )}
 
         {/* Effects */}
-        {audioUrl && !recording && (
+        {previewUrl && !recording && (
           <div className="space-y-5">
             {/* Effect selector */}
             <div>
@@ -378,7 +591,7 @@ export default function RecorderPage() {
             {/* Export */}
             <button
               onClick={handleExport}
-              disabled={processing}
+              disabled={processing || previewRendering}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
             >
               {processing ? (

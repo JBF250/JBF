@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 import './BorderGlow.css';
 
 function parseHSL(hslStr) {
@@ -33,16 +34,6 @@ function buildGradientVars(colors) {
   return vars;
 }
 
-function isLightColor(color) {
-  const value = color.trim().replace('#', '');
-  if (!/^[\da-f]{3}([\da-f]{3})?$/i.test(value)) return false;
-  const hex = value.length === 3 ? value.split('').map(char => char + char).join('') : value;
-  const red = parseInt(hex.slice(0, 2), 16);
-  const green = parseInt(hex.slice(2, 4), 16);
-  const blue = parseInt(hex.slice(4, 6), 16);
-  return red * 0.2126 + green * 0.7152 + blue * 0.0722 > 180;
-}
-
 function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
 function easeInCubic(x) { return x * x * x; }
 
@@ -73,6 +64,12 @@ const BorderGlow = ({
   fillOpacity = 0.5,
 }) => {
   const cardRef = useRef(null);
+  const { themeMode } = useTheme();
+  const isLight = themeMode === 'light';
+
+  // 两套光效：浅色模式用与粉/白对立的亮青色（在白卡片上清晰可见），深色模式沿用传入的青色系
+  const actualGlowColor = isLight ? '196 100 62' : glowColor;
+  const actualColors = isLight ? ['#0ea5e9', '#22d3ee', '#38bdf8'] : colors;
 
   const getCenterOfElement = useCallback((el) => {
     const { width, height } = el.getBoundingClientRect();
@@ -137,14 +134,13 @@ const BorderGlow = ({
     });
   }, [animated]);
 
-  const glowVars = buildGlowVars(glowColor, glowIntensity);
-  const lightSurface = isLightColor(backgroundColor);
+  const glowVars = buildGlowVars(actualGlowColor, glowIntensity);
 
   return (
     <div
       ref={cardRef}
       onPointerMove={handlePointerMove}
-      className={`border-glow-card${lightSurface ? ' border-glow-card--light' : ''} ${className}`}
+      className={`border-glow-card${isLight ? ' border-glow-card--light' : ''} ${className}`}
       style={{
         '--card-bg': backgroundColor,
         '--edge-sensitivity': edgeSensitivity,
@@ -153,7 +149,7 @@ const BorderGlow = ({
         '--cone-spread': coneSpread,
         '--fill-opacity': fillOpacity,
         ...glowVars,
-        ...buildGradientVars(colors),
+        ...buildGradientVars(actualColors),
       }}
     >
       <span className="edge-light" />

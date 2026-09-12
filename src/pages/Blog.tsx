@@ -7,6 +7,7 @@ import gainianPosts from '@/lib/gainianPosts'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Avatar from '@/components/Avatar'
 import BorderGlow from '@/components/BorderGlow'
+import { BlogCardSkeleton } from '@/components/Skeleton'
 
 export type CommunityPostWithAuthor = CommunityPost & {
   author?: { display_name: string; avatar_url: string | null; username: string } | null
@@ -21,6 +22,7 @@ export default function Blog() {
   )
   const [posts, setPosts] = useState<CommunityPostWithAuthor[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [skeletonCount, setSkeletonCount] = useState(3)
   const [postStats, setPostStats] = useState<Record<string, { likes: number; comments: number }>>({})
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -100,6 +102,12 @@ export default function Blog() {
 
   const fetchCommunityPosts = async () => {
     setIsLoading(true)
+    // 第一步先查询后端贴子总数，让占位卡片数量与实际贴子数量大致一致
+    const { count } = await supabase
+      .from('community_posts')
+      .select('id', { count: 'exact', head: true })
+    setSkeletonCount(count ? Math.min(Math.max(count, 1), 12) : 3)
+
     const { data, error } = await supabase
       .from('community_posts')
       .select('*')
@@ -258,7 +266,7 @@ export default function Blog() {
                 className={`w-full px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'community'
                     ? 'bg-gradient-primary btn-primary-text'
-                    : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                    : 'bg-transparent text-theme-secondary hover:text-primary'
                 }`}
               >
                 {t('blog.community')}
@@ -279,7 +287,7 @@ export default function Blog() {
                 className={`w-full px-4 py-3 rounded-xl font-medium transition-all ${
                   activeTab === 'gainian'
                     ? 'bg-gradient-primary btn-primary-text'
-                    : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                    : 'bg-transparent text-theme-secondary hover:text-primary'
                 }`}
               >
                 {t('blog.gainian')}
@@ -306,7 +314,7 @@ export default function Blog() {
                     className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
                       activeTab === 'community'
                         ? 'bg-gradient-primary btn-primary-text'
-                        : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                        : 'bg-transparent text-theme-secondary hover:text-primary'
                     }`}
                   >
                     {t('blog.community')}
@@ -326,7 +334,7 @@ export default function Blog() {
                     className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all ${
                       activeTab === 'gainian'
                         ? 'bg-gradient-primary btn-primary-text'
-                        : 'bg-transparent text-theme-secondary hover:text-theme-primary'
+                        : 'bg-transparent text-theme-secondary hover:text-primary'
                     }`}
                   >
                     {t('blog.gainian')}
@@ -370,15 +378,17 @@ export default function Blog() {
                   </div>
 
                   {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="space-y-4">
+                      {Array.from({ length: skeletonCount }).map((_, i) => (
+                        <BlogCardSkeleton key={i} />
+                      ))}
                     </div>
                   ) : posts.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-theme-secondary">{t('blog.contentPlaceholder')}</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 animate-fade-in">
                       {posts.map((post) => (
                         <BorderGlow
                           key={post.id}

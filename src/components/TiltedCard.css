@@ -50,6 +50,41 @@
   transform: translateZ(30px);
 }
 
+/* 图片加载占位：骨架图 + 中央圆形进度环 */
+.tilted-card-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.tilted-card-loading > .skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+}
+
+.tilted-loader-ring {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+.tilted-loader-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
 .tilted-card-caption {
   pointer-events: none;
   position: absolute;

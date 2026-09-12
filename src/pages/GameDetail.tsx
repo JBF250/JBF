@@ -85,7 +85,7 @@ export default function GameDetail() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${baseClass} bg-gradient-to-r from-cyan-500 to-sky-400 text-white`}
+            className={`${baseClass} bg-gradient-primary btn-primary-text`}
           >
             <ExternalLink className="w-4 h-4" />
             {t('detail.watchBilibili')}

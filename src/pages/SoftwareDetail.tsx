@@ -22,7 +22,7 @@ export default function SoftwareDetail() {
           <p className="text-gray-500 mb-6">{t('detail.back')}</p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-secondary to-cyan-400 text-white font-medium rounded-xl hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity"
           >
             <ArrowLeft className="w-5 h-5" />
             {t('detail.back')}
@@ -112,7 +112,7 @@ export default function SoftwareDetail() {
           <div className="mt-8 text-center">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-secondary to-cyan-400 text-white font-medium rounded-xl hover:opacity-90 transition-opacity hover:scale-105"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-primary btn-primary-text font-medium rounded-xl hover:opacity-90 transition-opacity hover:scale-105"
             >
               <ArrowLeft className="w-5 h-5" />
               {t('detail.back')}

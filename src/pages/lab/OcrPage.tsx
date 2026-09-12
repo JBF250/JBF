@@ -1,21 +1,21 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useI18n } from '@/context/I18nContext'
 import { LabLayout } from './LabLayout'
-import Tesseract from 'tesseract.js'
-import { ScanText, Loader2, Copy, Download, X, Info } from 'lucide-react'
+import { ScanText, Loader2, Copy, Download, X, Info, Languages } from 'lucide-react'
+import { getEngine, setEngineProgress } from '@/lib/ocr'
 
-type OcrLang = 'chi_sim' | 'eng' | 'jpn'
-
-const ACCEPTED = ['image/png', 'image/jpeg', 'image/webp', 'image/bmp']
+const ACCEPTED = ['image/png']
 const MAX_SIZE = 20 * 1024 * 1024
+
+type EngineState = 'idle' | 'loading' | 'ready' | 'error'
 
 export default function OcrPage() {
   const { t } = useI18n()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [lang, setLang] = useState<OcrLang>('chi_sim')
+  const [engineState, setEngineState] = useState<EngineState>('idle')
+  const [engineProgress, setEngineProgressState] = useState(0)
   const [recognizing, setRecognizing] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [resultText, setResultText] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -26,7 +26,6 @@ export default function OcrPage() {
     setImagePreview(null)
     setResultText('')
     setError(null)
-    setProgress(0)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -41,36 +40,36 @@ export default function OcrPage() {
     }
     setError(null)
     setResultText('')
-    setProgress(0)
     setImageFile(file)
-
-    const url = URL.createObjectURL(file)
-    setImagePreview(url)
+    setImagePreview(URL.createObjectURL(file))
   }
 
-  const handleRecognize = async () => {
+  const handleRecognize = useCallback(async () => {
     if (!imageFile) return
     setRecognizing(true)
     setError(null)
     setResultText('')
-    setProgress(0)
     try {
-      const result = await Tesseract.recognize(imageFile, lang, {
-        workerPath: '/tesseract/worker.min.js',
-        corePath: '/tesseract/core',
-        langPath: '/tesseract/lang',
-        logger: (m) => {
-          if (typeof m.progress === 'number') setProgress(m.progress)
-        },
-      })
-      setResultText(result.data.text.trim())
+      if (engineState !== 'ready') {
+        setEngineState('loading')
+        setEngineProgressState(0)
+        setEngineProgress((p) => setEngineProgressState(p))
+      }
+      const engine = await getEngine()
+      setEngineState('ready')
+      setEngineProgress(null)
+      const result = await engine.recognize(imageFile)
+      setResultText(result.fullText.trim())
+      if (!result.fullText.trim()) {
+        setError(t('lab.imageText.recognizeError'))
+      }
     } catch {
+      setEngineState('error')
       setError(t('lab.imageText.recognizeError'))
     } finally {
       setRecognizing(false)
-      setProgress(0)
     }
-  }
+  }, [imageFile, engineState, t])
 
   const copyText = async () => {
     if (!resultText) return
@@ -93,6 +92,11 @@ export default function OcrPage() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  const recognizingLabel =
+    engineState === 'loading' || (recognizing && engineState !== 'ready')
+      ? `${t('lab.imageText.engineLoading')} ${engineState === 'loading' ? Math.round(engineProgress * 100) + '%' : ''}`
+      : t('lab.imageText.recognizing')
 
   return (
     <LabLayout
@@ -122,7 +126,7 @@ export default function OcrPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/bmp"
+              accept="image/png"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0]
@@ -158,20 +162,10 @@ export default function OcrPage() {
                   </button>
                 </div>
 
-                {/* Language selector */}
-                <div>
-                  <label className="block text-sm font-medium text-theme-on-surface mb-1">
-                    {t('lab.imageText.languageLabel')}
-                  </label>
-                  <select
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value as OcrLang)}
-                    className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface"
-                  >
-                    <option value="chi_sim">{t('lab.imageText.langZh')}</option>
-                    <option value="eng">{t('lab.imageText.langEn')}</option>
-                    <option value="jpn">{t('lab.imageText.langJa')}</option>
-                  </select>
+                {/* Multilingual engine note */}
+                <div className="flex items-start gap-2 bg-theme-tertiary rounded-xl p-3">
+                  <Languages className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-theme-secondary text-sm">{t('lab.imageText.multilingualHint')}</p>
                 </div>
               </div>
             </div>
@@ -191,7 +185,7 @@ export default function OcrPage() {
               {recognizing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {t('lab.imageText.recognizing')} {Math.round(progress * 100)}%
+                  {recognizingLabel}
                 </>
               ) : (
                 <>

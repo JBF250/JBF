@@ -40,6 +40,19 @@ export default function HeroCanvas() {
     lastWheelTimeRef.current = now
   }, [])
 
+  // 手机端陀螺仪：替代鼠标驱动相机视角
+  const handleOrientation = useCallback((e: DeviceOrientationEvent) => {
+    if (!isMobile.current) return
+    if (e.gamma == null || e.beta == null) return
+    // gamma：左右偏转 → 水平旋转；beta（直立约为90）→ 纵向俯仰
+    let gx = (e.gamma || 0) / 70
+    let gy = (90 - (e.beta || 90)) / 80
+    gx = Math.max(-1.2, Math.min(1.2, gx))
+    gy = Math.max(-1.2, Math.min(1.2, gy))
+    mouseX.current.value = gx
+    mouseY.current.value = gy
+  }, [])
+
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -198,9 +211,39 @@ export default function HeroCanvas() {
     let targetCameraY = 0
     let animationTime = 0
 
+    let cleanupOrientation: (() => void) | undefined
     if (location.pathname === '/') {
       window.addEventListener('mousemove', handleMouseMove)
       window.addEventListener('wheel', handleWheel, { passive: false })
+
+      // 手机端：用陀螺仪驱动相机。iOS 需在用户手势后请求权限，安卓直接监听
+      if (isMobile.current) {
+        const DOE = window.DeviceOrientationEvent as unknown as {
+          requestPermission?: () => Promise<string>
+        }
+        const startOrientation = () =>
+          window.addEventListener('deviceorientation', handleOrientation, true)
+        if (DOE && typeof DOE.requestPermission === 'function') {
+          const requestAndWatch = async () => {
+            try {
+              const state = await DOE.requestPermission!()
+              if (state === 'granted') startOrientation()
+            } catch {
+              /* 权限被拒则保持静止 */
+            }
+          }
+          window.addEventListener('pointerdown', requestAndWatch, { once: true })
+          window.addEventListener('touchstart', requestAndWatch, { once: true })
+          cleanupOrientation = () => {
+            window.removeEventListener('pointerdown', requestAndWatch)
+            window.removeEventListener('touchstart', requestAndWatch)
+          }
+        } else {
+          startOrientation()
+          cleanupOrientation = () =>
+            window.removeEventListener('deviceorientation', handleOrientation, true)
+        }
+      }
     }
 
     const animate = () => {
@@ -234,17 +277,17 @@ export default function HeroCanvas() {
       planetRotationY.current += planetRotationVelocity.current
       planet.rotation.y = planetRotationY.current
 
-      if (!isMobile.current) {
-        targetCameraX += (mouseX.current.value - targetCameraX) * 0.05
-        targetCameraY += (mouseY.current.value - targetCameraY) * 0.05
-        const radius = 5
-        const theta = targetCameraX * Math.PI / 3
-        const phi = targetCameraY * Math.PI / 4 + Math.PI / 2
-        camera.position.x = radius * Math.sin(phi) * Math.cos(theta)
-        camera.position.y = radius * Math.cos(phi)
-        camera.position.z = radius * Math.sin(phi) * Math.sin(theta)
-        camera.lookAt(0, 0, 0)
-      }
+      // 手机陀螺仪与桌面鼠标共用的相机视差（桌面看鼠标，手机看陀螺仪）
+      targetCameraX += (mouseX.current.value - targetCameraX) * 0.05
+      // 反转纵向：鼠标上移 → 相机下移（朝上看），避免“鼠标上移却往下看”
+      targetCameraY += (-mouseY.current.value - targetCameraY) * 0.05
+      const radius = 5
+      const theta = targetCameraX * Math.PI / 3
+      const phi = targetCameraY * Math.PI / 4 + Math.PI / 2
+      camera.position.x = radius * Math.sin(phi) * Math.cos(theta)
+      camera.position.y = radius * Math.cos(phi)
+      camera.position.z = radius * Math.sin(phi) * Math.sin(theta)
+      camera.lookAt(0, 0, 0)
 
       if (animationTime < 0.8) {
         const progress = animationTime / 0.8
@@ -304,6 +347,8 @@ export default function HeroCanvas() {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      cleanupOrientation?.()
+      window.removeEventListener('deviceorientation', handleOrientation, true)
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('wheel', handleWheel)
@@ -321,7 +366,7 @@ export default function HeroCanvas() {
         ;(ring.material as THREE.MeshBasicMaterial).dispose()
       })
     }
-  }, [themeMode, handleMouseMove, handleWheel, location.pathname])
+  }, [themeMode, handleMouseMove, handleWheel, handleOrientation, location.pathname])
 
   return (
     <div ref={containerRef} className="w-full h-full absolute inset-0" />

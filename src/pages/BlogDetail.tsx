@@ -7,6 +7,8 @@ import { supabase, type CommunityPost } from '@/lib/supabase'
 import gainianPosts, { type GainianPost } from '@/lib/gainianPosts'
 import { useResetScroll } from '@/hooks/useResetScroll'
 import Avatar from '@/components/Avatar'
+import BorderGlow from '@/components/BorderGlow'
+import LazyImage from '@/components/LazyImage'
 
 interface Comment {
   id: string
@@ -279,40 +281,35 @@ export default function BlogDetail() {
           const imageUrl = matched || `/pictures/${part}`
           if (matched) usedImages.add(matched)
           return (
-            <img
+            <LazyImage
               key={index}
               src={imageUrl}
               alt={part}
-              crossOrigin="anonymous"
-              className="max-w-full h-auto rounded-xl my-6"
-              onError={(e) => {
-                console.warn('Blog image failed to load:', imageUrl)
-                ;(e.target as HTMLImageElement).style.opacity = '0.5'
-              }}
+              wrapperClass="my-6 block"
+              imgClass="w-full h-auto rounded-xl block"
             />
           )
         }
-        return (
-          <p key={index} className="text-theme-secondary leading-relaxed mb-4 text-base">
-            {part}
-          </p>
-        )
+        return part.split('\n').map((paragraph, pIndex) => {
+          if (!paragraph.trim()) return null
+          return (
+            <p key={`${index}-${pIndex}`} className="text-theme-secondary leading-relaxed mb-4 text-base">
+              {paragraph}
+            </p>
+          )
+        })
       })
 
       // 渲染未在内容中引用的上传图片
       const extraImages = images
         .filter(img => !usedImages.has(img))
         .map((img, index) => (
-          <img
+          <LazyImage
             key={`extra-${index}`}
             src={img}
             alt={`Image ${index + 1}`}
-            crossOrigin="anonymous"
-            className="max-w-full h-auto rounded-xl my-6"
-            onError={(e) => {
-              console.warn('Blog extra image failed to load:', img)
-              ;(e.target as HTMLImageElement).style.opacity = '0.5'
-            }}
+            wrapperClass="my-6 block"
+            imgClass="w-full h-auto rounded-xl block"
           />
         ))
 
@@ -326,11 +323,12 @@ export default function BlogDetail() {
       return parts.map((part, index) => {
         if (index % 2 === 1) {
           return (
-            <img
+            <LazyImage
               key={index}
               src={`/pictures/${part}`}
               alt={part}
-              className="max-w-full h-auto rounded-xl my-6"
+              wrapperClass="my-6 block"
+              imgClass="w-full h-auto rounded-xl block"
             />
           )
         }
@@ -413,24 +411,44 @@ export default function BlogDetail() {
           </div>
 
           <div className="flex items-center justify-center gap-8 mb-12 pb-8 border-b border-theme-color">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${
-                isLiked
-                  ? 'bg-gradient-primary btn-primary-text'
-                  : 'bg-theme-card text-theme-secondary hover:text-theme-primary border border-theme-color'
-              }`}
+            <BorderGlow
+              backgroundColor="var(--bg-card)"
+              glowColor="180 40 70"
+              colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+              borderRadius={12}
+              glowRadius={12}
+              glowIntensity={0.9}
+              coneSpread={28}
             >
-              <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              <span className="font-medium">{likes}</span>
-            </button>
-            <button
-              onClick={scrollToComments}
-              className="flex items-center gap-2 px-6 py-3 bg-theme-card text-theme-secondary hover:text-theme-primary border border-theme-color rounded-xl transition-colors"
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${
+                  isLiked
+                    ? 'bg-gradient-primary btn-primary-text'
+                    : 'bg-theme-card text-theme-secondary hover:text-theme-primary border border-theme-color'
+                }`}
+              >
+                <ThumbsUp className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                <span className="font-medium">{likes}</span>
+              </button>
+            </BorderGlow>
+            <BorderGlow
+              backgroundColor="var(--bg-card)"
+              glowColor="180 40 70"
+              colors={['#22d3ee', '#94a3b8', '#a5b4fc']}
+              borderRadius={12}
+              glowRadius={12}
+              glowIntensity={0.9}
+              coneSpread={28}
             >
-              <MessageCircle className="w-5 h-5" />
-              <span className="font-medium">{comments.length}</span>
-            </button>
+              <button
+                onClick={scrollToComments}
+                className="flex items-center gap-2 px-6 py-3 bg-theme-card text-theme-secondary hover:text-theme-primary border border-theme-color rounded-xl transition-colors"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-medium">{comments.length}</span>
+              </button>
+            </BorderGlow>
           </div>
 
           <div className="prose max-w-none mb-16">

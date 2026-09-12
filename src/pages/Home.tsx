@@ -2,6 +2,7 @@ import { useLenis } from '@/hooks/useLenis'
 import { Link, useLocation } from 'react-router-dom'
 import { ArrowDown, Github, Mail } from 'lucide-react'
 import { useI18n } from '@/context/I18nContext'
+import { useTheme } from '@/context/ThemeContext'
 import works from '@/data/works.json'
 import { AnimatedSection, AnimatedElement } from '@/components/AnimatedSection'
 import CertificateTimeline from '@/components/CertificateTimeline'
@@ -12,6 +13,7 @@ import { useEffect, useState, useRef } from 'react'
 
 export default function Home() {
   const { t, lang } = useI18n()
+  const { themeMode } = useTheme()
   const [heroVisible, setHeroVisible] = useState(true)
   const [showText, setShowText] = useState(false)
   const heroRef = useRef<HTMLElement>(null)
@@ -55,6 +57,8 @@ export default function Home() {
   }, [])
 
   const currentLang = lang
+  // 浅色模式用粉色深度色，深色模式保持青色
+  const heroDepthColor = themeMode === 'light' ? '#f472b6' : '#22d3ee'
 
   return (
     <div className="relative">
@@ -71,7 +75,7 @@ export default function Home() {
               depth={2}
               tilt={6}
               faceColor="#f8fafc"
-              depthColor="#22d3ee"
+              depthColor={heroDepthColor}
               fontSize="clamp(3.5rem, 10vw, 9rem)"
               fontWeight={900}
               orbitSpeed={0.15}
@@ -82,7 +86,7 @@ export default function Home() {
               depth={2}
               tilt={6}
               faceColor="#f8fafc"
-              depthColor="#22d3ee"
+              depthColor={heroDepthColor}
               fontSize="clamp(3rem, 9vw, 8rem)"
               fontWeight={900}
               orbitSpeed={0.15}
@@ -212,7 +216,7 @@ export default function Home() {
             {works.games.map((game, index) => (
               <AnimatedElement key={game.id} delay={400 + index * 150}>
                 <div 
-                  className="group bg-theme-card/50 backdrop-blur-sm rounded-3xl overflow-hidden hover:scale-105 transition-all duration-700 cursor-pointer border border-theme-color"
+                  className="group card-glass rounded-3xl overflow-hidden hover:scale-105 transition-all duration-700 cursor-pointer"
                 >
                   <TiltedCard
                     imageSrc={`/${game.thumbnail}`}
@@ -283,7 +287,7 @@ export default function Home() {
             {works.software.map((software, index) => (
               <AnimatedElement key={software.id} delay={400 + index * 150} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)]">
                 <div 
-                  className="group bg-theme-card/50 backdrop-blur-sm rounded-3xl overflow-hidden hover:scale-105 transition-all duration-700 cursor-pointer border border-theme-color"
+                  className="group card-glass rounded-3xl overflow-hidden hover:scale-105 transition-all duration-700 cursor-pointer"
                 >
                   {software.thumbnail ? (
                     <TiltedCard

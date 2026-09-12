@@ -49,7 +49,7 @@ export default function Settings() {
         display_name: displayName,
         theme_color: isDarkMode ? '#8b5cf6' : '#ffffff',
         language: language,
-        custom_cursor: customCursor
+        custom_cursor: customCursor,
       }
       
       if (avatarUrl) {
