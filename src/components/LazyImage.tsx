@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
-// 图片加载动画：骨架图 + 中央圆形进度环，加载完成渐入，失败时以半透明显示
+// 图片加载:骨架图 + 真实下载进度环(流式读取字节计算百分比),
+// 完成后渐入;已缓存图片走快速路径直接显示;fetch 失败则回退普通 img。
 export default function LazyImage({
   src,
   alt = '',
@@ -14,42 +15,86 @@ export default function LazyImage({
   imgClass?: string
   minHeight?: number
 }) {
-  const loadedRef = useRef(false)
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [indeterminate, setIndeterminate] = useState(false)
+  const [source, setSource] = useState('')
+  const urlRef = useRef('')
 
   useEffect(() => {
-    loadedRef.current = false
     setLoaded(false)
     setError(false)
     setProgress(0)
-
-    const img = new Image()
-    img.src = src
-    img.onload = () => {
-      loadedRef.current = true
-      setProgress(100)
-      setLoaded(true)
-    }
-    if (img.complete) {
-      loadedRef.current = true
-      setProgress(100)
-      setLoaded(true)
+    setIndeterminate(false)
+    setSource('')
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current)
+      urlRef.current = ''
     }
 
-    const ease = (p: number) => 1 - Math.pow(1 - p, 3)
-    const duration = 1400
-    const t0 = performance.now()
-    let raf = 0
-    const tick = (now: number) => {
-      if (loadedRef.current) return
-      const t = Math.min((now - t0) / duration, 1)
-      setProgress(Math.min(ease(t) * 100, 99))
-      if (t < 1) raf = requestAnimationFrame(tick)
+    let cancelled = false
+    let blobUrl = ''
+
+    // 快速路径:浏览器缓存里已有完整图片 -> 直接用原地址,免去任何等待
+    const probe = new Image()
+    probe.src = src
+    if (probe.complete && probe.naturalWidth > 0) {
+      setSource(src)
+      setProgress(100)
+      setLoaded(true)
+      return
     }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
+
+    // 主路径:fetch 流式读取,以字节比例给出真实进度
+    const controller = new AbortController()
+    fetch(src, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok || !res.body) return null
+        const total = Number(res.headers.get('Content-Length')) || 0
+        const reader = res.body.getReader()
+        const chunks: Uint8Array[] = []
+        let received = 0
+        for (;;) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+          received += value.length
+          if (total > 0 && !cancelled) {
+            setProgress(Math.min(99, Math.round((received / total) * 100)))
+          }
+        }
+        if (cancelled) return null
+        const contentType = res.headers.get('Content-Type') || ''
+        blobUrl = URL.createObjectURL(
+          new Blob(chunks as BlobPart[], { type: mimeTypeOf(src, contentType) })
+        )
+        return blobUrl
+      })
+      .then((url) => {
+        if (cancelled) return
+        if (url) {
+          urlRef.current = url
+          setSource(url)
+          setProgress(100)
+          setLoaded(true)
+        } else {
+          // fetch 失败/无法流式(如外部图跨域) -> 回退普通 img,不显示假百分比
+          setIndeterminate(true)
+          setSource(src)
+        }
+      })
+      .catch(() => {
+        if (cancelled) return
+        setIndeterminate(true)
+        setSource(src)
+      })
+
+    return () => {
+      cancelled = true
+      controller.abort()
+      if (blobUrl) URL.revokeObjectURL(blobUrl)
+    }
   }, [src])
 
   const ringRadius = 21
@@ -62,7 +107,12 @@ export default function LazyImage({
     >
       {!loaded && (
         <div className="absolute inset-0 rounded-xl flex items-center justify-center skeleton-shimmer">
-          <svg className="tilted-loader-ring" viewBox="0 0 48 48" width="56" height="56">
+          <svg
+            className={`tilted-loader-ring ${indeterminate ? 'lazy-ring-rotate' : ''}`}
+            viewBox="0 0 48 48"
+            width="56"
+            height="56"
+          >
             <circle
               cx="24"
               cy="24"
@@ -79,26 +129,32 @@ export default function LazyImage({
               stroke="#22d3ee"
               strokeWidth="4"
               strokeLinecap="round"
-              strokeDasharray={ringLength}
-              strokeDashoffset={ringLength * (1 - progress / 100)}
+              strokeDasharray={
+                indeterminate
+                  ? `calc(0.45 * ${ringLength}) ${ringLength}`
+                  : ringLength
+              }
+              strokeDashoffset={
+                indeterminate ? ringLength * 0.75 : ringLength * (1 - progress / 100)
+              }
               transform="rotate(-90 24 24)"
             />
           </svg>
-          <span className="tilted-loader-text">{Math.round(progress)}%</span>
+          {!indeterminate && (
+            <span className="tilted-loader-text">{Math.round(progress)}%</span>
+          )}
         </div>
       )}
 
       <img
-        src={src}
+        src={source}
         alt={alt}
         onLoad={() => {
-          loadedRef.current = true
           setProgress(100)
           setLoaded(true)
         }}
         onError={() => {
           setError(true)
-          loadedRef.current = true
           setLoaded(true)
         }}
         className={imgClass}
@@ -109,4 +165,20 @@ export default function LazyImage({
       />
     </div>
   )
+}
+
+function mimeTypeOf(url: string, contentType: string): string {
+  if (contentType.startsWith('image/')) return contentType
+  const m = (url.split('?')[0].match(/\.(\w+)$/) || [])[1]
+  const map: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    avif: 'image/avif',
+    svg: 'image/svg+xml',
+    bmp: 'image/bmp'
+  }
+  return (m && map[m]) || 'application/octet-stream'
 }

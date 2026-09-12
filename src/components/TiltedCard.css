@@ -85,6 +85,17 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
+/* 不确定进度的旋转环(流式/跨域不可用时的回退指示) */
+.lazy-ring-rotate {
+  animation: lazy-ring-spin 1s linear infinite;
+}
+
+@keyframes lazy-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .tilted-card-caption {
   pointer-events: none;
   position: absolute;
