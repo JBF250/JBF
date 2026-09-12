@@ -1,41 +1,52 @@
-import { OcrEngine } from '@ocr-web/core'
+/**
+ * OCR 引擎(单例懒加载)。
+ * 使用本地化的 Tesseract.js(worker/core/语言包均在 public/tesseract)，
+ * 避免 PP-OCR(onnxruntime-web)在 COEP 隔离 + Vite 打包 + Cloudflare 25MiB
+ * 组合下的 wasm 过大/worker 崩溃问题。
+ */
+import { createWorker } from 'tesseract.js'
+import type { Worker } from 'tesseract.js'
 
-let enginePromise: Promise<OcrEngine> | null = null
-let progressCb: ((p: number) => void) | null = null
+type ProgressCb = ((progress: number) => void) | null
 
-export function setEngineProgress(cb: ((p: number) => void) | null) {
+let progressCb: ProgressCb = null
+
+export function setEngineProgress(cb: ProgressCb): void {
   progressCb = cb
 }
 
-/**
- * Lazy-singleton: builds and caches a single RapidOCR/PP-OCRv5 engine.
- * ONNX 模型本地托管；onnxruntime 的 wasm（26.5MiB 超出 Cloudflare Pages 单文件 25MiB 限制）
- * 改为从 Supabase Storage 公开桶拉取。
- */
-const ORT_STORAGE_BASE = 'https://noiebpjyskscjtmdytxj.supabase.co/storage/v1/object/public/ort/'
+const WORKER_PATH = '/tesseract/worker.min.js'
+// 用非 SIMD 的 lstm core，兼容性最好；单个也是小体积，无 25MiB 困扰
+const CORE_PATH = '/tesseract/core/tesseract-core-lstm.wasm.js'
+const LANG_PATH = '/tesseract/lang'
 
-export function getEngine(): Promise<OcrEngine> {
-  if (!enginePromise) {
-    enginePromise = OcrEngine.create({
-      models: {
-        detection: '/ocr/ppocrv5_det.onnx',
-        recognition: '/ocr/ppocrv5_rec.onnx',
-      },
-      dictionary: '/ocr/ppocrv5_dict.txt',
-      runtime: 'wasm',
-      // 让 onnxruntime 的 glue(.mjs) 与 wasm 都从 Supabase Storage 拉取，避免部署超限
-      wasmPaths: {
-        'ort-wasm-simd-threaded.jsep.mjs': ORT_STORAGE_BASE + 'ort-wasm-simd-threaded.jsep.mjs',
-        'ort-wasm-simd-threaded.jsep.wasm': ORT_STORAGE_BASE + 'ort-wasm-simd-threaded.jsep.wasm',
-      },
-      numThreads: 2,
-      onProgress: ({ loaded, total }) => {
-        if (progressCb) progressCb(total > 0 ? loaded / total : 0)
+let workerPromise: Promise<Worker> | null = null
+
+function getWorker(): Promise<Worker> {
+  if (!workerPromise) {
+    workerPromise = createWorker(['chi_sim', 'eng', 'jpn'], 1, {
+      workerPath: WORKER_PATH,
+      corePath: CORE_PATH,
+      langPath: LANG_PATH,
+      logger: (m) => {
+        if (progressCb && typeof m.progress === 'number') {
+          progressCb(m.progress)
+        }
       },
     }).catch((err) => {
-      enginePromise = null
+      workerPromise = null
       throw err
     })
   }
-  return enginePromise
+  return workerPromise
+}
+
+export function getEngine() {
+  return {
+    async recognize(file: File): Promise<{ fullText: string }> {
+      const worker = await getWorker()
+      const { data } = await worker.recognize(file)
+      return { fullText: data.text ?? '' }
+    },
+  }
 }
