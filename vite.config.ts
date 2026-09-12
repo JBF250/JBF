@@ -57,12 +57,33 @@ function servePublicOrt(): Plugin {
   }
 }
 
+/**
+ * onnxruntime-web 会把它的 wasm(26.5MiB)自动孪生一份进 dist 资产。
+ * 运行时已改从 Supabase Storage 拉取(见 src/lib/ocr.ts 的 wasmPaths)，这份本地副本无用
+ * 且超出 Cloudflare Pages 单文件 25MiB 限制，故在 output 阶段剔除。
+ */
+function stripOrtWasm(): Plugin {
+  return {
+    name: 'strip-ort-wasm',
+    generateBundle(_options, bundle) {
+      for (const name of Object.keys(bundle)) {
+        const file = bundle[name]
+        if (file.type === 'asset' && /ort-wasm-.*\.wasm$/.test(file.fileName)) {
+          delete bundle[name]
+          this.warn(`已剔除超限的 onnxruntime wasm 资产: ${file.fileName}`)
+        }
+      }
+    },
+  }
+}
+
 export default defineConfig({
   base: '/',
   plugins: [
     react(),
     crossOriginIsolation(),
     servePublicOrt(),
+    stripOrtWasm(),
   ],
   optimizeDeps: {
     exclude: ['onnxruntime-web', '@ocr-web/core'],
