@@ -106,10 +106,11 @@ export default function ConverterPage() {
       ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
         setProgress(Math.max(0, Math.min(100, Math.round(p * 100))))
       })
-      const hasSAB = typeof SharedArrayBuffer !== 'undefined'
-      const isCOI = typeof (window as any).crossOriginIsolated !== 'undefined' && (window as any).crossOriginIsolated
-      const useMt = hasSAB && isCOI
-      addLog(`FFmpeg (音频) 初始化中... ${useMt ? '(多线程模式)' : '(单线程模式)'}`)
+      // 始终走单线程:存储桶仅部署了单线程核心文件(ffmpeg-core.esm.js/.wasm),
+      // 多线程所需 ffmpeg-core-mt.esm.js / ffmpeg-core-mt.worker.js 缺失(404),
+      // 加载会一直重试而卡在 0%。即使环境支持 SharedArrayBuffer,也统一用单线程以保证稳定。
+      const useMt = false
+      addLog('FFmpeg (音频) 初始化中... (单线程模式)')
       let coreURL: string, wasmURL: string, workerURL: string | undefined
       if (useMt) {
         coreURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-mt-esm.js`, 'text/javascript')
