@@ -222,7 +222,7 @@
       },
       "converter": {
         "title": "ファイル変換",
-        "desc": "画像・音声・動画の変換"
+        "desc": "画像変換・音声変換・音声抽出"
       },
       "gifTool": {
         "title": "GIFツール",
@@ -289,8 +289,7 @@
     "converter": {
       "imageTab": "画像変換",
       "audioTab": "音声変換",
-      "videoTab": "動画変換",
-      "extractTab": "動画→音声",
+      "extractTab": "音声抽出",
       "dropFile": "クリックまたはドラッグ&ドロップ",
       "orClick": "アップロード",
       "maxFileSize": "最大ファイルサイズ：500MB",
@@ -302,11 +301,6 @@
       "height": "高さ (px)",
       "bitrate": "ビットレート",
       "sampleRate": "サンプルレート",
-      "videoQuality": "動画品質",
-      "fast": "高速",
-      "medium": "標準",
-      "slow": "高品質",
-      "videoBitrate": "動画ビットレート",
       "convert": "変換開始",
       "converting": "変換中",
       "downloadResult": "ファイルをダウンロード",
@@ -322,7 +316,6 @@
       "log": "ログ",
       "maintenanceTitle": "フォーマット変換メンテナンス中",
       "maintenanceDesc": "マルチスレッド FFmpeg 対応のためフォーマット変換機能を一時停止しています。画像変換など他の機能は引き続きご利用いただけます。",
-      "shortVideoTip": "短い動画（3分以内）での変換をおすすめします。長い動画はブラウザでメモリ不足により処理に失敗する可能性があります。",
       "volumeGain": "音量ゲイン",
       "trimAudio": "オーディオトリム",
       "trimStart": "開始時間",

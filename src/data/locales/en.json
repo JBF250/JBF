@@ -222,7 +222,7 @@
       },
       "converter": {
         "title": "File Converter",
-        "desc": "Image, audio, video conversion"
+        "desc": "Image, audio conversion & audio extraction"
       },
       "gifTool": {
         "title": "GIF Tool",
@@ -289,8 +289,7 @@
     "converter": {
       "imageTab": "Image",
       "audioTab": "Audio",
-      "videoTab": "Video",
-      "extractTab": "Video to Audio",
+      "extractTab": "Audio Extraction",
       "dropFile": "Click or drag file here",
       "orClick": "to upload",
       "maxFileSize": "Max file size: 500MB",
@@ -302,11 +301,6 @@
       "height": "Height (px)",
       "bitrate": "Bitrate",
       "sampleRate": "Sample Rate",
-      "videoQuality": "Video Quality",
-      "fast": "Fast",
-      "medium": "Medium",
-      "slow": "High Quality",
-      "videoBitrate": "Video Bitrate",
       "convert": "Convert",
       "converting": "Converting",
       "downloadResult": "Download File",
@@ -322,7 +316,6 @@
       "log": "Log",
       "maintenanceTitle": "Format Converter Under Maintenance",
       "maintenanceDesc": "The format converter is temporarily unavailable during multi-threaded FFmpeg adaptation. Image conversion and other features remain unaffected. Stay tuned!",
-      "shortVideoTip": "Short videos (under 3 minutes) are recommended for transcoding. Long videos may cause memory overflow in the browser.",
       "volumeGain": "Volume Gain",
       "trimAudio": "Trim Audio",
       "trimStart": "Start Time",

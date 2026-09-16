@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useI18n } from '@/context/I18nContext'
 import { LabLayout } from './LabLayout'
-import { Upload, Download, FileImage, Music, Video, Scissors, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react'
+import { Upload, Download, FileImage, Music, Scissors, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 
-type ConvertTab = 'image' | 'audio' | 'video' | 'extract'
+type ConvertTab = 'image' | 'audio' | 'extract'
 
 interface ConvertConfig {
   [key: string]: any
@@ -11,7 +11,72 @@ interface ConvertConfig {
 
 const STORAGE_KEY = 'lab_converter_config'
 const SUPABASE_URL = 'https://noiebpjyskscjtmdytxj.supabase.co'
-const STORAGE_BASE = `${SUPABASE_URL}/storage/v1/object/public/ffmpeg-core`
+// 核心库托管地址。可用环境变量 VITE_FFMPEG_CORE_BASE 覆盖（例如换成国内 CDN /
+// Cloudflare R2）——Supabase Storage 在部分网络下对 30MB 大文件的吞吐极低。
+const CORE_BASE = import.meta.env.VITE_FFMPEG_CORE_BASE || `${SUPABASE_URL}/storage/v1/object/public/ffmpeg-core`
+// 同源核心目录：由 scripts/prepare-ffmpeg-cores.mjs 在 predev/prebuild 时生成到 public/ffmpeg-mt。
+// 同源加载没有跨域与第三方 CDN 限速问题，是首选路径；wasm 超过 Pages 单文件上限，被切成多片。
+const LOCAL_CORE_BASE = '/ffmpeg-mt'
+
+let localCoreManifest: Record<string, { size: number; parts: number }> | null = null
+async function loadLocalCoreManifest(): Promise<Record<string, { size: number; parts: number }>> {
+  if (localCoreManifest) return localCoreManifest
+  const resp = await fetch(`${LOCAL_CORE_BASE}/manifest.json`)
+  if (!resp.ok) throw new Error(`本地核心清单不可用 (HTTP ${resp.status})`)
+  localCoreManifest = (await resp.json()) as Record<string, { size: number; parts: number }>
+  return localCoreManifest
+}
+
+// [文件名, MIME, 加载进度区间起点, 终点]：加载阶段占 2%~45%，转换阶段占 45%~100%
+const MT_FILES: [string, string, number, number][] = [
+  ['ffmpeg-core-mt-esm.js', 'text/javascript', 2, 4],
+  ['ffmpeg-core-mt.wasm', 'application/wasm', 4, 42],
+  ['ffmpeg-core-mt.worker.js', 'text/javascript', 42, 45],
+]
+const ST_FILES: [string, string, number, number][] = [
+  ['ffmpeg-core-esm.js', 'text/javascript', 2, 4],
+  ['ffmpeg-core.wasm', 'application/wasm', 4, 45],
+]
+
+type CoreProgress = (pct: number, msg?: string) => void
+
+// 同源核心的字节只取一次：后台预载与点击转换共用同一个 Promise，
+// 结果（blob URL）缓存在这里，避免重复下载。失败时清空以便下次重试。
+let localCoreAssets: Promise<{ coreURL: string; wasmURL: string; workerURL: string }> | null = null
+let localCoreProgress: CoreProgress | null = null
+
+function loadLocalCoreAssets(onProgress?: CoreProgress) {
+  localCoreProgress = onProgress ?? null
+  if (localCoreAssets) return localCoreAssets
+  localCoreAssets = (async () => {
+    const manifest = await loadLocalCoreManifest()
+    const urls: string[] = []
+    for (const [file, mime, from, to] of MT_FILES) {
+      const info = manifest[file]
+      if (!info) throw new Error(`本地核心缺少 ${file}`)
+      localCoreProgress?.(from, info.parts > 1 ? `[下载] ${file} (同源, ${info.parts} 片)` : `[下载] ${file} (同源)`)
+      const parts = info.parts <= 1 ? [file] : Array.from({ length: info.parts }, (_, i) => `${file}.part${i}`)
+      const chunks: Uint8Array[] = []
+      let done = 0
+      for (const part of parts) {
+        const resp = await fetch(`${LOCAL_CORE_BASE}/${part}`)
+        if (!resp.ok) throw new Error(`读取 ${part} 失败 (HTTP ${resp.status})`)
+        const buf = new Uint8Array(await resp.arrayBuffer())
+        chunks.push(buf)
+        done += buf.byteLength
+        localCoreProgress?.(Math.max(from, Math.min(to, Math.round(from + (done / info.size) * (to - from)))))
+      }
+      if (done !== info.size) throw new Error(`${file} 拼装不完整 (${done}/${info.size})`)
+      // 一律转成 blob URL：dev 下 Vite 不允许把 /public 里的文件当模块 import，
+      // 而 ffmpeg 核心内部会对 coreURL 做 import()、对 workerURL 做 new Worker()。
+      urls.push(URL.createObjectURL(new Blob(chunks as BlobPart[], { type: mime })))
+    }
+    localCoreProgress?.(45)
+    return { coreURL: urls[0], wasmURL: urls[1], workerURL: urls[2] }
+  })()
+  localCoreAssets.catch(() => { localCoreAssets = null })
+  return localCoreAssets
+}
 
 export default function ConverterPage() {
   const { t } = useI18n()
@@ -23,8 +88,6 @@ export default function ConverterPage() {
   const [scaleHeight, setScaleHeight] = useState('')
   const [audioBitrate, setAudioBitrate] = useState('320k')
   const [audioSampleRate, setAudioSampleRate] = useState('48000')
-  const [videoQuality, setVideoQuality] = useState('slow')
-  const [videoBitrate, setVideoBitrate] = useState('10M')
   const [volumeGain, setVolumeGain] = useState(0)
   const [trimStart, setTrimStart] = useState('')
   const [trimEnd, setTrimEnd] = useState('')
@@ -35,9 +98,10 @@ export default function ConverterPage() {
   const [exportName, setExportName] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  // 两个独立的 FFmpeg 实例：mt 用于音频/提取（多线程高速），st 用于视频转码（完整编码器）
-  const ffmpegMtRef = useRef<any>(null)
-  const ffmpegStRef = useRef<any>(null)
+  // 单个 FFmpeg 实例（单线程核心），音频转换与音频提取共用
+  const ffmpegRef = useRef<any>(null)
+  // 取消标记：用户在转换过程中移除文件时置位，用于废弃进行中的任务
+  const cancelRef = useRef(false)
   const logBufferRef = useRef<string[]>([])
   const logFlushTimerRef = useRef<number | null>(null)
 
@@ -51,8 +115,6 @@ export default function ConverterPage() {
         setQuality(config.quality || 1)
         setAudioBitrate(config.audioBitrate || '320k')
         setAudioSampleRate(config.audioSampleRate || '48000')
-        setVideoQuality(config.videoQuality || 'slow')
-        setVideoBitrate(config.videoBitrate || '10M')
         setVolumeGain(config.volumeGain || 0)
         setTrimStart(config.trimStart || '')
         setTrimEnd(config.trimEnd || '')
@@ -63,10 +125,10 @@ export default function ConverterPage() {
   // Save config
   useEffect(() => {
     const config: ConvertConfig = {
-      outputFormat, quality, audioBitrate, audioSampleRate, videoQuality, videoBitrate, volumeGain, trimStart, trimEnd,
+      outputFormat, quality, audioBitrate, audioSampleRate, volumeGain, trimStart, trimEnd,
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
-  }, [outputFormat, quality, audioBitrate, audioSampleRate, videoQuality, videoBitrate, volumeGain, trimStart, trimEnd])
+  }, [outputFormat, quality, audioBitrate, audioSampleRate, volumeGain, trimStart, trimEnd])
 
   const flushLogs = useCallback(() => {
     logFlushTimerRef.current = null
@@ -95,78 +157,315 @@ export default function ConverterPage() {
     }
   }, [])
 
-  // 多线程 FFmpeg — 用于音频 / 提取音频（从 Supabase 加载，速度快）
-  const initFfmpegMt = useCallback(async () => {
-    if (ffmpegMtRef.current) return ffmpegMtRef.current
-    try {
-      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
-      const { toBlobURL } = await import('@ffmpeg/util')
-      const ffmpeg = new FFmpeg()
-      ffmpeg.on('log', ({ message }: { message: string }) => { addLog(message) })
-      ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
-        setProgress(Math.max(0, Math.min(100, Math.round(p * 100))))
-      })
-      // 始终走单线程:存储桶仅部署了单线程核心文件(ffmpeg-core.esm.js/.wasm),
-      // 多线程所需 ffmpeg-core-mt.esm.js / ffmpeg-core-mt.worker.js 缺失(404),
-      // 加载会一直重试而卡在 0%。即使环境支持 SharedArrayBuffer,也统一用单线程以保证稳定。
-      const useMt = false
-      addLog('FFmpeg (音频) 初始化中... (单线程模式)')
-      let coreURL: string, wasmURL: string, workerURL: string | undefined
-      if (useMt) {
-        coreURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-mt-esm.js`, 'text/javascript')
-        wasmURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-mt.wasm`, 'application/wasm')
-        workerURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-mt.worker.js`, 'text/javascript')
-      } else {
-        coreURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-esm.js`, 'text/javascript')
-        wasmURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core.wasm`, 'application/wasm')
-      }
-      const loadConfig: { coreURL: string; wasmURL: string; workerURL?: string } = { coreURL, wasmURL }
-      if (workerURL) loadConfig.workerURL = workerURL
-      await Promise.race([
-        ffmpeg.load(loadConfig),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('FFmpeg 核心库加载超时 (60s)')), 60000)),
-      ])
-      ffmpegMtRef.current = ffmpeg
-      addLog('FFmpeg (音频) 核心库加载完成')
-      return ffmpeg
-    } catch (err: any) {
-      console.error('FFmpeg MT init error:', err)
-      setError(err.message || 'FFmpeg 加载失败')
-      return null
-    }
-  }, [addLog])
+  // 进入转换页即后台预载同源核心（约 31MB），把首次等待藏在选文件/调参数的时间里。
+  // 预载与点击转换共用同一份缓存，不会重复下载；失败静默处理（点转换时仍会走完整降级链路）。
+  useEffect(() => {
+    // 省流模式或非跨源隔离环境（用不到多线程核心）就不预载，避免白耗流量
+    if ((navigator as any).connection?.saveData) return
+    if (typeof SharedArrayBuffer === 'undefined' || !(window as any).crossOriginIsolated) return
+    // 稍作延迟，避免用户只是路过该页面时浪费 31MB
+    const timer = window.setTimeout(() => {
+      loadLocalCoreAssets().catch(() => { /* ignore */ })
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
-  // 单线程 FFmpeg（完整编码器：libx264 / libvpx-vp9）— 用于视频转码
-  const initFfmpegSt = useCallback(async () => {
-    if (ffmpegStRef.current) return ffmpegStRef.current
+  // FFmpeg 单例初始化：跨源隔离可用时用「多线程核心」（音频转换/音频提取），
+  // 环境不支持或加载失败时回退单线程核心。核心文件托管在 Supabase Storage。
+  const initFfmpeg = useCallback(async () => {
+    if (ffmpegRef.current) return ffmpegRef.current
     try {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg')
-      const { toBlobURL } = await import('@ffmpeg/util')
-      const ffmpeg = new FFmpeg()
-      ffmpeg.on('log', ({ message }: { message: string }) => { addLog(message) })
-      ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
-        setProgress(Math.max(0, Math.min(100, Math.round(p * 100))))
-      })
-      addLog('FFmpeg (视频) 初始化中... (单线程)')
-      const coreURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core-esm.js`, 'text/javascript')
-      const wasmURL = await toBlobURL(`${STORAGE_BASE}/ffmpeg-core.wasm`, 'application/wasm')
-      await Promise.race([
-        ffmpeg.load({ coreURL, wasmURL }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('FFmpeg 核心库加载超时 (60s)')), 60000)),
-      ])
-      ffmpegStRef.current = ffmpeg
-      addLog('FFmpeg (视频) 单线程初始化完成')
-      return ffmpeg
+
+      const crossOriginIsolated = typeof SharedArrayBuffer !== 'undefined' && !!(window as any).crossOriginIsolated
+      addLog(crossOriginIsolated ? '加载 ffmpeg 多线程核心库...' : t('lab.converter.loadingFfmpeg'))
+
+      const build = () => {
+        const f = new FFmpeg()
+        f.on('log', ({ message }: { message: string }) => addLog(message))
+        // 转换阶段的进度 → 45%~100%（核心库加载阶段不产生 progress 事件）
+        f.on('progress', ({ progress: p }: { progress: number }) => {
+          setProgress(Math.max(45, Math.min(100, Math.round(45 + p * 55))))
+        })
+        return f
+      }
+
+      const loadWith = async (f: any, cfg: any) => {
+        await Promise.race([
+          f.load(cfg),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('FFmpeg 核心库加载超时 (90s)')), 90000)),
+        ])
+      }
+
+      // 核心库下载：分片（Range）下载 + 每片超时与长度校验。
+      // 背景：单次长连接拉 30MB 在部分网络下会被中断或无限挂起（表现为一直 0%），
+      // 而浏览器受 CORS 限制拿不到 Content-Range，无法从响应得知文件总长，
+      // 因此用固定的预期字节数算进度并做完整性校验。
+      // 注意：升级 @ffmpeg/core / @ffmpeg/core-mt 版本后需同步更新下表数值。
+      const SIZES: Record<string, number> = {
+        'ffmpeg-core-mt-esm.js': 128947,
+        'ffmpeg-core-mt.wasm': 32718323,
+        'ffmpeg-core-mt.worker.js': 2115,
+        'ffmpeg-core-esm.js': 114494,
+        'ffmpeg-core.wasm': 32129114,
+      }
+      const CHUNK_SIZE = 4 * 1024 * 1024
+      // 空闲超时：只要还在持续收到数据就不算超时（慢速网络也能走完），
+      // 只有连续 IDLE_TIMEOUT 毫秒收不到任何字节才判定为卡死并重试该片。
+      const IDLE_TIMEOUT = 15000
+
+      const fetchCore = async (file: string, mime: string, noStore: boolean, from: number, to: number) => {
+        const expect = SIZES[file] || 0
+        const t0 = Date.now()
+        addLog(`[下载] ${file} ...`)
+        const parts: Uint8Array[] = []
+        let offset = 0
+        for (;;) {
+          const end = offset + CHUNK_SIZE - 1
+          let chunk: Uint8Array | null = null
+          let lastErr: any = null
+          for (let attempt = 1; attempt <= 4 && !chunk; attempt++) {
+            const ac = new AbortController()
+            let idleTimer: number | undefined
+            const resetIdle = () => {
+              if (idleTimer !== undefined) clearTimeout(idleTimer)
+              idleTimer = window.setTimeout(() => ac.abort(), IDLE_TIMEOUT)
+            }
+            resetIdle()
+            try {
+              const resp = await fetch(`${CORE_BASE}/${file}`, {
+                headers: { Range: `bytes=${offset}-${end}` },
+                cache: noStore ? 'no-store' : 'default',
+                signal: ac.signal,
+              })
+              if (resp.status !== 206 && resp.status !== 200) throw new Error(`HTTP ${resp.status}`)
+              // 注意：不能用 content-length 预分配缓冲区——JS 文件会被 gzip 传输，
+              // 该头是压缩后的大小，与实际解压后的字节数不一致。改为动态累积，
+              // 最终用预期总长（SIZES）校验完整性。
+              const got: Uint8Array[] = []
+              let n = 0
+              const reader = resp.body?.getReader()
+              if (reader) {
+                for (;;) {
+                  const { done, value } = await reader.read()
+                  if (done) break
+                  if (value?.length) {
+                    got.push(value)
+                    n += value.length
+                    resetIdle()
+                    // 边下边推进进度，让慢速网络下也能看出仍在传输
+                    const est = expect || Math.max(offset + n, 1)
+                    setProgress(Math.max(from, Math.min(to, Math.round(from + ((offset + n) / est) * (to - from)))))
+                  }
+                }
+              } else {
+                const b = new Uint8Array(await resp.arrayBuffer())
+                got.push(b)
+                n = b.byteLength
+              }
+              if (!n) throw new Error('响应为空')
+              const merged = new Uint8Array(n)
+              let cursor = 0
+              for (const p of got) {
+                merged.set(p, cursor)
+                cursor += p.length
+              }
+              chunk = merged
+            } catch (e) {
+              lastErr = e
+              if (attempt < 4) {
+                addLog(`[下载] ${file} 第 ${Math.floor(offset / CHUNK_SIZE) + 1} 片失败，重试 (${attempt}/4)...`)
+                await new Promise((r) => setTimeout(r, 800 * attempt))
+              }
+            } finally {
+              if (idleTimer !== undefined) clearTimeout(idleTimer)
+            }
+          }
+          if (!chunk) throw new Error(`下载 ${file} 失败：${lastErr?.message || lastErr}`)
+          parts.push(chunk)
+          offset += chunk.byteLength
+          const total = expect || Math.max(offset, 1)
+          setProgress(Math.max(from, Math.min(to, Math.round(from + (offset / total) * (to - from)))))
+          // 短读即到达文件末尾（浏览器拿不到 Content-Range，只能这样判断）
+          if (chunk.byteLength < CHUNK_SIZE) break
+        }
+        if (expect && offset !== expect) throw new Error(`下载 ${file} 不完整 (${offset}/${expect})`)
+        addLog(`[下载] ${file} 完成 (${(offset / 1024 / 1024).toFixed(1)}MB, ${((Date.now() - t0) / 1000).toFixed(1)}s)`)
+        return URL.createObjectURL(new Blob(parts as BlobPart[], { type: mime }))
+      }
+
+      // 主路径下载：与 2.7 一样「一次请求整取」，但必须可中断——
+      // toBlobURL 内部无法中止，连接一旦卡死就会永远等下去，降级分支也就永远走不到。
+      // 用「空闲超时」代替总时长限制：只要还在持续收到数据就不打断（慢速网络能走完），
+      // 连续 IDLE_TIMEOUT 收不到任何字节才中止，交给分片下载去重试。
+      const fetchWhole = async (file: string, mime: string, from: number, to: number) => {
+        const expect = SIZES[file] || 0
+        const t0 = Date.now()
+        addLog(`[下载] ${file} ...`)
+        const ac = new AbortController()
+        let idleTimer: number | undefined
+        const resetIdle = () => {
+          if (idleTimer !== undefined) clearTimeout(idleTimer)
+          idleTimer = window.setTimeout(() => ac.abort(), IDLE_TIMEOUT)
+        }
+        resetIdle()
+        try {
+          const resp = await fetch(`${CORE_BASE}/${file}`, { signal: ac.signal })
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+          const got: Uint8Array[] = []
+          let n = 0
+          const reader = resp.body?.getReader()
+          if (reader) {
+            for (;;) {
+              const { done, value } = await reader.read()
+              if (done) break
+              if (value?.length) {
+                got.push(value)
+                n += value.length
+                resetIdle()
+                const est = expect || Math.max(n, 1)
+                setProgress(Math.max(from, Math.min(to, Math.round(from + (n / est) * (to - from)))))
+              }
+            }
+          } else {
+            const b = new Uint8Array(await resp.arrayBuffer())
+            got.push(b)
+            n = b.byteLength
+          }
+          if (expect && n !== expect) throw new Error(`下载不完整 (${n}/${expect})`)
+          addLog(`[下载] ${file} 完成 (${(n / 1024 / 1024).toFixed(1)}MB, ${((Date.now() - t0) / 1000).toFixed(1)}s)`)
+          return URL.createObjectURL(new Blob(got as BlobPart[], { type: mime }))
+        } finally {
+          if (idleTimer !== undefined) clearTimeout(idleTimer)
+        }
+      }
+
+      const withTimeout = <T,>(p: Promise<T>, ms: number, what: string): Promise<T> =>
+        Promise.race([
+          p,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${what} 超时 (${ms / 1000}s)`)), ms)),
+        ])
+
+      const loadChunkedCore = async (kind: 'mt' | 'st', noStore: boolean) => {
+        const f = build()
+        try {
+          const files = kind === 'mt' ? MT_FILES : ST_FILES
+          const urls = await withTimeout(
+            (async () => {
+              const out: string[] = []
+              for (const [file, mime, from, to] of files) {
+                out.push(await fetchCore(file, mime, noStore, from, to))
+              }
+              return out
+            })(),
+            600000,
+            '核心库下载'
+          )
+          const cfg: any = { coreURL: urls[0], wasmURL: urls[1] }
+          if (urls[2]) cfg.workerURL = urls[2]
+          await loadWith(f, cfg)
+          return f
+        } catch (e) {
+          try { f.terminate() } catch { /* ignore */ }
+          throw e
+        }
+      }
+
+      // 主路径：与 2.7 一致——每个文件一次请求整取（不分片）+ 60s 加载超时。
+      const loadSimple = async (kind: 'mt' | 'st') => {
+        const f = build()
+        try {
+          const files = kind === 'mt' ? MT_FILES : ST_FILES
+          const urls: string[] = []
+          for (const [file, mime, from, to] of files) {
+            urls.push(await fetchWhole(file, mime, from, to))
+          }
+          const cfg: any = { coreURL: urls[0], wasmURL: urls[1] }
+          if (urls[2]) cfg.workerURL = urls[2]
+          await withTimeout(f.load(cfg), 60000, 'FFmpeg 核心库加载')
+          return f
+        } catch (e) {
+          try { f.terminate() } catch { /* ignore */ }
+          throw e
+        }
+      }
+
+      // 首选路径：同源核心。无跨域、无第三方限速，wasm 分片取回后拼成 Blob 交给 ffmpeg。
+      const loadLocal = async () => {
+        const f = build()
+        try {
+          // 复用（可能已由后台预载完成的）同源核心，只创建一个 FFmpeg 实例
+          const assets = await loadLocalCoreAssets((pct, msg) => {
+            if (msg) addLog(msg)
+            setProgress(pct)
+          })
+          await withTimeout(
+            f.load({ coreURL: assets.coreURL, wasmURL: assets.wasmURL, workerURL: assets.workerURL }),
+            60000,
+            'FFmpeg 核心库加载'
+          )
+          return f
+        } catch (e) {
+          try { f.terminate() } catch { /* ignore */ }
+          throw e
+        }
+      }
+
+      // 主路径失败（被中断/超时/缓存了截断副本）时降级：
+      // 分片下载 + 空闲超时重试 + 完整性校验，并绕过浏览器缓存。
+      const tryLoad = async (kind: 'mt' | 'st') => {
+        try {
+          return await loadSimple(kind)
+        } catch (e: any) {
+          addLog(`核心库加载失败，改用分片下载重试...（${String(e?.message || e).slice(0, 70)}）`)
+          return await loadChunkedCore(kind, true)
+        }
+      }
+
+      const adopt = (f: any) => {
+        if (cancelRef.current) {
+          try { f.terminate() } catch { /* ignore */ }
+          return null
+        }
+        ffmpegRef.current = f
+        setProgress(50)
+        return f
+      }
+
+      if (crossOriginIsolated) {
+        // 1) 同源核心（首选）
+        try {
+          const mt = await loadLocal()
+          addLog('ffmpeg 多线程核心库加载完成（同源）')
+          return adopt(mt)
+        } catch (e: any) {
+          addLog(`同源核心不可用，改用远程加载（${String(e?.message || e).slice(0, 60)}）`)
+        }
+        // 2) 远程核心（Supabase），失败再回退单线程
+        try {
+          const mt = await tryLoad('mt')
+          addLog('ffmpeg 多线程核心库加载完成')
+          return adopt(mt)
+        } catch (e: any) {
+          console.error('FFmpeg MT 初始化失败，回退单线程:', e)
+          addLog(`多线程核心不可用，回退单线程（${String(e?.message || e).slice(0, 60)}）`)
+        }
+      }
+
+      const st = await tryLoad('st')
+      addLog('ffmpeg 核心库加载完成')
+      return adopt(st)
     } catch (err: any) {
-      console.error('FFmpeg ST init error:', err)
-      setError(err.message || 'FFmpeg 加载失败')
+      console.error('FFmpeg init error:', err)
+      setError(err.message || t('lab.converter.ffmpegLoadError'))
       return null
     }
-  }, [addLog])
+  }, [addLog, t])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0]
     if (selected) {
+      cancelRef.current = false
       setError(''); setResult(null); setProgress(0); setLogs([]); logBufferRef.current = []
       if (selected.size > 500 * 1024 * 1024) { setError(t('lab.converter.fileTooLarge')); return }
       setFile(selected)
@@ -180,6 +479,7 @@ export default function ConverterPage() {
     e.preventDefault()
     const dropped = e.dataTransfer.files[0]
     if (dropped) {
+      cancelRef.current = false
       setError(''); setResult(null); setProgress(0); setLogs([]); logBufferRef.current = []
       if (dropped.size > 500 * 1024 * 1024) { setError(t('lab.converter.fileTooLarge')); return }
       setFile(dropped)
@@ -193,7 +493,6 @@ export default function ConverterPage() {
     switch (tab) {
       case 'image': return 'png'
       case 'audio': return 'mp3'
-      case 'video': return 'webm'
       case 'extract': return 'mp3'
       default: return ''
     }
@@ -201,6 +500,7 @@ export default function ConverterPage() {
 
   const convertImage = async () => {
     if (!file || !outputFormat) return
+    cancelRef.current = false
     setConverting(true); setProgress(0); setError('')
     addLog(t('lab.converter.startingConversion'))
     try {
@@ -235,36 +535,30 @@ export default function ConverterPage() {
     return new Blob([data.buffer as ArrayBuffer], { type: mimeType })
   }
 
-  const convertWithFfmpeg = async (tab: 'audio' | 'video' | 'extract') => {
+  const convertWithFfmpeg = async (tab: 'audio' | 'extract') => {
     if (!file || !outputFormat) return
+    cancelRef.current = false
     setConverting(true); setProgress(0); setError('')
 
-    const isVideo = tab === 'video'
-    addLog(isVideo ? 'FFmpeg (视频) 初始化中...' : t('lab.converter.loadingFfmpeg'))
-
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
-    if (isVideo) {
-      if (file.size > 100 * 1024 * 1024) addLog(`警告: 视频文件较大 (${sizeMB}MB)，浏览器端转码可能耗时较长`)
-      else if (file.size > 30 * 1024 * 1024) addLog(`提示: 视频 ${sizeMB}MB，建议使用较短视频进行转码`)
-      else addLog(`视频大小: ${sizeMB}MB`)
-    } else if (tab === 'extract') {
-      if (file.size > 50 * 1024 * 1024) addLog(`警告: 文件较大 (${sizeMB}MB)，浏览器端处理可能需要5-15分钟`)
-      else addLog(`文件大小: ${sizeMB}MB`)
+    if (tab === 'extract' && file.size > 50 * 1024 * 1024) {
+      addLog(`警告: 文件较大 (${sizeMB}MB)，浏览器端处理可能需要5-15分钟`)
+    } else {
+      addLog(`文件大小: ${sizeMB}MB`)
     }
 
     try {
-      // 音频/提取 → 多线程 mt；视频转码 → 单线程 st（完整编码器）
-      const ffmpeg = isVideo ? await initFfmpegSt() : await initFfmpegMt()
-      if (!ffmpeg) throw new Error('FFmpeg 加载失败')
+      const ffmpeg = await initFfmpeg()
+      if (!ffmpeg || cancelRef.current) return
 
       addLog(t('lab.converter.startingConversion'))
       const inputName = file.name
       const outputName = `output.${outputFormat}`
       const fileBuffer = await file.arrayBuffer()
-      setProgress(3)
+      setProgress(52)
       await ffmpeg.writeFile(inputName, new Uint8Array(fileBuffer))
       addLog(t('lab.converter.inputLoaded'))
-      setProgress(8)
+      setProgress(56)
 
       const args = ['-i', inputName]
 
@@ -286,96 +580,70 @@ export default function ConverterPage() {
           args.push('-to', trimEnd)
         }
         args.push('-b:a', audioBitrate, '-ar', audioSampleRate)
-      } else if (tab === 'extract') {
+      } else {
         args.push('-vn')
         if (outputFormat === 'mp3') args.push('-c:a', 'libmp3lame')
         else if (outputFormat === 'wav') args.push('-c:a', 'pcm_s16le')
         else if (outputFormat === 'm4a') args.push('-c:a', 'aac', '-f', 'ipod')
         else if (outputFormat === 'ogg') args.push('-c:a', 'libvorbis', '-f', 'ogg')
         args.push('-b:a', audioBitrate)
-      } else if (tab === 'video') {
-        // 根据输出格式选择编码器参数
-        if (outputFormat === 'webm') {
-          args.push('-c:v', 'libvpx')
-          if (videoQuality === 'fast') {
-            args.push('-b:v', '2M', '-deadline', 'realtime', '-cpu-used', '8')
-          } else if (videoQuality === 'medium') {
-            args.push('-b:v', '5M', '-deadline', 'realtime', '-cpu-used', '5')
-          } else {
-            args.push('-b:v', videoBitrate, '-deadline', 'realtime', '-cpu-used', '2')
-          }
-          args.push('-c:a', 'libvorbis', '-b:a', '128k')
-        } else if (outputFormat === 'mp4') {
-          args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p')
-          if (videoQuality === 'fast') {
-            args.push('-preset', 'ultrafast', '-crf', '30')
-          } else if (videoQuality === 'medium') {
-            args.push('-preset', 'veryfast', '-crf', '26')
-          } else {
-            args.push('-preset', 'fast', '-crf', '23')
-          }
-          // 防止 sar 兼容性问题
-          args.push('-vf', 'setsar=1')
-          args.push('-c:a', 'aac', '-b:a', '128k')
-        } else if (outputFormat === 'mov') {
-          addLog('注意: MOV 格式在浏览器 WASM 环境中兼容性有限，建议优先使用 MP4')
-          args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p')
-          if (videoQuality === 'fast') {
-            args.push('-preset', 'ultrafast', '-crf', '30')
-          } else if (videoQuality === 'medium') {
-            args.push('-preset', 'veryfast', '-crf', '26')
-          } else {
-            args.push('-preset', 'fast', '-crf', '23')
-          }
-          args.push('-vf', 'setsar=1')
-          args.push('-c:a', 'aac', '-b:a', '128k', '-f', 'mov')
-        }
-        addLog(`视频编码参数: ${outputFormat} / ${videoQuality}`)
       }
 
       args.push('-y', outputName)
       addLog(t('lab.converter.processing'))
-      setProgress(10)
+      setProgress(58)
 
-      // 视频转码超时更长（300s）
-      const timeout = isVideo ? 300000 : 120000
       await Promise.race([
         ffmpeg.exec(args),
-        new Promise((_, reject) => setTimeout(() => reject(new Error(`转换超时 (${timeout / 1000}s)`)), timeout)),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('转换超时 (120s)')), 120000)),
       ])
+      if (cancelRef.current) return
       setProgress(85)
       addLog(t('lab.converter.readingOutput'))
       const outputData = await ffmpeg.readFile(outputName)
       setProgress(92)
       const getMimeType = () => {
-        if (tab === 'audio' || tab === 'extract') {
-          if (outputFormat === 'mp3') return 'audio/mpeg'
-          if (outputFormat === 'm4a') return 'audio/mp4'
-          if (outputFormat === 'ogg') return 'audio/ogg'
-          if (outputFormat === 'wav') return 'audio/wav'
-        }
-        if (tab === 'video') {
-          if (outputFormat === 'mp4' || outputFormat === 'mov') return 'video/mp4'
-          if (outputFormat === 'webm') return 'video/webm'
-        }
+        if (outputFormat === 'mp3') return 'audio/mpeg'
+        if (outputFormat === 'm4a') return 'audio/mp4'
+        if (outputFormat === 'ogg') return 'audio/ogg'
+        if (outputFormat === 'wav') return 'audio/wav'
         return 'application/octet-stream'
       }
       const blob = uint8ArrayToBlob(outputData as Uint8Array, getMimeType())
       setProgress(95)
       await ffmpeg.deleteFile(inputName)
       await ffmpeg.deleteFile(outputName)
+      if (cancelRef.current) return
       setResult(blob); setProgress(100)
       addLog(t('lab.converter.conversionComplete'))
     } catch (err: any) {
+      // 用户取消（移除文件）导致的失败不提示
+      if (cancelRef.current) return
       setError(err.message || t('lab.converter.conversionFailed'))
       addLog(t('lab.converter.conversionFailed'))
-    } finally { setConverting(false) }
+    } finally {
+      if (!cancelRef.current) setConverting(false)
+    }
+  }
+
+  // 移除已导入文件：中断进行中的转换并复位所有状态（避免标签页被 disabled 卡住）
+  const handleRemoveFile = () => {
+    cancelRef.current = true
+    try { ffmpegRef.current?.terminate() } catch { /* ignore */ }
+    ffmpegRef.current = null
+    setFile(null)
+    setResult(null)
+    setConverting(false)
+    setProgress(0)
+    setError('')
+    setLogs([])
+    logBufferRef.current = []
   }
 
   const handleConvert = async () => {
     switch (activeTab) {
       case 'image': await convertImage(); break
-      case 'audio': case 'video': case 'extract': await convertWithFfmpeg(activeTab); break
+      case 'audio': case 'extract': await convertWithFfmpeg(activeTab); break
     }
   }
 
@@ -392,7 +660,6 @@ export default function ConverterPage() {
   const tabs = [
     { id: 'image' as ConvertTab, icon: FileImage, label: t('lab.converter.imageTab') },
     { id: 'audio' as ConvertTab, icon: Music, label: t('lab.converter.audioTab') },
-    { id: 'video' as ConvertTab, icon: Video, label: t('lab.converter.videoTab') },
     { id: 'extract' as ConvertTab, icon: Scissors, label: t('lab.converter.extractTab') },
   ]
 
@@ -407,11 +674,6 @@ export default function ConverterPage() {
       { value: 'm4a', label: 'M4A' },
       { value: 'ogg', label: 'OGG' },
       { value: 'wav', label: 'WAV' },
-    ],
-    video: [
-      { value: 'webm', label: 'WebM (VP8)' },
-      { value: 'mp4', label: 'MP4 (H.264)' },
-      { value: 'mov', label: 'MOV (QuickTime)' },
     ],
     extract: [
       { value: 'mp3', label: 'MP3' },
@@ -452,14 +714,6 @@ export default function ConverterPage() {
           ))}
         </div>
 
-        {/* 短视频提示（视频 Tab） */}
-        {activeTab === 'video' && (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 flex items-start gap-2">
-            <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-            <p className="text-blue-300 text-sm">{t('lab.converter.shortVideoTip')}</p>
-          </div>
-        )}
-
         {/* File Upload Area */}
         <div
           onDrop={handleDrop}
@@ -483,13 +737,13 @@ export default function ConverterPage() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-center gap-3">
-                {activeTab === 'image' ? <FileImage className="w-6 h-6 text-blue-400" /> : activeTab === 'audio' ? <Music className="w-6 h-6 text-purple-400" /> : activeTab === 'video' ? <Video className="w-6 h-6 text-orange-400" /> : <Scissors className="w-6 h-6 text-green-400" />}
+                {activeTab === 'image' ? <FileImage className="w-6 h-6 text-blue-400" /> : activeTab === 'audio' ? <Music className="w-6 h-6 text-purple-400" /> : <Scissors className="w-6 h-6 text-green-400" />}
                 <div className="text-left">
                   <p className="text-theme-on-surface text-sm font-medium truncate max-w-[300px]">{file.name}</p>
                   <p className="text-theme-tertiary text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); setFile(null); setResult(null) }}
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFile() }}
                   className="text-theme-tertiary hover:text-red-400 transition-colors"
                 >x</button>
               </div>
@@ -637,28 +891,6 @@ export default function ConverterPage() {
                   </div>
                 )}
               </>
-            )}
-
-            {activeTab === 'video' && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.videoQuality')}</label>
-                  <select value={videoQuality} onChange={(e) => setVideoQuality(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface">
-                    <option value="fast">{t('lab.converter.fast')}</option>
-                    <option value="medium">{t('lab.converter.medium')}</option>
-                    <option value="slow">{t('lab.converter.slow')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-theme-secondary mb-1 block">{t('lab.converter.videoBitrate')}</label>
-                  <select value={videoBitrate} onChange={(e) => setVideoBitrate(e.target.value)} className="w-full px-3 py-2 bg-theme-tertiary border border-theme-color rounded-lg text-theme-on-surface" disabled={videoQuality !== 'slow'}>
-                    <option value="2M">2 Mbps</option>
-                    <option value="5M">5 Mbps</option>
-                    <option value="10M">10 Mbps</option>
-                    <option value="20M">20 Mbps</option>
-                  </select>
-                </div>
-              </div>
             )}
           </div>
         )}
