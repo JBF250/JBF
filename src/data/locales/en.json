@@ -179,7 +179,10 @@
     "visitOfficial": "Visit Official Site",
     "download": "Download",
     "downloadCode": "Code: {code}",
-    "watchBilibili": "Bilibili Demo"
+    "watchBilibili": "Bilibili Demo",
+    "downloadFor": "Download for {label}",
+    "requirements": "Requires Windows 10 / 11",
+    "totalDownloads": "Total downloads {count}"
   },
   "lab": {
     "title": "Lab",

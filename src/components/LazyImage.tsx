@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
-// 图片加载:骨架图 + 真实下载进度环(流式读取字节计算百分比),
-// 完成后渐入;已缓存图片走快速路径直接显示;fetch 失败则回退普通 img。
+// 图片加载:骨架图 + 真实下载进度环(流式读取字节计算百分比),完成后渐入;
+// 已缓存图片走快速路径直接显示;fetch 失败则回退普通 img。
+//
+// 注意:在拿到地址之前不能渲染 <img>。空字符串的 src 会被浏览器视为无效资源并
+// 立刻触发 onError,导致骨架/进度环被提前撤掉、只显示一个损坏占位。
 export default function LazyImage({
   src,
   alt = '',
@@ -17,8 +20,8 @@ export default function LazyImage({
 }) {
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [indeterminate, setIndeterminate] = useState(false)
+  // null 表示响应没有 Content-Length(无法算出百分比),此时用转动的环表示
+  const [progress, setProgress] = useState<number | null>(0)
   const [source, setSource] = useState('')
   const urlRef = useRef('')
 
@@ -26,7 +29,6 @@ export default function LazyImage({
     setLoaded(false)
     setError(false)
     setProgress(0)
-    setIndeterminate(false)
     setSource('')
     if (urlRef.current) {
       URL.revokeObjectURL(urlRef.current)
@@ -34,7 +36,7 @@ export default function LazyImage({
     }
 
     let cancelled = false
-    let blobUrl = ''
+    let created = ''
 
     // 快速路径:浏览器缓存里已有完整图片 -> 直接用原地址,免去任何等待
     const probe = new Image()
@@ -50,8 +52,10 @@ export default function LazyImage({
     const controller = new AbortController()
     fetch(src, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok || !res.body) return null
+        if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
         const total = Number(res.headers.get('Content-Length')) || 0
+        // 拿不到总长就用不确定态(转圈),不要假装 0%
+        if (!total) setProgress(null)
         const reader = res.body.getReader()
         const chunks: Uint8Array[] = []
         let received = 0
@@ -65,40 +69,37 @@ export default function LazyImage({
           }
         }
         if (cancelled) return null
-        const contentType = res.headers.get('Content-Type') || ''
-        blobUrl = URL.createObjectURL(
-          new Blob(chunks as BlobPart[], { type: mimeTypeOf(src, contentType) })
+        created = URL.createObjectURL(
+          new Blob(chunks as BlobPart[], { type: mimeTypeOf(src, res.headers.get('Content-Type') || '') })
         )
-        return blobUrl
+        return created
       })
       .then((url) => {
         if (cancelled) return
         if (url) {
           urlRef.current = url
+          // 只换地址,骨架留到 <img onLoad> 时再撤,避免出现"空档"
           setSource(url)
-          setProgress(100)
-          setLoaded(true)
         } else {
-          // fetch 失败/无法流式(如外部图跨域) -> 回退普通 img,不显示假百分比
-          setIndeterminate(true)
+          // fetch 无法流式(如外部跨域图) -> 回退普通 img
           setSource(src)
         }
       })
       .catch(() => {
         if (cancelled) return
-        setIndeterminate(true)
         setSource(src)
       })
 
     return () => {
       cancelled = true
       controller.abort()
-      if (blobUrl) URL.revokeObjectURL(blobUrl)
+      if (created) URL.revokeObjectURL(created)
     }
   }, [src])
 
   const ringRadius = 21
   const ringLength = 2 * Math.PI * ringRadius
+  const spinning = progress === null
 
   return (
     <div
@@ -108,7 +109,7 @@ export default function LazyImage({
       {!loaded && (
         <div className="absolute inset-0 rounded-xl flex items-center justify-center skeleton-shimmer">
           <svg
-            className={`tilted-loader-ring ${indeterminate ? 'lazy-ring-rotate' : ''}`}
+            className={`tilted-loader-ring ${spinning ? 'lazy-ring-rotate' : ''}`}
             viewBox="0 0 48 48"
             width="56"
             height="56"
@@ -129,40 +130,39 @@ export default function LazyImage({
               stroke="#22d3ee"
               strokeWidth="4"
               strokeLinecap="round"
-              strokeDasharray={
-                indeterminate
-                  ? `calc(0.45 * ${ringLength}) ${ringLength}`
-                  : ringLength
-              }
+              strokeDasharray={spinning ? `calc(0.45 * ${ringLength}) ${ringLength}` : ringLength}
               strokeDashoffset={
-                indeterminate ? ringLength * 0.75 : ringLength * (1 - progress / 100)
+                spinning ? ringLength * 0.75 : ringLength * (1 - (progress ?? 0) / 100)
               }
               transform="rotate(-90 24 24)"
             />
           </svg>
-          {!indeterminate && (
-            <span className="tilted-loader-text">{Math.round(progress)}%</span>
+          {!spinning && (
+            <span className="tilted-loader-text">{Math.round(progress ?? 0)}%</span>
           )}
         </div>
       )}
 
-      <img
-        src={source}
-        alt={alt}
-        onLoad={() => {
-          setProgress(100)
-          setLoaded(true)
-        }}
-        onError={() => {
-          setError(true)
-          setLoaded(true)
-        }}
-        className={imgClass}
-        style={{
-          opacity: loaded ? (error ? 0.5 : 1) : 0,
-          transition: 'opacity 0.6s ease'
-        }}
-      />
+      {source && (
+        <img
+          src={source}
+          alt={alt}
+          onLoad={() => {
+            setProgress(100)
+            setError(false)
+            setLoaded(true)
+          }}
+          onError={() => {
+            setError(true)
+            setLoaded(true)
+          }}
+          className={imgClass}
+          style={{
+            opacity: loaded ? (error ? 0.5 : 1) : 0,
+            transition: 'opacity 0.6s ease'
+          }}
+        />
+      )}
     </div>
   )
 }

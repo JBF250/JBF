@@ -179,7 +179,10 @@
     "visitOfficial": "访问官网",
     "download": "下载",
     "downloadCode": "提取码：{code}",
-    "watchBilibili": "B站演示"
+    "watchBilibili": "B站演示",
+    "downloadFor": "下载 {label} 版",
+    "requirements": "系统要求：仅支持 Windows 10 / 11",
+    "totalDownloads": "总下载次数 {count}"
   },
   "lab": {
     "title": "实验室",

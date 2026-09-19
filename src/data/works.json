@@ -79,9 +79,9 @@
         {
             "id": "software-1",
             "title": {
-                "zh": "Lume",
-                "en": "Lume",
-                "ja": "Lume"
+                "zh": "Chronvyr",
+                "en": "Chronvyr",
+                "ja": "Chronvyr"
             },
             "description": {
                 "zh": "简洁易用的桌面级日程软件。",
@@ -89,13 +89,23 @@
                 "ja": "シンプルで使いやすいデスクトップ予定管理ソフトウェア。"
             },
             "fullDescription": {
-                "zh": "Lume是一款基于WinUI3原生技术打造的极致轻量化桌面悬浮日程小组件，转为Win11/10设计，主打高度自定义的桌面日程管理，你可以在桌面放置你的日程安排，让每一步目标都更加清晰。",
-                "en": "Lume is an extremely lightweight desktop floating schedule widget built with native WinUI3 technology, designed specifically for Win11/10. It focuses on highly customizable desktop schedule management, allowing you to place your schedule on the desktop, making every goal clearer.",
-                "ja": "LumeはWinUI3ネイティブ技術をベースに構築された極限まで軽量化されたデスクトップフローティング予定ウィジェットで、Win11/10専用に設計されています。高度にカスタマイズ可能なデスクトップ予定管理を中心に、デスクトップ上に予定を配置し、目標をより明確にすることができます。"
+                "zh": "Chronvyr是一款基于WinUI3原生技术打造的极致轻量化桌面悬浮日程小组件，转为Win11/10设计，主打高度自定义的桌面日程管理，你可以在桌面放置你的日程安排，让每一步目标都更加清晰。",
+                "en": "Chronvyr is an extremely lightweight desktop floating schedule widget built with native WinUI3 technology, designed specifically for Win11/10. It focuses on highly customizable desktop schedule management, allowing you to place your schedule on the desktop, making every goal clearer.",
+                "ja": "ChronvyrはWinUI3ネイティブ技術をベースに構築された極限まで軽量化されたデスクトップフローティング予定ウィジェットで、Win11/10専用に設計されています。高度にカスタマイズ可能なデスクトップ予定管理を中心に、デスクトップ上に予定を配置し、目標をより明確にすることができます。"
             },
             "tech": ["WinUI3", "C#", "Desktop Widget"],
             "status": "completed",
-            "thumbnail": ""
+            "thumbnail": "pictures/Chronvyr.png",
+            "requirements": {
+                "zh": "仅支持 Windows 10 / 11，提供 x64 / x86 / ARM64 三个版本，请按本机架构选择",
+                "en": "Windows 10 / 11 only, available in x64 / x86 / ARM64 builds — pick the one matching your system",
+                "ja": "Windows 10 / 11 のみ対応。x64 / x86 / ARM64 の3種類をご用意していますので、お使いの環境に合うものをお選びください"
+            },
+            "downloads": [
+                { "arch": "x64", "label": "Windows x64", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-x64-Setup.exe" },
+                { "arch": "x86", "label": "Windows x86", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-x86-Setup.exe" },
+                { "arch": "ARM64", "label": "Windows ARM64", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-ARM64-Setup.exe" }
+            ]
         }
     ]
 }

@@ -179,7 +179,10 @@
     "visitOfficial": "公式サイトを訪問",
     "download": "ダウンロード",
     "downloadCode": "抽出コード：{code}",
-    "watchBilibili": "Bilibiliデモ"
+    "watchBilibili": "Bilibiliデモ",
+    "downloadFor": "{label} 版をダウンロード",
+    "requirements": "対応OS：Windows 10 / 11 のみ",
+    "totalDownloads": "総ダウンロード数 {count}"
   },
   "lab": {
     "title": "ラボ",

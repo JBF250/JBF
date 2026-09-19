@@ -296,8 +296,9 @@ export default function Home() {
                       captionText={software.title[currentLang]}
                       containerHeight="230px"
                       containerWidth="100%"
-                      imageHeight="230px"
-                      imageWidth="100%"
+                      imageHeight="152px"
+                      imageWidth="152px"
+                      objectFit="contain"
                       rotateAmplitude={12}
                       scaleOnHover={1.05}
                       showMobileWarning={false}

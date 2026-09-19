@@ -20,6 +20,7 @@ export default function TiltedCard({
   rotateAmplitude = 14,
   showMobileWarning = true,
   showTooltip = false,
+  objectFit = 'cover',
   overlayContent = null,
   displayOverlayContent = false
 }) {
@@ -147,6 +148,7 @@ export default function TiltedCard({
           style={{
             width: imageWidth,
             height: imageHeight,
+            objectFit,
             opacity: imgLoaded ? 1 : 0,
             transition: 'opacity 0.6s ease'
           }}
