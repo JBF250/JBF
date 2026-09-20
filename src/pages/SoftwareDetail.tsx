@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Download, Info, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Download, Info, ShieldCheck } from 'lucide-react'
 import { useI18n } from '@/context/I18nContext'
 import works from '@/data/works.json'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { recordDownload, getDownloadCount } from '@/lib/downloads'
+import { recordDownload } from '@/lib/downloads'
 
 export default function SoftwareDetail() {
   const { id } = useParams<{ id: string }>()
@@ -16,19 +16,9 @@ export default function SoftwareDetail() {
   const software = works.software.find((s) => s.id === id)
 
   const [iconFailed, setIconFailed] = useState(false)
-  const [downloadCount, setDownloadCount] = useState<number | null>(null)
 
   useEffect(() => {
     setIconFailed(false)
-    setDownloadCount(null)
-    if (!id) return
-    let cancelled = false
-    getDownloadCount(id).then((n) => {
-      if (!cancelled) setDownloadCount(n)
-    })
-    return () => {
-      cancelled = true
-    }
   }, [id])
 
   if (!software) {
@@ -135,11 +125,16 @@ export default function SoftwareDetail() {
                     <Info className="w-3.5 h-3.5 flex-shrink-0" />
                     {software.requirements?.[currentLang] ?? t('detail.requirements')}
                   </span>
-                  {downloadCount !== null && (
-                    <span className="inline-flex items-center gap-2 text-gray-500 text-xs">
-                      <BarChart3 className="w-3.5 h-3.5 flex-shrink-0" />
-                      {t('detail.totalDownloads', { count: downloadCount.toLocaleString() })}
-                    </span>
+                  {software.privacyUrl && (
+                    <a
+                      href={software.privacyUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-2 text-gray-500 hover:text-primary text-xs underline underline-offset-4 decoration-gray-600 transition-colors"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                      {t('detail.privacyPolicy')}
+                    </a>
                   )}
                 </div>
               </div>

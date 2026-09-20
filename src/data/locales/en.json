@@ -182,7 +182,8 @@
     "watchBilibili": "Bilibili Demo",
     "downloadFor": "Download for {label}",
     "requirements": "Requires Windows 10 / 11",
-    "totalDownloads": "Total downloads {count}"
+    "totalDownloads": "Total downloads {count}",
+    "privacyPolicy": "Read Privacy Policy"
   },
   "lab": {
     "title": "Lab",

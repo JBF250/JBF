@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content="Chronvyr 隐私政策：本软件不收集、不上传任何个人信息，所有数据均保存在用户本地。" />
+    <title>Chronvyr 隐私政策</title>
+    <link rel="icon" type="image/png" href="/pictures/icon.png" />
+    <script>
+      // 提前应用站点保存的主题与语言，避免进入页面时闪烁
+      (function () {
+        try {
+          if (localStorage.getItem('themeMode') === 'light') {
+            document.documentElement.classList.remove('dark')
+            document.documentElement.classList.add('light')
+          }
+          var saved = localStorage.getItem('language')
+          if (saved === 'zh' || saved === 'en' || saved === 'ja') {
+            document.documentElement.lang = saved
+          }
+        } catch (e) {}
+      })()
+    </script>
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --card: #12121a;
+        --border: #252530;
+        --text: #ffffff;
+        --text-dim: #b0b0b8;
+        --accent: #22d3ee;
+        --accent-soft: #8ca2b5;
+      }
+      html.light {
+        --bg: #f5f7fa;
+        --card: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --text-dim: #4b5563;
+        --accent: #0e7490;
+        --accent-soft: #5b7488;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei',
+          'PingFang SC', 'Hiragino Sans', Meiryo, system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+        background: var(--bg);
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-dim);
+        font-size: 14px;
+      }
+
+      .back:hover {
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .langs {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+
+      .langs button {
+        border: 0;
+        background: transparent;
+        color: var(--text-dim);
+        font: inherit;
+        font-size: 13px;
+        padding: 5px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: color 0.2s ease, background-color 0.2s ease;
+      }
+
+      .langs button:hover {
+        color: var(--text);
+      }
+
+      .langs button[aria-pressed='true'] {
+        background: var(--accent);
+        color: #0c1620;
+        font-weight: 600;
+      }
+
+      main {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px;
+      }
+
+      h1 {
+        font-size: 30px;
+        line-height: 1.3;
+        margin: 0 0 10px;
+      }
+
+      .effective {
+        margin: 0 0 8px;
+        color: var(--text-dim);
+        font-size: 14px;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 28px 0;
+      }
+
+      section + section {
+        margin-top: 30px;
+      }
+
+      h2 {
+        font-size: 19px;
+        margin: 0 0 10px;
+        color: var(--accent-soft);
+      }
+
+      html.light h2 {
+        color: var(--accent);
+      }
+
+      section p {
+        margin: 0 0 8px;
+        color: var(--text-dim);
+      }
+
+      section p:last-child {
+        margin-bottom: 0;
+      }
+
+      footer {
+        margin-top: 28px;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 13px;
+      }
+
+      @media (max-width: 640px) {
+        .card {
+          padding: 26px 20px;
+          border-radius: 16px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        main {
+          padding: 24px 14px 48px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="back" href="/" data-i18n="back"></a>
+      <div class="langs" role="group" aria-label="Language">
+        <button type="button" data-lang="zh">中文</button>
+        <button type="button" data-lang="en">English</button>
+        <button type="button" data-lang="ja">日本語</button>
+      </div>
+    </div>
+
+    <main>
+      <article class="card">
+        <h1 data-i18n="title"></h1>
+        <p class="effective" data-i18n="effective"></p>
+        <div class="divider"></div>
+
+        <section>
+          <h2 data-i18n="s1Title"></h2>
+          <p data-i18n="s1p1"></p>
+          <p data-i18n="s1p2"></p>
+          <p data-i18n="s1p3"></p>
+        </section>
+
+        <section>
+          <h2 data-i18n="s2Title"></h2>
+          <p data-i18n="s2p1"></p>
+        </section>
+
+        <section>
+          <h2 data-i18n="s3Title"></h2>
+          <p data-i18n="s3p1"></p>
+        </section>
+
+        <section>
+          <h2 data-i18n="s4Title"></h2>
+          <p data-i18n="s4p1"></p>
+        </section>
+
+        <section>
+          <h2 data-i18n="s5Title"></h2>
+          <p data-i18n="s5p1"></p>
+        </section>
+      </article>
+
+      <footer>Chronvyr · <a href="https://gainian.de5.net/">gainian.de5.net</a></footer>
+    </main>
+
+    <script>
+      var I18N = {
+        zh: {
+          pageTitle: 'Chronvyr 隐私政策',
+          back: '← 返回首页',
+          title: 'Chronvyr 隐私政策',
+          effective: '生效日期：2026年09月20日',
+          s1Title: '1. 信息收集',
+          s1p1: 'Chronvyr 不会收集、上传、存储任何可以识别用户身份的个人信息。',
+          s1p2: '所有日程、日记内容全部保存在用户本地电脑，不会上传到任何服务器。',
+          s1p3: '软件仅在用户主动查看节日信息时，联网请求公开的节假日数据，该请求不附带任何用户身份信息。',
+          s2Title: '2. 信息共享',
+          s2p1: '本软件不会向第三方分享任何用户数据。',
+          s3Title: '3. 外部服务',
+          s3p1: '软件会调用公共节假日开放接口，仅用于获取公开日历节日数据，不会携带用户隐私信息。',
+          s4Title: '4. 用户权利',
+          s4p1: '本软件所有用户数据保存在本地，用户可以随时在设备内删除软件及本地存储的日程文件。',
+          s5Title: '5. 联系我们',
+          s5p1: '如有隐私相关疑问，可通过项目网站联系开发者。'
+        },
+        en: {
+          pageTitle: 'Chronvyr Privacy Policy',
+          back: '← Back to home',
+          title: 'Chronvyr Privacy Policy',
+          effective: 'Effective date: September 20, 2026',
+          s1Title: '1. Information Collection',
+          s1p1: 'Chronvyr does not collect, upload, or store any personal information that could identify a user.',
+          s1p2: 'All schedules and journal entries are stored entirely on the user\u2019s local computer and are never uploaded to any server.',
+          s1p3: 'The software only connects to the internet to request publicly available holiday data when the user actively views holiday information. Such requests carry no user identity information.',
+          s2Title: '2. Information Sharing',
+          s2p1: 'This software does not share any user data with third parties.',
+          s3Title: '3. External Services',
+          s3p1: 'The software calls public holiday APIs solely to retrieve publicly available calendar holiday data. No user privacy information is included.',
+          s4Title: '4. User Rights',
+          s4p1: 'All user data is stored locally. Users may delete the software and the locally stored schedule files from their device at any time.',
+          s5Title: '5. Contact Us',
+          s5p1: 'If you have any privacy-related questions, you can contact the developer through the project website.'
+        },
+        ja: {
+          pageTitle: 'Chronvyr プライバシーポリシー',
+          back: '← ホームに戻る',
+          title: 'Chronvyr プライバシーポリシー',
+          effective: '発効日：2026年9月20日',
+          s1Title: '1. 情報の収集',
+          s1p1: 'Chronvyr は、ユーザーを識別できる個人情報を収集・アップロード・保存しません。',
+          s1p2: 'すべての予定および日記の内容はユーザーのローカルコンピューターにのみ保存され、いかなるサーバーにもアップロードされません。',
+          s1p3: '本ソフトウェアは、ユーザーが祝日情報を能動的に表示した場合にのみ、公開されている祝日データを取得するためにインターネットに接続します。この通信にはユーザーの身元情報は含まれません。',
+          s2Title: '2. 情報の共有',
+          s2p1: '本ソフトウェアは、ユーザーデータを第三者と共有しません。',
+          s3Title: '3. 外部サービス',
+          s3p1: '本ソフトウェアは、公開カレンダーの祝日データを取得する目的に限り、公共の祝日オープン API を呼び出します。ユーザーのプライバシー情報は含まれません。',
+          s4Title: '4. ユーザーの権利',
+          s4p1: 'すべてのユーザーデータはローカルに保存されます。ユーザーはいつでもデバイスから本ソフトウェアおよびローカルに保存された予定ファイルを削除できます。',
+          s5Title: '5. お問い合わせ',
+          s5p1: 'プライバシーに関するご質問は、プロジェクトサイトを通じて開発者にお問い合わせください。'
+        }
+      }
+
+      var buttons = document.querySelectorAll('.langs button')
+      var nodes = document.querySelectorAll('[data-i18n]')
+
+      function setLang(lang) {
+        var dict = I18N[lang] || I18N.zh
+        document.documentElement.lang = lang
+        document.title = dict.pageTitle
+        nodes.forEach(function (node) {
+          var key = node.getAttribute('data-i18n')
+          if (dict[key]) node.textContent = dict[key]
+        })
+        buttons.forEach(function (btn) {
+          btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === lang))
+        })
+        try {
+          localStorage.setItem('language', lang)
+        } catch (e) {}
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setLang(btn.getAttribute('data-lang'))
+        })
+      })
+
+      var initial = document.documentElement.lang
+      setLang(I18N[initial] ? initial : 'zh')
+    </script>
+  </body>
+</html>

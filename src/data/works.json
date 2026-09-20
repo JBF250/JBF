@@ -96,6 +96,7 @@
             "tech": ["WinUI3", "C#", "Desktop Widget"],
             "status": "completed",
             "thumbnail": "pictures/Chronvyr.png",
+            "privacyUrl": "/privacy.html",
             "requirements": {
                 "zh": "仅支持 Windows 10 / 11，提供 x64 / x86 / ARM64 三个版本，请按本机架构选择",
                 "en": "Windows 10 / 11 only, available in x64 / x86 / ARM64 builds — pick the one matching your system",

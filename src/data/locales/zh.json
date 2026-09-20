@@ -182,7 +182,8 @@
     "watchBilibili": "B站演示",
     "downloadFor": "下载 {label} 版",
     "requirements": "系统要求：仅支持 Windows 10 / 11",
-    "totalDownloads": "总下载次数 {count}"
+    "totalDownloads": "总下载次数 {count}",
+    "privacyPolicy": "阅读隐私政策"
   },
   "lab": {
     "title": "实验室",

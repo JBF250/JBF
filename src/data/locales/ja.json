@@ -182,7 +182,8 @@
     "watchBilibili": "Bilibiliデモ",
     "downloadFor": "{label} 版をダウンロード",
     "requirements": "対応OS：Windows 10 / 11 のみ",
-    "totalDownloads": "総ダウンロード数 {count}"
+    "totalDownloads": "総ダウンロード数 {count}",
+    "privacyPolicy": "プライバシーポリシーを読む"
   },
   "lab": {
     "title": "ラボ",
