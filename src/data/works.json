@@ -103,9 +103,9 @@
                 "ja": "Windows 10 / 11 のみ対応。x64 / x86 / ARM64 の3種類をご用意していますので、お使いの環境に合うものをお選びください"
             },
             "downloads": [
-                { "arch": "x64", "label": "Windows x64", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-x64-Setup.exe" },
-                { "arch": "x86", "label": "Windows x86", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-x86-Setup.exe" },
-                { "arch": "ARM64", "label": "Windows ARM64", "url": "https://gainian.de5.net/download/Chronvyr/Chronvyr-1.0.0-ARM64-Setup.exe" }
+                { "arch": "x64", "label": "Windows x64", "url": "https://gainian.de5.net/download/Chronvyr/latest/x64" },
+                { "arch": "x86", "label": "Windows x86", "url": "https://gainian.de5.net/download/Chronvyr/latest/x86" },
+                { "arch": "ARM64", "label": "Windows ARM64", "url": "https://gainian.de5.net/download/Chronvyr/latest/ARM64" }
             ]
         }
     ]
